@@ -1,0 +1,1 @@
+# life@smu Project\n\nThis repository contains the codebase for student life events management at SMU.\n\n## Structure\n- frontend-react-native: Mobile app\n- frontend-react: Web app\n- backend: Backend API service
