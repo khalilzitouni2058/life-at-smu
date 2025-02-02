@@ -88,4 +88,51 @@ router.post('/signup', async (req, res) => {
   }
 });
 
+
+router.get("/users",async (req,res) =>{
+
+  try{
+    const users = await User.find()
+    if(users && users.length>0){
+       return res.status(200).json({users : users});
+    }else{
+       return res.status(404).json({msg: "No users found"});
+    }
+}catch(error){
+    console.error(error);
+   return res.status(500).json({msg:"Error onn getting users"});
+}
+
+});
+
+router.get("/users/:id",async (req,res) =>{
+
+  const id = req.params.id;
+    try {
+        const foundUser = await User.findById(id);
+        if (foundUser) {
+            res.status(200).json({ user: foundUser });
+        } else {
+            res.status(404).json({ msg: "No user found with the given ID" });
+        }
+    }catch (error) {
+        res.status(500).json({ msg: "Error on retrieving the user" });
+    }
+
+});
+
+router.put("/users/:id",async (req,res) =>{
+
+  const id = req.params.id;
+  const user=req.body
+  console.log(user)
+  try {
+      await User.findByIdAndUpdate(id,user)
+      res.status(200).json({ msg: "update success" });
+  }catch (error){
+      res.status(400).json({ msg: "error on updating user" });
+  }
+
+});
+
 module.exports = router;
