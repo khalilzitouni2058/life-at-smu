@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import {
   Text,
   View,
@@ -21,11 +22,27 @@ const Login = () => {
   const topRightAnim = useRef(new Animated.Value(-500)).current;
   const bottomLeftAnim = useRef(new Animated.Value(-300)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current; 
-  
+  const navigation = useNavigation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('https://your-backend-url.com/login', {
+        email,
+        password,
+      });
 
+      if (response.status === 200) {
+        // Handle successful login
+        console.log('Login successful:', response.data);
+        
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      
+    }
+  };
   useEffect(() => {
     // Initial animations for branch images
     Animated.timing(topRightAnim, {
@@ -55,6 +72,11 @@ const Login = () => {
       ]).start();
     }, 2000); 
   }, []);
+  const handlesignup = () => {
+    
+    
+    navigation.navigate('signup');
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -113,7 +135,7 @@ const Login = () => {
                 <Text style={styles.text4}>Forget password?</Text>
                 <Text style={styles.text5}>
                  Don't have an account? 
-            <TouchableOpacity onPress={() => console.log('Sign up clicked')}>
+            <TouchableOpacity onPress={() => handlesignup()}>
                 <Text style={styles.signupText}>Sign up</Text>
             </TouchableOpacity>
             </Text>
@@ -143,6 +165,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 25,
         borderRadius: 8,
+        marginTop:18
       },
       buttonText: {
         color: '#fff',
@@ -197,7 +220,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     alignSelf: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 1,
   },
   input: {
     borderBottomWidth: 1,
