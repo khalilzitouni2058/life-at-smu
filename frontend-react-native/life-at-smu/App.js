@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import Home from './features/HomePage/screens/Home';
 import Login from './features/HomePage/screens/Login';
-import signup from './features/HomePage/screens/signup';\
+import signup from './features/HomePage/screens/signup';
 import UpdateProfile from "./features/clubPage/UpdateProfile";
 import Profile from "./features/clubPage/Profile";
 
