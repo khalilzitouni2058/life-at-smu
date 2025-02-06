@@ -4,16 +4,31 @@ import branch4 from "../../../assets/branch4.png"; // Assuming this image is use
 import { ScrollView } from "react-native";
 import { Ionicons } from "react-native-vector-icons";
 import { Animated } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
-const Profile = () => {
-  const user = {
-    picture:
-      "https://th.bing.com/th/id/OIP.QZIRZKUSWt1HBifjDRKGzAHaFj?w=212&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+
+
+const Profile = ({ route, navigation }) => {
+  const [user, setUser] = useState({
+    picture: "https://th.bing.com/th/id/OIP.QZIRZKUSWt1HBifjDRKGzAHaFj?w=212&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
     fullname: "John Doe",
     email: "john.doe@example.com",
     program: "Computer Science",
     major: "Software Engineering",
-  };
+  });
+
+  useEffect(() => {
+    if (route.params?.updatedUser) {
+      setUser(route.params.updatedUser);
+    }
+  }, [route.params?.updatedUser]);
+
+
+  const getUserId = async () => {
+    const userId = await AsyncStorage.getItem("userId");
+    navigation.navigate("EditProfile", { userId }); }
 
   const slideAnim = useRef(new Animated.Value(300)).current; // Start below the screen
   const branchOpacity = useRef(new Animated.Value(0)).current; // Initial opacity for branches
@@ -55,7 +70,7 @@ const Profile = () => {
           <View style={{ flex: 1, gap: 20, alignItems: "center" }}>
             <Text style={styles.name}>{user.fullname}</Text>
             <Text style={styles.email}>{user.email}</Text>
-            <TouchableOpacity style={styles.editProfileButton}>
+            <TouchableOpacity style={styles.editProfileButton} onPress={getUserId}>
               <Text style={styles.editProfileText}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
