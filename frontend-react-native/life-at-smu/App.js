@@ -5,22 +5,31 @@ import Login from './features/HomePage/screens/Login';
 import Profile from './features/ProfilePage/screens/Profile';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { NavigationContainer } from '@react-navigation/native';
+import { UserProvider } from './Context/UserContext';
 import signup from './features/HomePage/screens/signup';
-import EditProfile from './features/ProfilePage/screens/EditProfile';
+
+import HomeMain from './features/HomePage/screens/HomeMain';
+;
+
 export default function App() {
 
 const Stack = createNativeStackNavigator();
   return (
     <NavigationContainer>
-    <Stack.Navigator initialRouteName="Profile">
+
+      <UserProvider>
+    <Stack.Navigator initialRouteName="Home">
       <Stack.Screen name="Home" component={Home}  options={{ headerShown: false }} />
       <Stack.Screen name="Login" component={Login}  options={{ headerShown: false }} />
       <Stack.Screen name="signup" component={signup}  options={{ headerShown: false }} />
-      <Stack.Screen name="Profile" component={Profile}  options={{ headerShown: false }} />
-      <Stack.Screen name="EditProfile" component={EditProfile}  options={{ headerShown: false }} />
+      
+      <Stack.Screen name="HomeMain" component={HomeMain}  options={{ headerShown: false }} />
+      
+
 
 
     </Stack.Navigator>
+    </UserProvider>
   </NavigationContainer>
   );
 }
