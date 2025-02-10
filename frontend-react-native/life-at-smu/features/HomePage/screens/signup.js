@@ -1,12 +1,16 @@
 
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet,TextInput,Image,Button,Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet,TextInput,Image,Button,Pressable,Alert } from 'react-native';
 import branch from '../../../assets/branch.png';
 import { Dropdown } from 'react-native-element-dropdown';
-
+import { useUser } from '../../../Context/UserContext';
 import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from '@react-navigation/native';
+import Constants from "expo-constants";
+import axios from 'axios';
 export default function SignUpPage() {
-  // State to track the current step
+  const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
   const [currentStep, setCurrentStep] = useState(1);
 const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,18 +19,62 @@ const [email, setEmail] = useState('');
   const [photo, setPhoto] = useState(null);
   const [value, setValue] = useState(null);
   const [major, setmajor] = useState(null);
+  const navigation = useNavigation();
+  const { setUser } = useUser();
   const data = [
-    { label: 'MSB', value: '1' },
-    { label: 'Medtech', value: '2' },
-    { label: 'LCI', value: '3' },
+    { label: 'MSB', value: 'MSB' },
+    { label: 'Medtech', value: 'Medtech' },
+    { label: 'LCI', value: 'LCI' },
     
   ];
   const Major = [
-    { label: 'software-engineering', value: '1' },
-    { label: 'Computer-systems-Engineering', value: '2' },
-    { label: 'Renewable-Energy-Engineering', value: '3' },
+    { label: 'software-engineering', value: 'software-engineering' },
+    { label: 'Computer-systems-Engineering', value: 'Computer-systems-Engineering2' },
+    { label: 'Renewable-Energy-Engineering', value: 'Renewable-Energy-Engineering' },
     
   ];
+  const userData = {
+    email: email,
+    fullname: fullname,
+    password: password,
+    picture: photo, 
+    program: value,
+    major: major,
+  };
+  const handleMain= () => {
+    
+    
+    navigation.navigate('HomeMain');
+  };
+  const signupUser = async (signupData) => {
+    try {
+      const response = await axios.post(`http://${ipAddress}:8000/api/auth/signup`, signupData);
+      setUser(response.data.user)
+      console.log('User signup successful:', response.data);
+      handleMain();
+    } catch (error) {
+      if (error.response) {
+        
+        
+      } else if (error.request) {
+        
+        console.error('No response from server:', error.request);
+      } else {
+        
+        console.error('Error setting up signup request:', error.message);
+      }
+    }
+  };
+  const handleEmailValidation = () => {
+    if (email.length > 0 && !email.endsWith('@medtech.tn')) {
+      return true;
+    }
+    return false;
+  };
+  const submithandler =()=>{
+    console.log(currentStep)
+    signupUser(userData);
+  }
 
 
   const handleUploadPhoto = async () => {
@@ -48,12 +96,34 @@ const [email, setEmail] = useState('');
     }
   };
   const handleNextStep = () => {
-    if (currentStep < 3) {
+    if (currentStep === 1) {
+      if (handleemailsumbit()) {
+        alert('Email is wrong it must end with @medtech.tn ! Please try again.');
+        return;
+      }
+    }
+    if (currentStep === 2) {
+      if (!handleConfirmPasswordValidation()) {
+        alert('Passwords do not match. Please try again.');
+        return;
+      }
+    }
+  
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
   
-
+  const handleConfirmPasswordValidation = () => {
+    
+    if (password === confirmpassword) {
+      return true;
+    }
+  };
+  const handleemailsumbit = () => {
+    
+    return handleEmailValidation();
+  };
   
   const getBarStyle = (step) => {
     return {
@@ -89,6 +159,7 @@ const [email, setEmail] = useState('');
                             style={styles.input}
                             value={email}
                             onChangeText={setEmail}
+                            onEndEditing={handleEmailValidation}
                             placeholder="someone@medtech.tn"
                             placeholderTextColor="#888"
                             keyboardType="email-address"
@@ -100,7 +171,7 @@ const [email, setEmail] = useState('');
                                               onChangeText={setfullname}
                                               placeholder="Full Name"
                                               placeholderTextColor="#888"
-                                              secureTextEntry={true}
+                                              
                                               />
           
         </View>
@@ -110,22 +181,25 @@ const [email, setEmail] = useState('');
         <View style={styles.stepContainer}>
         <Text style={styles.text3}>Password</Text>
                         <TextInput
+                        secureTextEntry={true}
                           style={styles.input}
                           value={password}
                           onChangeText={setPassword}
                           placeholder="password"
                           placeholderTextColor="#888"
-                          keyboardType="email-address"
-                          secureTextEntry={true}
+                          
+                          
                         />
                         <Text style={styles.text3}>Confirm Password</Text>
                                         <TextInput
                                             style={styles.input}
                                             value={confirmpassword}
                                             onChangeText={setconfirmpassword}
+                                            onEndEditing={handleConfirmPasswordValidation}
                                             placeholder="Confirm Password"
                                             placeholderTextColor="#888"
                                             secureTextEntry={true}
+                                            
                                             />
         
       </View>
@@ -150,7 +224,10 @@ const [email, setEmail] = useState('');
         valueField="value"
         placeholder="Select an option"
         value={value}
-        onChange={item => setValue(item.value)} 
+        onChange={item => {
+          console.log(item.label); 
+          setValue(item.value);
+        }}
         
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
@@ -178,8 +255,8 @@ const [email, setEmail] = useState('');
       )}
 
       {/* Next Button */}
-      <TouchableOpacity onPress={handleNextStep} style={[styles.button, currentStep === 3 ? styles.button2 : null]}>
-        <Text style={styles.buttonText}>
+      <TouchableOpacity onPress={currentStep === 4 ? submithandler() : handleNextStep} style={[styles.button, currentStep === 3 ? styles.button2 : null]}>
+        <Text style={styles.buttonText} >
           {currentStep === 3 ? 'Submit' : 'Next Step'}
         </Text>
       </TouchableOpacity>
