@@ -1,8 +1,13 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { useNavigation } from "@react-navigation/native";
 const Footer = () => {
+  const navigation = useNavigation();
+    
+  const handleprofile = () =>{
+    navigation.navigate("Profile");
+  }
   return (
     <View style={styles.footer}>
       <TouchableOpacity style={styles.iconContainer} onPress={() => console.log('Home pressed')}>
@@ -18,7 +23,7 @@ const Footer = () => {
         <Text style={styles.iconLabel}>Schedule</Text>
       </TouchableOpacity>
       
-      <TouchableOpacity style={styles.iconContainer} onPress={() => console.log('Profile pressed')}>
+      <TouchableOpacity style={styles.iconContainer} onPress={() => handleprofile()}>
         <Ionicons name="person-outline" size={30} color="#fff" />
         <Text style={styles.iconLabel}>Profile</Text>
       </TouchableOpacity>

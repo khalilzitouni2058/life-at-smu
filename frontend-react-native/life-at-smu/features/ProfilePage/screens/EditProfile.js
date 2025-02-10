@@ -3,23 +3,16 @@ import React, { useState } from "react";
 import { Ionicons } from "react-native-vector-icons";
 import * as ImagePicker from 'expo-image-picker'; // Image picker to allow users to choose a new picture
 
-const EditProfile = ({  navigation }) => {
+const EditProfile = ({  navigation,route }) => {
+  console.log(route.params.user)
+  
 
-  const [user, setUser] = useState({
-    picture:
-      "https://th.bing.com/th/id/OIP.QZIRZKUSWt1HBifjDRKGzAHaFj?w=212&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-    fullname: "John Doe",
-    email: "john.doe@example.com",
-    program: "Computer Science",
-    major: "Software Engineering",
-  });
-
-  // States for input fields
-  const [username, setUsername] = useState(user.fullname);
-  const [email, setEmail] = useState(user.email);
-  const [major, setMajor] = useState(user.major);
-  const [program, setProgram] = useState(user.program);
-  const [profilePicture, setProfilePicture] = useState(user.picture);
+  
+  const [fullname, setfullname] = useState(route.params.user.fullname);
+  const [email, setEmail] = useState(route.params.user.email);
+  const [major, setMajor] = useState(route.params.user.major);
+  const [program, setProgram] = useState(route.params.user.program);
+  const [picture, setpicture] = useState(route.params.user.picture);
 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -30,7 +23,7 @@ const EditProfile = ({  navigation }) => {
     });
 
     if (!result.canceled) {
-      setProfilePicture(result.assets[0].uri);
+      setpicture(result.assets[0].uri);
     }
   };
 
@@ -38,10 +31,10 @@ const EditProfile = ({  navigation }) => {
   
 
   const handleSave = () => {
-    console.log("Saved user details:", { username, email, major, program, profilePicture });
-    
+    console.log("Saved user details:", { fullname, email, major, program, picture });
+    // BACKEND UPDATE
     navigation.navigate('Profile', {
-      updatedUser: { username, email, major, program, profilePicture }
+      updatedUser: { fullname, email, major, program, picture }
     });
   
     
@@ -51,7 +44,7 @@ const EditProfile = ({  navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.profilePictureContainer}>
-        <Image source={{ uri: profilePicture }} style={styles.profilePicture} />
+        <Image source={{ uri: picture }} style={styles.profilePicture} />
         <TouchableOpacity onPress={pickImage} style={styles.changePictureButton}>
           <Ionicons name="camera" size={24} color="#fff" />
         </TouchableOpacity>
@@ -62,8 +55,8 @@ const EditProfile = ({  navigation }) => {
         <TextInput
           style={styles.inputField}
           placeholder="Username"
-          value={username}
-          onChangeText={setUsername}
+          value={fullname}
+          onChangeText={setfullname}
         />
         <TextInput
           style={styles.inputField}
