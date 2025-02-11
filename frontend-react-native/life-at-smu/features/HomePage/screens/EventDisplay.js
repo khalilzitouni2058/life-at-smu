@@ -1,4 +1,4 @@
-import { Text, View ,StyleSheet,Dimensions,FlatList,Image} from 'react-native'
+import { Text, View ,StyleSheet,Dimensions,FlatList,Image,ImageBackground } from 'react-native'
 import React, { Component } from 'react'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -24,12 +24,7 @@ export class EventDisplay extends Component {
             eventPhoto: { uri: 'https://i.postimg.cc/XXDcNvK5/sample-image.jpg' },
             time: '12:30 PM',
           },
-          {
-            id: '3',
-            name: 'Project Presentation',
-            eventPhoto: { uri: 'https://i.postimg.cc/XXDcNvK5/sample-image.jpg' },
-            time: '03:00 PM',
-          },
+          
         ],
       };
     
@@ -43,30 +38,42 @@ export class EventDisplay extends Component {
   <Text style={styles.text}> {item.organizedby}</Text>
 
         </View>
+        
         <View style={styles.eventContainer}>
+        <ImageBackground
+          source={item.eventPhoto}
+          style={styles.eventImageBackground}
+            imageStyle={styles.imageStyle}
+
+        >
+           
             
-      <View style={styles.eventTextContainer}>
-        <Text style={styles.eventTitle}>{item.name}</Text>
-        <View style={styles.row}>
-        <Ionicons name="calendar-clear-outline" color={"white"} size={14} style={{marginRight:4}}></Ionicons>
-        <Text style={styles.eventTime}>{item.date}</Text>
-        </View>
+            </ImageBackground>
+            <View style={styles.eventTextContainer}>
+              <Text style={styles.eventTitle}>{item.name}</Text>
+              <View style={styles.row}>
+              <Ionicons name="calendar-clear-outline" color={"black"} size={14} style={{marginRight:4}}></Ionicons>
+              <Text style={styles.eventTime}>{item.date}</Text>
+              </View>
+              
+              <View style={styles.row}>
+              <Ionicons name="location-outline" color={"black"} size={14} style={{marginRight:4}}></Ionicons>
+              <Text style={styles.eventTime}>{item.location}</Text>
+              </View>
+              
+              <View style={styles.row}>
+              <Ionicons name="time-outline" color={"black"} size={14} style={{marginRight:4}}></Ionicons>
+              <Text style={styles.eventTime}>{item.time}</Text>
+              </View>
+              
+              
+            </View>
+          </View>
+
+
+
         
-        <View style={styles.row}>
-        <Ionicons name="location-outline" color={"white"} size={14} style={{marginRight:4}}></Ionicons>
-        <Text style={styles.eventTime}>{item.location}</Text>
-        </View>
         
-        <View style={styles.row}>
-        <Ionicons name="time-outline" color={"white"} size={14} style={{marginRight:4}}></Ionicons>
-        <Text style={styles.eventTime}>{item.time}</Text>
-        </View>
-        
-        
-      </View>
-      
-      <Image source={item.eventPhoto} style={styles.eventImage} />
-    </View>
     </>
     );
   render() {
@@ -82,68 +89,75 @@ export class EventDisplay extends Component {
   }
 }
 const styles = StyleSheet.create({
-    container2: {
-        height: 50,
-        backgroundColor: 'white',
-        borderTopLeftRadius: 8,
-        borderTopRightRadius: 8,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 10,
-      },
-      circularImage: {
-        width: 40,
-        height: 40,
-        borderRadius: 20, 
-        marginRight: 10,
-      },
-      text: {
-        color: 'black',
-        fontSize: 16,
-        fontWeight:"bold"
-      },
-    row: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginVertical: 5,
-      },
-    container: {
-      flex: 1,
-      backgroundColor: '#f3f3f3',
-      padding: 10,
-      width:screenWidth
-    },
-    eventContainer: {
-      backgroundColor: '#007DA5',
-      padding: 10,
-      margin: 0,
-      marginBottom: 15,
-      borderBottomLeftRadius: 8,
-      borderBottomRightRadius: 8,
-      flexDirection: 'row', // Aligns image and text horizontally
-      alignItems: 'center',
-       // Vertically aligns the items in the center
-    },
-    eventImage: {
-      width: 150,
-      height: 150,
-      borderRadius: 8,
-      marginLeft: 15,
-      resizeMode:"cover" 
-    },
-    eventTextContainer: {
-      flex: 1, // Makes sure the text container takes up available space
-    },
-    eventTitle: {
-      color: '#ffffff',
-      fontSize: 20,
-      fontWeight: 'bold',
-      marginBottom:20
-    },
-    eventTime: {
-      color: '#ffffff',
-      fontSize: 14,
-    },
-  });
-
+  eventImageBackground: {
+    resizeMode:"cover",
+   
+    height: 100,
+    width:350,
+    
+  },
+ 
+  container2: {
+    height: 50,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+   
+  },
+  circularImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 12,
+  },
+  text: {
+    color: '#333',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 6,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: '#E9F8FF',
+    padding: 12,
+    width: screenWidth,
+  },
+  eventContainer: {
+    backgroundColor: 'white',
+   
+    marginVertical: 0,
+    marginBottom:15,
+    borderRadius: 12,
+    
+    alignItems: 'flex-start',
+    elevation: 3, // Shadow effect
+  },
+  
+  eventTextContainer: {
+    marginTop:10,
+    flex: 1,
+    marginLeft: 10,
+   
+    
+  },
+  eventTitle: {
+   
+    color: 'black',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  eventTime: {
+    color: 'black',
+    fontSize: 14,
+    opacity: 0.9,
+  },
+});
 export default EventDisplay
