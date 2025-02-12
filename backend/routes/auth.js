@@ -6,51 +6,52 @@ const User = require("../models/users");
 const Club = require("../models/clubs");
 const Event = require("../models/events");
 
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
+  router.post("/login", async (req, res) => {
+    const { email, password } = req.body;
 
-  // Validate input
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required" });
-  }
-
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    try {
+      const user = await User.findOne({ email });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      const isMatch = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+
+      // Create JWT token
+      const token = jwt.sign(
+        { userId: user._id, email: user.email },
+        process.env.JWT_SECRET,
+        { expiresIn: "2h" }
+      );
+
+      return res.status(200).json({
+        message: "Login successful",
+        token,
+        user: {
+          id: user._id,
+          email: user.email,
+          fullname: user.fullname,
+          picture: user.picture,
+          program: user.program,
+          major: user.major,
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      return res
+        .status(500)
+        .json({ message: "Server error", error: err.message });
     }
-
-    // Create JWT token
-    const token = jwt.sign(
-      { userId: user._id, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: "2h" }
-    );
-
-    return res.status(200).json({
-      message: "Login successful",
-      token,
-      user: {
-        email: user.email,
-        fullname: user.fullname,
-        picture: user.picture,
-        program: user.program,
-        major: user.major,
-      },
-    });
-  } catch (err) {
-    console.error(err);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: err.message });
-  }
-});
+  });
 router.post("/signup", async (req, res) => {
   const { email, fullname, password, picture, program, major } = req.body;
 
