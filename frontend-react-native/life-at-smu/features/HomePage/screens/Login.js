@@ -1,5 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
+
+import Constants from "expo-constants";
+
+
 import {
   Text,
   View,
@@ -16,31 +21,50 @@ import {
 } from 'react-native';
 import branch from '../../../assets/branch.png';
 import logo from '../../../assets/logo.png';
+import { useUser } from '../../../Context/UserContext';
 
 const Login = () => {
+  const { setUser } = useUser();
   const [showText, setShowText] = useState(false);
   const topRightAnim = useRef(new Animated.Value(-500)).current;
   const bottomLeftAnim = useRef(new Animated.Value(-300)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current; 
   const navigation = useNavigation();
-
+  
+  const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
+  
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const handleLogin = async () => {
     try {
-      const response = await axios.post('https://your-backend-url.com/login', {
+      const response = await axios.post(`http://${ipAddress}:8000/api/auth/login`, {
         email,
         password,
       });
-
+  
       if (response.status === 200) {
-        // Handle successful login
-        console.log('Login successful:', response.data);
-        
+        // Handle success
+        console.log('Login successful:', response.data.user);
+  
+        const userData = response.data.user;  
+        setUser(userData);  // Update user state
+  
+       
+        handlelogin();  // Navigate to the next screen after login
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      
+      if (error.response) {
+        // Server responded with a status code other than 2xx
+        console.error('Error response:', error.response.data);
+      } else if (error.request) {
+        // No response was received
+        console.error('Error request:', error.request);
+      } else {
+        // Something else caused the error
+        console.error('Error during login:', error.message);
+      }
     }
   };
   useEffect(() => {
@@ -76,6 +100,11 @@ const Login = () => {
     
     
     navigation.navigate('signup');
+  };
+  const handlelogin = () => {
+    
+    
+    navigation.navigate('HomeMain');
   };
 
   return (
@@ -125,7 +154,7 @@ const Login = () => {
                 style={styles.button}
                 onPress={() => {
                     // Handle button press
-                    console.log("Button pressed!");
+                    handleLogin();
                 }}
                 >
                 <Text style={styles.buttonText}>Log in</Text>

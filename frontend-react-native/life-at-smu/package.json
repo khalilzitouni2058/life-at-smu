@@ -16,6 +16,7 @@
     "@react-navigation/stack": "^7.1.1",
     "axios": "^1.7.9",
     "expo": "~52.0.28",
+    "expo-dev-client": "^5.0.11",
     "expo-image-picker": "~16.0.5",
     "expo-status-bar": "~2.0.1",
     "react": "18.3.1",
@@ -28,8 +29,8 @@
     "react-native-screens": "^4.6.0",
     "react-native-svg": "^15.11.1",
     "react-native-web": "~0.19.13",
-    "web": "^0.0.2"
-    
+    "web": "^0.0.2",
+    "react-native-vector-icons": "^10.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
