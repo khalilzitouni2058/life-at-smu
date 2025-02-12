@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Image,
   Alert,
+  ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 
@@ -17,7 +18,7 @@ const AddBoardMember = ({ navigation }) => {
   const [role, setRole] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryCode, setCountryCode] = useState("TN +216");
-  const [profileImage, setProfileImage] = useState(null); // Declare profileImage state
+  const [profileImage, setProfileImage] = useState(null);
 
   const handleImageUpload = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -31,17 +32,33 @@ const AddBoardMember = ({ navigation }) => {
       quality: 1,
     });
     if (!result.canceled) {
-      setProfileImage(result.assets[0].uri); // Set the selected image URI to the state
+      setProfileImage(result.assets[0].uri);
     }
   };
 
   const handleSave = () => {
-    if (!name || !email || !role) {
-      Alert.alert("Error", "Please fill out all required fields!");
-      return;
+    let errorMessages = [];
+    console.log("Save button clicked!");
+    if (!name.trim()) {
+      errorMessages.push("Name is required.");
+    }
+    if (!email.trim()) {
+      errorMessages.push("Email is required.");
+    }
+    if (!role.trim()) {
+      errorMessages.push("Role is required.");
+    }
+    if (!phoneNumber.trim()) {
+      errorMessages.push("Phone number is required.");
+    }
+    console.log("Error Messages:", errorMessages);
+    if (errorMessages.length > 0) {
+      Alert.alert("Error", errorMessages.join("\n")); // Show all errors
+      return; // Stop execution if there are errors
     }
 
-    navigation.navigate("UpdateProfile", {
+    // If no errors, navigate to the UpdateProfile screen with data
+    navigation.navigate("ClubUpdate", {
       newMember: {
         name,
         email,
@@ -55,117 +72,174 @@ const AddBoardMember = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header Section */}
+    <View style={{ flex: 1, backgroundColor: "#f0f8ff" }}>
+      {/* Header */}
       <View style={styles.header}>
-        <Image
-          source={require("../../assets/logo.png")} // Replace with the correct path
-          style={styles.logo}
-        />
+        <Image source={require("../../assets/logo.png")} style={styles.logo} />
         <Text style={styles.title}>Add Board Member</Text>
       </View>
 
-      {/* Profile Image Upload */}
-      <TouchableOpacity onPress={handleImageUpload} style={styles.imageWrapper}>
-        {profileImage ? (
-          <Image source={{ uri: profileImage }} style={styles.profileImage} />
-        ) : (
-          <Text style={styles.placeholderText}>+</Text>
-        )}
-      </TouchableOpacity>
+      {/* Scrollable Content */}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Profile Image Upload */}
+        <TouchableOpacity
+          onPress={handleImageUpload}
+          style={styles.imageWrapper}
+        >
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          ) : (
+            <Text style={styles.placeholderText}>+</Text>
+          )}
+        </TouchableOpacity>
 
-      {/* Form */}
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Name</Text>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="Enter Name"
-          placeholderTextColor="#888"
-        />
-      </View>
+        {/* Form */}
+        <View style={styles.formContainer}>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>
+              Name <Text style={styles.required}>*</Text>
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter Name"
+              placeholderTextColor="#888"
+            />
+          </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Enter Email"
-          placeholderTextColor="#888"
-          keyboardType="email-address"
-        />
-      </View>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>
+              Email <Text style={styles.required}>*</Text>
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              placeholder="Enter Email"
+              placeholderTextColor="#888"
+              keyboardType="email-address"
+            />
+          </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Facebook Link</Text>
-        <TextInput
-          style={styles.input}
-          value={facebookLink}
-          onChangeText={setFacebookLink}
-          placeholder="Enter Facebook Link"
-          placeholderTextColor="#888"
-        />
-      </View>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Facebook Link</Text>
+            <TextInput
+              style={styles.input}
+              value={facebookLink}
+              onChangeText={setFacebookLink}
+              placeholder="Enter Facebook Link"
+              placeholderTextColor="#888"
+            />
+          </View>
 
-      <View style={styles.formGroup}>
-        <Text style={styles.label}>Role</Text>
-        <TextInput
-          style={styles.input}
-          value={role}
-          onChangeText={setRole}
-          placeholder="Enter Role"
-          placeholderTextColor="#888"
-        />
-      </View>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>
+              Role <Text style={styles.required}>*</Text>
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={role}
+              onChangeText={setRole}
+              placeholder="Enter Role"
+              placeholderTextColor="#888"
+            />
+          </View>
 
-      {/* Add Phone Number Section */}
-      <View style={styles.phoneNumberSection}>
-        <Text style={styles.label}>Add Phone Number</Text>
-        <View style={styles.phoneInputContainer}>
-          <TouchableOpacity style={styles.dropdown}>
-            <Text style={styles.dropdownText}>{countryCode}</Text>
-          </TouchableOpacity>
-          <TextInput
-            style={styles.phoneInput}
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            placeholder="Enter Phone Number"
-            placeholderTextColor="#888"
-            keyboardType="phone-pad"
-          />
+          {/* Phone Number Section */}
+          <View style={styles.phoneNumberSection}>
+            <Text style={styles.label}>
+              Add Phone Number <Text style={styles.required}>*</Text>
+            </Text>
+            <View style={styles.phoneInputContainer}>
+              <TouchableOpacity style={styles.dropdown}>
+                <Text style={styles.dropdownText}>{countryCode}</Text>
+              </TouchableOpacity>
+              <TextInput
+                style={styles.phoneInput}
+                value={phoneNumber}
+                onChangeText={setPhoneNumber}
+                placeholder="Enter Phone Number"
+                placeholderTextColor="#888"
+                keyboardType="phone-pad"
+              />
+            </View>
+          </View>
         </View>
-      </View>
 
-      {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Save</Text>
-      </TouchableOpacity>
+        {/* Save Button */}
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Save</Text>
+        </TouchableOpacity>
+
+        {/* Ignore Button */}
+        <TouchableOpacity
+          style={styles.ignoreButton}
+          onPress={() => navigation.navigate("UpdateProfile")}
+        >
+          <Text style={styles.ignoreButtonText}>Ignore</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#f9f9f9",
-  },
   header: {
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    justifyContent: "center",
+    backgroundColor: "#007DA5",
+    paddingVertical: 20,
   },
   logo: {
-    width: 60,
-    height: 60,
-    marginRight: 10,
+    position: "absolute",
+    left: 10,
+    width: 50,
+    height: 50,
+    resizeMode: "contain",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#007DA5",
+    color: "#fff",
+    textAlign: "center",
+  },
+  scrollContent: {
+    padding: 20,
+  },
+  formContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+    marginBottom: 20,
+  },
+  imageWrapper: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: "#f0f0f0",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    borderWidth: 2,
+    borderColor: "#ddd",
+    marginBottom: 20,
+  },
+  placeholderText: {
+    fontSize: 36,
+    color: "#ccc",
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
   },
   formGroup: {
     marginBottom: 20,
@@ -175,6 +249,10 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
+  },
+  required: {
+    color: "red",
+    fontSize: 16,
   },
   input: {
     borderBottomWidth: 1,
@@ -213,7 +291,6 @@ const styles = StyleSheet.create({
     borderColor: "#ccc",
     paddingVertical: 8,
     fontSize: 16,
-    backgroundColor: "transparent",
   },
   saveButton: {
     backgroundColor: "#007DA5",
@@ -227,26 +304,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  imageWrapper: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  ignoreButton: {
     backgroundColor: "#f0f0f0",
-    justifyContent: "center",
+    padding: 10,
+    borderRadius: 5,
     alignItems: "center",
-    alignSelf: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    marginBottom: 20,
+    marginTop: 10,
   },
-  placeholderText: {
-    fontSize: 36,
-    color: "#ccc",
-  },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  ignoreButtonText: {
+    color: "#007DA5",
+    fontSize: 14,
+    fontWeight: "bold",
   },
 });
 
