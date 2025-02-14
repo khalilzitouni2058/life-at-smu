@@ -10,35 +10,73 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
+import { useClub } from "../../Context/ClubContext";
+import Constants from "expo-constants";
 
-const ClubUpdate = ({ navigation, route }) => {
-  const [clubData, setClubData] = useState({
-    clubName: "Lions club SMU nation",
-    category: "",
-    clubDescription: "",
-    contactInfo: "Lions@SMU.tn",
-    boardMembers: [
-      {
-        name: "John Doe",
-        role: "President",
-        picture:
-          "https://th.bing.com/th/id/OIP.QZIRZKUSWt1HBifjDRKGzAHaFj?w=212&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7",
-      },
-    ],
-  });
-
+const ClubUpdate = ({ navigation }) => {
+  const { clubId } = useClub();
+  const [clubData, setClubData] = useState(null);
   const [logo, setLogo] = useState(null);
   const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingContact, setIsEditingContact] = useState(false);
+
+  const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
 
   useEffect(() => {
-    if (route.params?.newMember) {
-      setClubData((prevData) => ({
-        ...prevData,
-        boardMembers: [...prevData.boardMembers, route.params.newMember],
-      }));
+    if (!clubId) {
+      Alert.alert("Error", "No club ID found.");
+      return;
     }
-  }, [route.params?.newMember]);
+    fetchClubDetails();
+  }, [clubId]);
+
+  const fetchClubDetails = async () => {
+    try {
+      const response = await axios.get(
+        `http://${ipAddress}:8000/api/auth/clubs/${clubId}`
+      );
+      setClubData(response.data.club);
+      setLogo(response.data.club.profilePicture);
+    } catch (error) {
+      console.error("Error fetching club details:", error);
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    if (!clubData) return;
+    try {
+      await axios.put(
+        `http://${ipAddress}:8000/api/auth/clubs/${clubId}`,
+        clubData
+      );
+      Alert.alert("Success", "Profile updated successfully!");
+      navigation.navigate("ClubProfile");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      Alert.alert("Error", "Could not update profile.");
+    }
+  };
+
+  const handleDeleteMember = async (index) => {
+    if (!clubData) return;
+    const updatedBoardMembers = clubData.boardMembers.filter(
+      (_, i) => i !== index
+    );
+
+    try {
+      await axios.put(`http://${ipAddress}:8000/api/auth/clubs/${clubId}`, {
+        ...clubData,
+        boardMembers: updatedBoardMembers,
+      });
+
+      setClubData({ ...clubData, boardMembers: updatedBoardMembers });
+      Alert.alert("Success", "Board member removed.");
+    } catch (error) {
+      console.error("Error deleting board member:", error);
+      Alert.alert("Error", "Could not delete board member.");
+    }
+  };
 
   const handleUploadLogo = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -51,34 +89,38 @@ const ClubUpdate = ({ navigation, route }) => {
       allowsEditing: true,
       quality: 1,
     });
-    if (!result.cancelled) {
-      setLogo(result.uri);
-    } else {
-      Alert.alert("Error", "No image was selected.");
-    }
-  };
 
-  const handleUpdateProfile = () => {
-    let errorMessages = [];
-    if (!clubData.clubName.trim()) errorMessages.push("Club Name is required.");
-    if (!clubData.contactInfo.trim())
-      errorMessages.push("Contact Information is required.");
-    if (!clubData.category.trim()) errorMessages.push("Category is required.");
-    if (!clubData.clubDescription.trim())
-      errorMessages.push("Description is required.");
-
-    if (errorMessages.length > 0) {
-      Alert.alert("Error", errorMessages.join("\n"));
+    if (result.cancelled || !result.assets || result.assets.length === 0) {
+      Alert.alert("Upload cancelled", "No image was selected.");
       return;
     }
-    Alert.alert("Success", "Profile updated successfully!");
-  };
 
-  const handleDeleteMember = (index) => {
+    const newProfilePicture = result.assets[0].uri;
+    setLogo(newProfilePicture);
     setClubData((prevData) => ({
       ...prevData,
-      boardMembers: prevData.boardMembers.filter((_, i) => i !== index),
+      profilePicture: newProfilePicture,
     }));
+    updateProfilePicture(newProfilePicture);
+  };
+
+  const updateProfilePicture = async (newProfilePicture) => {
+    if (!clubData) return;
+    try {
+      const updatedClub = await axios.put(
+        `http://${ipAddress}:8000/api/auth/clubs/${clubId}`,
+        {
+          ...clubData,
+          profilePicture: newProfilePicture,
+        }
+      );
+      setClubData(updatedClub.data.club);
+      setLogo(updatedClub.data.club.profilePicture);
+      Alert.alert("Success", "Profile picture updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+      Alert.alert("Error", "Could not update profile picture.");
+    }
   };
 
   return (
@@ -122,7 +164,7 @@ const ClubUpdate = ({ navigation, route }) => {
             </View>
             <TextInput
               style={styles.input}
-              value={clubData.clubName}
+              value={clubData?.clubName || ""}
               editable={isEditingName}
               onChangeText={(value) =>
                 setClubData((prevData) => ({ ...prevData, clubName: value }))
@@ -137,7 +179,7 @@ const ClubUpdate = ({ navigation, route }) => {
             <Text style={styles.label}>Category</Text>
             <TextInput
               style={styles.input}
-              value={clubData.category}
+              value={clubData?.category || ""}
               onChangeText={(value) =>
                 setClubData((prevData) => ({ ...prevData, category: value }))
               }
@@ -151,7 +193,7 @@ const ClubUpdate = ({ navigation, route }) => {
             <Text style={styles.label}>Description</Text>
             <TextInput
               style={styles.textarea}
-              value={clubData.clubDescription}
+              value={clubData?.clubDescription || ""}
               onChangeText={(value) =>
                 setClubData((prevData) => ({
                   ...prevData,
@@ -168,19 +210,10 @@ const ClubUpdate = ({ navigation, route }) => {
           <View style={styles.formGroup}>
             <View style={styles.row}>
               <Text style={styles.label}>Contact Information</Text>
-              <TouchableOpacity
-                onPress={() => setIsEditingContact(!isEditingContact)}
-                style={styles.editButton}
-              >
-                <Text style={styles.editButtonText}>
-                  {isEditingContact ? "Done" : "Edit"}
-                </Text>
-              </TouchableOpacity>
             </View>
             <TextInput
               style={styles.input}
-              value={clubData.contactInfo}
-              editable={isEditingContact}
+              value={clubData?.contactInfo || ""}
               onChangeText={(value) =>
                 setClubData((prevData) => ({
                   ...prevData,
@@ -197,34 +230,38 @@ const ClubUpdate = ({ navigation, route }) => {
         <View style={styles.formGroup}>
           <Text style={styles.label}>Board Members</Text>
           <View style={styles.boardMembersContainer}>
-            {clubData.boardMembers.map((member, index) => (
-              <View key={index} style={styles.boardMemberCard}>
-                <Image
-                  source={{ uri: member.picture }}
-                  style={styles.boardMemberPicture}
-                />
-                <View style={styles.boardMemberDetails}>
-                  <Text style={styles.boardMemberName}>{member.name}</Text>
-                  <Text style={styles.boardMemberRole}>{member.role}</Text>
+            {clubData?.boardMembers?.length > 0 ? (
+              clubData.boardMembers.map((member, index) => (
+                <View key={index} style={styles.boardMemberCard}>
+                  <Image
+                    source={{uri: member?.profilePicture}}
+                    style={styles.boardMemberPicture}
+                  />
+                  <View style={styles.boardMemberDetails}>
+                    <Text style={styles.boardMemberName}>{member?.name}</Text>
+                    <Text style={styles.boardMemberRole}>{member?.role}</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.editButton}
+                    onPress={() =>
+                      navigation.navigate("EditBoardMember", {
+                        editingMember: member,
+                      })
+                    }
+                  >
+                    <Text style={styles.editButtonText}>Edit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={() => handleDeleteMember(index)}
+                  >
+                    <Text style={styles.deleteButtonText}>Delete</Text>
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  style={styles.editButton}
-                  onPress={() =>
-                    navigation.navigate("AddBoardMember", {
-                      editingMember: member,
-                    })
-                  }
-                >
-                  <Text style={styles.editButtonText}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.deleteButton}
-                  onPress={() => handleDeleteMember(index)}
-                >
-                  <Text style={styles.deleteButtonText}>Delete</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+              ))
+            ) : (
+              <Text>No board members available.</Text>
+            )}
           </View>
         </View>
 
@@ -262,8 +299,10 @@ const styles = StyleSheet.create({
   },
 
   contentContainer: {
-    padding: 20,
+    padding: -10,
+    alignItems: "center",
   },
+
   header: {
     width: "100%",
     flexDirection: "row",
@@ -320,6 +359,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold",
     marginBottom: 8,
+    marginLeft: 5,
   },
   input: {
     borderBottomWidth: 1,
@@ -425,7 +465,7 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
-    marginTop: 10,
+    marginVertical: 10,
   },
   updateButtonText: {
     color: "#fff",

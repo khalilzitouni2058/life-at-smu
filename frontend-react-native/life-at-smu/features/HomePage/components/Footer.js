@@ -2,12 +2,24 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from "@react-navigation/native";
+import { useUser } from '../../../Context/UserContext';
+import { useClub } from '../../../Context/ClubContext';
+
 const Footer = () => {
   const navigation = useNavigation();
+  const { clubId } = useClub();
+  const { user } = useUser();
     
-  const handleprofile = () =>{
-    navigation.navigate("Profile");
-  }
+ const handleprofile = () => {
+    if (clubId) {
+      navigation.navigate("ClubProfile", { id: clubId });
+    } else if (user) {
+      navigation.navigate("Profile", { id: user.id });
+    } else {
+      Alert.alert("Error", "No profile found.");
+    }
+  };
+
   return (
     <View style={styles.footer}>
       <TouchableOpacity style={styles.iconContainer} onPress={() => console.log('Home pressed')}>
