@@ -13,53 +13,57 @@ import * as ImagePicker from "expo-image-picker";
 import { useClub } from "../../Context/ClubContext";
 import Constants from "expo-constants";
 import axios from "axios";
+import { useEffect } from "react";
 
-const AddBoardMember = ({ navigation }) => {
+const EditBoardMember = ({ navigation, route }) => {
   const { clubId } = useClub();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [facebookLink, setFacebookLink] = useState("");
-  const [role, setRole] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [countryCode, setCountryCode] = useState("TN +216");
-  const [profileImage, setProfileImage] = useState(null);
+  const { editingMember } = route.params || {};
+  const [name, setName] = useState(editingMember?.name || "");
+  const [email, setEmail] = useState(editingMember?.email || "");
+  const [facebookLink, setFacebookLink] = useState(editingMember?.facebookLink || "");
+  const [role, setRole] = useState(editingMember?.role || "");
+  const [phoneNumber, setPhoneNumber] = useState(editingMember?.phoneNumber || "");
+  const [countryCode, setCountryCode] = useState("TN +216")
+  const [profileImage, setProfileImage] = useState(editingMember?.profileImage || "");
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
 
+  useEffect(() => {
+    if (editingMember) {
+      setName(editingMember.name);
+      setEmail(editingMember.email);
+      setFacebookLink(editingMember.facebookLink);
+      setRole(editingMember.role);
+      setPhoneNumber(editingMember.phoneNumber);
+      setProfileImage(editingMember.profilePicture);
+    }
+  }, [editingMember]);
+
   const handleSave = async () => {
     if (!clubId) {
-      Alert.alert("Error", "Club ID not found.");
+      Alert.alert("Error", "No club ID found.");
       return;
     }
-
-    if (!name.trim() || !email.trim() || !role.trim() || !phoneNumber.trim()) {
-      Alert.alert("Error", "All fields are required.");
-      return;
-    }
-    const formattedPhoneNumber = `${countryCode} ${phoneNumber}`;
-
-    const newMember = {
-      name,
-      email,
-      facebookLink,
-      role,
-      phoneNumber: formattedPhoneNumber,
-      profilePicture:
+    try {
+      const response = await axios.put(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/update-board-member`, {
+        name,
+        email,
+        facebookLink,
+        role,
+        phoneNumber,
+        profilePicture:
         profileImage ||
         "https://scontent.ftun8-1.fna.fbcdn.net/v/t39.30808-6/469963732_2801171663397034_3870197941446985944_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=uqzP4t61bloQ7kNvgGuZweS&_nc_oc=AdiZi3rCnmG1hpiNhZIlx-rDtV1XEM0uwGxQef6qz8dJ724A7BKL5cPjYMLA5Di_4-4&_nc_zt=23&_nc_ht=scontent.ftun8-1.fna&_nc_gid=Akr1sLeZP0dLZ-JjE-afwYi&oh=00_AYAjfD91fKYDbB1FqX_D4lx-qx5KrgPJCj9enbH2X8cEIg&oe=67AFB8AB",
-    };
+      });
 
-    try {
-      await axios.put(
-        `http://${ipAddress}:8000/api/auth/clubs/${clubId}/add-board-member`,
-        newMember
-      );
-      Alert.alert("Success", "Board member added successfully!");
-      navigation.navigate("ClubUpdate"); // ✅ Navigate back to ClubUpdate
+      if (response.status === 200) {
+        Alert.alert("Success", "Board member updated successfully.");
+        navigation.navigate("ClubUpdate");
+      }
     } catch (error) {
-      console.error("Error adding board member:", error);
-      Alert.alert("Error", "Could not add board member.");
+      console.error("Error updating board member:", error);
+      Alert.alert("Error", "Could not update board member.");
     }
   };
 
@@ -84,7 +88,7 @@ const AddBoardMember = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <Image source={require("../../assets/logo.png")} style={styles.logo} />
-        <Text style={styles.title}>Add Board Member</Text>
+        <Text style={styles.title}>Edit Board Member</Text>
       </View>
 
       {/* Scrollable Content */}
@@ -326,4 +330,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddBoardMember;
+export default EditBoardMember;

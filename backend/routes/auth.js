@@ -6,52 +6,52 @@ const User = require("../models/users");
 const Club = require("../models/clubs");
 const Event = require("../models/events");
 
-  router.post("/login", async (req, res) => {
-    const { email, password } = req.body;
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
 
-    // Validate input
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required" });
+  // Validate input
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and password are required" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
     }
 
-    try {
-      const user = await User.findOne({ email });
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+    const isMatch = await bcrypt.compare(password, user.password);
 
-      const isMatch = await bcrypt.compare(password, user.password);
-
-      if (!isMatch) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-
-      // Create JWT token
-      const token = jwt.sign(
-        { userId: user._id, email: user.email },
-        process.env.JWT_SECRET,
-        { expiresIn: "2h" }
-      );
-
-      return res.status(200).json({
-        message: "Login successful",
-        token,
-        user: {
-          id: user._id,
-          email: user.email,
-          fullname: user.fullname,
-          picture: user.picture,
-          program: user.program,
-          major: user.major,
-        },
-      });
-    } catch (err) {
-      console.error(err);
-      return res
-        .status(500)
-        .json({ message: "Server error", error: err.message });
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
-  });
+
+    // Create JWT token
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "2h" }
+    );
+
+    return res.status(200).json({
+      message: "Login successful",
+      token,
+      user: {
+        id: user._id,
+        email: user.email,
+        fullname: user.fullname,
+        picture: user.picture,
+        program: user.program,
+        major: user.major,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ message: "Server error", error: err.message });
+  }
+});
 router.post("/signup", async (req, res) => {
   const { email, fullname, password, picture, program, major } = req.body;
 
@@ -61,7 +61,6 @@ router.post("/signup", async (req, res) => {
   }
 
   try {
-    
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -132,10 +131,10 @@ router.put("/users/:id", async (req, res) => {
 
 // Club Signup Route
 router.post("/clubs/signup", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, clubName } = req.body;
 
   // Validate input
-  if (!email || !password) {
+  if (!email || !password || !clubName) {
     return res.status(400).json({ message: "Email and password are required" });
   }
 
@@ -150,10 +149,12 @@ router.post("/clubs/signup", async (req, res) => {
     const newClub = new Club({
       email,
       password,
-      clubName: "",
+      clubName,
       clubDescription: "",
       category: "",
       contactInfo: "",
+      profilePicture:
+        "https://scontent.ftun8-1.fna.fbcdn.net/v/t39.30808-6/469963732_2801171663397034_3870197941446985944_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=uqzP4t61bloQ7kNvgGuZweS&_nc_oc=AdiZi3rCnmG1hpiNhZIlx-rDtV1XEM0uwGxQef6qz8dJ724A7BKL5cPjYMLA5Di_4-4&_nc_zt=23&_nc_ht=scontent.ftun8-1.fna&_nc_gid=Akr1sLeZP0dLZ-JjE-afwYi&oh=00_AYAjfD91fKYDbB1FqX_D4lx-qx5KrgPJCj9enbH2X8cEIg&oe=67AFB8AB",
       boardMembers: [],
     });
 
@@ -177,6 +178,7 @@ router.post("/clubs/signup", async (req, res) => {
         clubDescription: newClub.clubDescription,
         category: newClub.category,
         contactInfo: newClub.contactInfo,
+        profilePicture: newClub.profilePicture,
         boardMembers: newClub.boardMembers,
       },
     });
@@ -225,6 +227,7 @@ router.post("/clubs/login", async (req, res) => {
         clubDescription: club.clubDescription,
         category: club.category,
         contactInfo: club.contactInfo,
+        profilePicture: club.profilePicture,
         boardMembers: club.boardMembers,
       },
     });
@@ -234,15 +237,29 @@ router.post("/clubs/login", async (req, res) => {
   }
 });
 
+// Update Club
 router.put("/clubs/:id", async (req, res) => {
   const { id } = req.params;
-  const { clubName, clubDescription, category, contactInfo, boardMembers } =
-    req.body;
+  const {
+    clubName,
+    clubDescription,
+    category,
+    contactInfo,
+    profilePicture,
+    boardMembers,
+  } = req.body;
 
   try {
     const updatedClub = await Club.findByIdAndUpdate(
       id,
-      { clubName, clubDescription, category, contactInfo, boardMembers },
+      {
+        clubName,
+        clubDescription,
+        category,
+        contactInfo,
+        profilePicture,
+        boardMembers,
+      },
       { new: true, runValidators: true }
     );
 
@@ -259,6 +276,7 @@ router.put("/clubs/:id", async (req, res) => {
         clubDescription: updatedClub.clubDescription,
         category: updatedClub.category,
         contactInfo: updatedClub.contactInfo,
+        profilePicture: updatedClub.profilePicture,
         boardMembers: updatedClub.boardMembers,
       },
     });
@@ -268,59 +286,157 @@ router.put("/clubs/:id", async (req, res) => {
   }
 });
 
-// Create a new event for a club
-router.post('/clubs/:clubId/events', async (req, res) => {
+// Get Club Details by ID
+router.get("/clubs/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const club = await Club.findById(id).populate("boardMembers"); // Populate events if needed
+    if (!club) {
+      return res.status(404).json({ message: "Club not found" });
+    }
+
+    res.status(200).json({ club });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Add Board Member for Clubs
+router.put("/clubs/:id/add-board-member", async (req, res) => {
+  const { id } = req.params;
+  const { name, email, facebookLink, role, phoneNumber, profilePicture } =
+    req.body;
+
+  try {
+    const club = await Club.findById(id);
+    if (!club) {
+      return res.status(404).json({ message: "Club not found" });
+    }
+
+    // ✅ Append new board member to existing list
+    club.boardMembers.push({
+      name,
+      email,
+      facebookLink,
+      role,
+      phoneNumber,
+      profilePicture,
+    });
+
+    await club.save(); // ✅ Save the updated club
+
+    res.status(200).json({ message: "Board member added successfully", club });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Update Board Members of a Club
+router.put("/clubs/:clubId/update-board-member", async (req, res) => {
   const { clubId } = req.params;
-  const { eventName, eventDescription, eventDate, eventTime, eventLocation, additionalNotes, eventImage } = req.body;
+  const { name, email, facebookLink, role, phoneNumber, profilePicture } =
+    req.body;
+
+  try {
+    const club = await Club.findById(clubId);
+    if (!club) {
+      return res.status(404).json({ message: "Club not found" });
+    }
+
+    // Find the board member by email and update their details
+    const memberIndex = club.boardMembers.findIndex((m) => m.email === email);
+    if (memberIndex === -1) {
+      return res.status(404).json({ message: "Board member not found" });
+    }
+
+    club.boardMembers[memberIndex] = {
+      name,
+      email,
+      facebookLink,
+      role,
+      phoneNumber,
+      profilePicture,
+    };
+
+    await club.save();
+
+    res
+      .status(200)
+      .json({ message: "Board member updated successfully", club });
+  } catch (err) {
+    console.error("Error updating board member:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Create a new event for a club
+router.post("/clubs/:clubId/events", async (req, res) => {
+  const { clubId } = req.params;
+  const {
+    eventName,
+    eventDescription,
+    eventDate,
+    eventTime,
+    eventLocation,
+    additionalNotes,
+    eventImage,
+  } = req.body;
 
   if (!eventName || !eventDate || !eventTime || !eventLocation) {
-      return res.status(400).json({ message: 'Event name, date, time, and location are required' });
+    return res
+      .status(400)
+      .json({ message: "Event name, date, time, and location are required" });
   }
 
   try {
-      const club = await Club.findById(clubId);
-      if (!club) {
-          return res.status(404).json({ message: 'Club not found' });
-      }
+    const club = await Club.findById(clubId);
+    if (!club) {
+      return res.status(404).json({ message: "Club not found" });
+    }
 
-      const newEvent = new Event({
-          eventName,
-          eventDescription,
-          eventDate,
-          eventTime,
-          eventLocation,
-          additionalNotes,
-          eventImage,
-          club: clubId
-      });
+    const newEvent = new Event({
+      eventName,
+      eventDescription,
+      eventDate,
+      eventTime,
+      eventLocation,
+      additionalNotes,
+      eventImage,
+      club: clubId,
+    });
 
-      await newEvent.save();
+    await newEvent.save();
 
-      // Add event to the club's event list
-      club.events.push(newEvent._id);
-      await club.save();
+    // Add event to the club's event list
+    club.events.push(newEvent._id);
+    await club.save();
 
-      res.status(201).json({ message: 'Event created successfully', event: newEvent });
+    res
+      .status(201)
+      .json({ message: "Event created successfully", event: newEvent });
   } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Server error', error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
 // Get all events for a club
-router.get('/clubs/:clubId/events', async (req, res) => {
+router.get("/clubs/:clubId/events", async (req, res) => {
   const { clubId } = req.params;
 
   try {
-      const club = await Club.findById(clubId).populate('events');
-      if (!club) {
-          return res.status(404).json({ message: 'Club not found' });
-      }
+    const club = await Club.findById(clubId).populate("events");
+    if (!club) {
+      return res.status(404).json({ message: "Club not found" });
+    }
 
-      res.status(200).json({ events: club.events });
+    res.status(200).json({ events: club.events });
   } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Server error', error: err.message });
+    console.error(err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
