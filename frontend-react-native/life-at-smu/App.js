@@ -1,3 +1,5 @@
+
+import EventForm from './features/Club/components/EventForm';
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import Home from "./features/HomePage/screens/Home";
@@ -20,6 +22,7 @@ export default function App() {
   return (
     <NavigationContainer>
       <UserProvider>
+
         <ClubProvider>
           <Stack.Navigator initialRouteName="Home">
             <Stack.Screen
@@ -32,11 +35,13 @@ export default function App() {
               component={Login}
               options={{ headerShown: false }}
             />
+<Stack.Screen name="eventForm" component={EventForm}  options={{ headerShown: false }} />
             <Stack.Screen
               name="signup"
               component={signup}
               options={{ headerShown: false }}
             />
+
 
             <Stack.Screen
               name="HomeMain"
