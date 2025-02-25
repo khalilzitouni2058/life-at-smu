@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
 export default CalendarView = ({ lastDayOfMonth, firstDayOfMonth }) => {
   // State to keep track of the selected dates
   const [selectedDates, setSelectedDates] = useState([]);
@@ -106,7 +107,7 @@ export default CalendarView = ({ lastDayOfMonth, firstDayOfMonth }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 140,
+    marginTop: 20,
     
     height:180
   },
