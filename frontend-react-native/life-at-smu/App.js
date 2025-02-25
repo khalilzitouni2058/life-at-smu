@@ -10,6 +10,7 @@ import signup from './features/HomePage/screens/signup';
 import Profile from './features/ProfilePage/screens/Profile';
 import HomeMain from './features/HomePage/screens/HomeMain';
 import EditProfile from './features/ProfilePage/screens/EditProfile';
+import EventForm from './features/Club/components/EventForm';
 
 export default function App() {
 
@@ -18,10 +19,12 @@ const Stack = createNativeStackNavigator();
     <NavigationContainer>
 
       <UserProvider>
-    <Stack.Navigator initialRouteName="Home">
+    <Stack.Navigator initialRouteName="eventForm">
+      <Stack.Screen name="eventForm" component={EventForm}  options={{ headerShown: false }} />
       <Stack.Screen name="Home" component={Home}  options={{ headerShown: false }} />
       <Stack.Screen name="Login" component={Login}  options={{ headerShown: false }} />
       <Stack.Screen name="signup" component={signup}  options={{ headerShown: false }} />
+      
       
       <Stack.Screen name="HomeMain" component={HomeMain}  options={{ headerShown: false }} />
       <Stack.Screen name="Profile" component={Profile}  options={{ headerShown: false }} />
