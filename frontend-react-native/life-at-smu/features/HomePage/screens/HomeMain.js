@@ -1,3 +1,4 @@
+
 import React,{useState} from 'react';
 import { Text, View ,StyleSheet,TextInput,TouchableOpacity } from 'react-native';
 import { useUser } from '../../../Context/UserContext';
@@ -9,6 +10,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const HomeMain = () => {
   const { user,eventCount } = useUser();
+
   const [now, setNow] = useState(new Date());
 
   const [firstDayOfMonth, setFirstDayOfMonth] = useState(
@@ -23,17 +25,17 @@ const HomeMain = () => {
     const randomIndex = Math.floor(Math.random() * colors.length);
     return colors[randomIndex];
   };
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [drawerVisible, setDrawerVisible] = useState(false);
   return (
-    <View style={styles.container} >
+    <View style={styles.container}>
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchBar}
           placeholder="Search events..."
           placeholderTextColor="#aaa"
           value={searchQuery}
-          onChangeText={text => setSearchQuery(text)}
+          onChangeText={(text) => setSearchQuery(text)}
         />
         <TouchableOpacity onPress={() => setDrawerVisible(!drawerVisible)}>
           <Ionicons name="notifications-outline" size={24} color="#333" />
@@ -48,10 +50,11 @@ const HomeMain = () => {
           <Text style={styles.drawerText}>hello</Text>
         </View>
       )}
-      <CalendarView 
-        lastDayOfMonth ={lastDayOfMonth} 
-        firstDayOfMonth={firstDayOfMonth} 
+      <CalendarView
+        lastDayOfMonth={lastDayOfMonth}
+        firstDayOfMonth={firstDayOfMonth}
         selectedIndex={selectedIndex}
+
         setSelectedIndex = {setSelectedIndex}
         
         />
@@ -63,66 +66,64 @@ const HomeMain = () => {
         
         
         
+
       <Footer />
     </View>
   );
 };
 const styles = StyleSheet.create({
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 0,
-    marginTop:40
+    marginTop: 40,
   },
   searchBar: {
     flex: 1,
     height: 40,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 12,
     marginRight: 8,
-    marginLeft:8,
-    backgroundColor: '#fff',
+    marginLeft: 8,
+    backgroundColor: "#fff",
   },
   drawer: {
-    zIndex:1,
-    position: 'absolute',
+    zIndex: 1,
+    position: "absolute",
     right: 0,
     top: 70,
     width: 200,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 8,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 2 },
   },
   drawerText: {
     fontSize: 16,
-   
   },
   
   placeholder: {
     height: 200,
-    backgroundColor: '#ddd',
+    backgroundColor: "#ddd",
   },
-  text:{
-    fontSize:30,
-  fontWeight:"bold",  
-  color:"#007DA5",
-  marginRight:"auto",
-  marginLeft:"20",
-  marginTop:10,
-  marginBottom:10
+  text: {
+    fontSize: 30,
+    fontWeight: "bold",
+    color: "#007DA5",
+    marginRight: "auto",
+    marginLeft: "20",
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    alignItems: "center",
+  },
+});
 
-},
-    container: {
-      flex: 1,
-      backgroundColor: '#fff',
-      alignItems: 'center',
-      
-    },
-  });
-  
 export default HomeMain;
