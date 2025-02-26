@@ -37,6 +37,7 @@ const Login = () => {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  console.log(ipAddress)
   const handleLogin = async () => {
     try {
       const response = await axios.post(`http://${ipAddress}:8000/api/auth/login`, {

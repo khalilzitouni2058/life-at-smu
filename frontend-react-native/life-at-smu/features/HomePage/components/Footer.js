@@ -11,20 +11,20 @@ const Footer = () => {
   return (
     <View style={styles.footer}>
       <TouchableOpacity style={styles.iconContainer} onPress={() => console.log('Home pressed')}>
-        <Ionicons name="home-outline" size={30} color="#fff" />
+        <Ionicons name="home-outline" size={30} color="black" />
         <Text style={styles.iconLabel}>Home</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.iconContainer} onPress={() => console.log('Search pressed')}>
-        <Ionicons name="people-circle-outline" size={30} color="#fff" />
+        <Ionicons name="people-circle-outline" size={30} color="black" />
         <Text style={styles.iconLabel}>Clubs</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.iconContainer} onPress={() => console.log('Search pressed')}>
-        <Ionicons name="calendar-outline" size={30} color="#fff" />
+        <Ionicons name="calendar-outline" size={30} color="black" />
         <Text style={styles.iconLabel}>Schedule</Text>
       </TouchableOpacity>
       
       <TouchableOpacity style={styles.iconContainer} onPress={() => handleprofile()}>
-        <Ionicons name="person-outline" size={30} color="#fff" />
+        <Ionicons name="person-outline" size={30} color="black" />
         <Text style={styles.iconLabel}>Profile</Text>
       </TouchableOpacity>
     </View>
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    backgroundColor: 'grey',
+    backgroundColor: '#E9F8FF',
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     height: 65,
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: -4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-    elevation: 5,
+    
   },
   iconContainer: {
     alignItems: 'center',
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   },
   iconLabel: {
     marginTop: 4,
-    color: '#ECF0F1',
+    color: 'black',
     fontSize: 12,
     fontWeight: '500',
   },

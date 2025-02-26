@@ -5,11 +5,12 @@ import Footer from '../components/Footer';
 import CalendarView from '../components/CalendarView';
 import EventDisplay from './EventDisplay';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Animated, { SlideInRight, SlideOutRight } from 'react-native-reanimated';
+
 
 const HomeMain = () => {
-  const { user } = useUser() // Accessing user data from context
+  const { user,eventCount } = useUser();
   const [now, setNow] = useState(new Date());
+
   const [firstDayOfMonth, setFirstDayOfMonth] = useState(
     new Date(now.getFullYear(), now.getMonth(), 1)
   );
@@ -39,20 +40,22 @@ const HomeMain = () => {
         </TouchableOpacity>
       </View>
       {drawerVisible && (
-        <Animated.View
+        <View
           entering={SlideInRight.duration(300)}
           exiting={SlideOutRight.duration(300)}
           style={styles.drawer}
         >
-          <Text style={styles.drawerText}>hellob </Text>
-        </Animated.View>
+          <Text style={styles.drawerText}>hello</Text>
+        </View>
       )}
       <CalendarView 
         lastDayOfMonth ={lastDayOfMonth} 
         firstDayOfMonth={firstDayOfMonth} 
         selectedIndex={selectedIndex}
         setSelectedIndex = {setSelectedIndex}
+        
         />
+        
         <Text style={styles.text}>Events</Text>
         <EventDisplay />
         
@@ -99,10 +102,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
    
   },
-  text: {
-    fontSize: 18,
-    marginVertical: 8,
-  },
+  
   placeholder: {
     height: 200,
     backgroundColor: '#ddd',
