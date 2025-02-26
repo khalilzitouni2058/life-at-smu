@@ -33,8 +33,11 @@ const Login = () => {
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  console.log(ipAddress)
 
   const handleLogin = async () => {
     try {

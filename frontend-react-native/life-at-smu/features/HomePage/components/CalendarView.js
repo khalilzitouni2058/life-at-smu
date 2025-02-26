@@ -1,9 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { useUser } from '../../../Context/UserContext';
 export default CalendarView = ({ lastDayOfMonth, firstDayOfMonth }) => {
-  // State to keep track of the selected dates
+  const { events = [], eventCount = 0 } = useUser() || {};
+
+    
+  const firstEventDate = events?.[0]?.date || "";
+    const extractMonthAndDay = (dateString) => {
+      if (!dateString) return null; 
+    
+    
+      const cleanedDate = dateString.replace(/^\w+, /, '');
+    
+      
+      const monthMatch = cleanedDate.match(/[A-Za-z]+/); 
+      const monthAbbr = monthMatch ? monthMatch[0].substring(0, 3).toUpperCase() : null; 
+    
+     
+      const dayMatch = cleanedDate.match(/\d+/); 
+      const day = dayMatch ? dayMatch[0] : null;
+    
+      return { month: monthAbbr, day };
+    };
+    
+    console.log(extractMonthAndDay(firstEventDate))
   const [selectedDates, setSelectedDates] = useState([]);
   const [isDropDownVisible, setIsDropDownVisible] = useState(false);
   const [selectedDay, setSelectedDay] = useState(0);
@@ -71,6 +92,9 @@ export default CalendarView = ({ lastDayOfMonth, firstDayOfMonth }) => {
               <Text style={styles.dayText}>{dayName}</Text>
               <Text style={styles.dateText}>{date.getDate()}</Text>
               <Text style={styles.monthText}>{shortMonthName}</Text>
+                <View style={styles.redCircle}>
+      <Text style={styles.circleText}>{eventCount}</Text>
+    </View>
             </TouchableOpacity>
           );
         })}
@@ -106,6 +130,24 @@ export default CalendarView = ({ lastDayOfMonth, firstDayOfMonth }) => {
 };
 
 const styles = StyleSheet.create({
+  redCircle: {
+    
+    top: 5,
+    right: 5,
+    width: 15,
+    height: 15,
+    borderRadius: 10,
+    backgroundColor: 'red',
+    justifyContent: 'center',
+    position:"absolute",
+    left:2,
+    alignItems:"center"
+  },
+  circleText: {
+    color: 'white',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
   container: {
     marginTop: 20,
     
