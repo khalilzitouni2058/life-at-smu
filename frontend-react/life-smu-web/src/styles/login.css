@@ -1,0 +1,128 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7fcff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+  }
+  
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .welcome-text {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007da5;
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 10px 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-bottom: 2px solid #007da5;
+    display: inline-block;
+    box-shadow: 0px 4px 6px rgba(0, 125, 165, 0.2);
+    border-radius: 5px;
+    background: rgba(0, 125, 165, 0.05);
+  }
+  
+  
+  .login-box {
+    background: white;
+    padding: 25px;
+    box-shadow: 0px 6px 12px rgba(0, 125, 165, 0.2);
+    border-radius: 10px;
+    width: 570px;
+    text-align: center;
+    border: 2px solid #007da5;
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  .login-box:hover {
+    transform: translateY(-5px);
+  }
+  
+  .login-box h2 {
+    margin-bottom: 20px;
+    color: #007da5;
+    font-weight: bold;
+  }
+  
+  label {
+    display: flex;
+    justify-content: flex-start;
+    font-size: 14px;
+    color: #007da5;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 2px solid #007da5;
+    border-radius: 6px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  
+  input:focus {
+    border-color: #005b75;
+  }
+  
+  .error {
+    color: red;
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+  
+  button {
+    width: 100%;
+    padding: 12px;
+    background-color: #007da5;
+    color: white;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out, transform 0.2s;
+  }
+  
+  button:hover {
+    background-color: #005b75;
+    transform: scale(1.05);
+  }
+  
+  .dashboard-container {
+    text-align: center;
+  }
+  
+  .dashboard-container h2 {
+    margin-bottom: 20px;
+    color: #007da5;
+    font-weight: bold;
+  }
+  
+  .dashboard-container button {
+    background-color: #ff4d4d;
+    padding: 12px 24px;
+    color: white;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background-color 0.3s ease-in-out, transform 0.2s;
+  }
+  
+  .dashboard-container button:hover{
+    background-color: #d32f2f;
+    transform: scale(1.05);
+  }
+  
