@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import '../styles/Dashboard/Dashboard.css';
 import logo from '../assets/logo.png'
 import ListOfUsers from '../components/ListOfUsers';
+import ListOfClubs from '../components/ListOfClubs';
 
 
 const Dashboard = () => {
@@ -20,6 +21,13 @@ const Dashboard = () => {
           <>
             <div className={`content ${isSidebarOpen ? 'open' : ''}`}> Users</div>;
             <ListOfUsers isSidebarOpen={isSidebarOpen}/>
+          </>
+        )
+        case 'clubs':
+        return( 
+          <>
+            <div className={`content ${isSidebarOpen ? 'open' : ''}`}> clubs</div>;
+            <ListOfClubs isSidebarOpen={isSidebarOpen}/>
           </>
         )
       default:
@@ -50,6 +58,12 @@ const Dashboard = () => {
             onClick={() => setActiveTab('users')}
           >
             Users
+          </li>
+          <li
+            className={activeTab === 'clubs' ? 'active' : ''}
+            onClick={() => setActiveTab('clubs')}
+          >
+            Clubs
           </li>
         </ul>
       </div>

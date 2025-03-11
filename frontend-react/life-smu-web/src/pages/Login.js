@@ -10,8 +10,8 @@ const Login = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
 
   const validUser = {
-    username: "admin",
-    password: "password123",
+    username: "a",
+    password: "a",
   };
 
   const handleLogin = (e) => {
