@@ -7,7 +7,7 @@ const eventSchema = new mongoose.Schema({
   eventTime: { type: String, required: true }, // Store as string (e.g., "14:00" or "2:00 PM")
   eventLocation: { type: String, required: true },
   additionalNotes: { type: String },
-  eventImage: { type: String }, // Store image URL or file path
+  eventImage: { uri: String }, // Store image URL or file path
   club: { type: mongoose.Schema.Types.ObjectId, ref: "Club", required: true }, // Reference to Club
 });
 

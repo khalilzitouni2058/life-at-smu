@@ -4,47 +4,37 @@ import branch4 from "../../../life-at-smu/assets/branch4.png"; // Assuming this 
 import { ScrollView } from "react-native";
 import { Ionicons } from "react-native-vector-icons";
 import { Animated } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import UpdateProfile from "./UpdateProfile";
-const Profile = ({ route, navigation }) => {
-  const [profile, setProfile] = useState({
-    picture:
-      "https://upload.wikimedia.org/wikipedia/en/thumb/5/5b/Lions_Clubs_International_logo.svg/1200px-Lions_Clubs_International_logo.svg.png",
-    clubName: "Lions SMU nation",
-    email: "Lions@smu.tn",
-    clubDescription: "bla bla bla bla blaaa bla bla bla",
-    category: "charity",
-    contactInfo: "+216 29 111 383",
-    boardMembers: [
-      {
-        name: "John Doe",
-        email: "john.doe@example.com",
-        facebookLink: "https://facebook.com/johndoe",
-        role: "President",
-        phoneNumber: "+216 20 123 456",
-        picture:
-          "https://scontent.ftun8-1.fna.fbcdn.net/v/t39.30808-6/469963732_2801171663397034_3870197941446985944_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=uqzP4t61bloQ7kNvgGuZweS&_nc_oc=AdiZi3rCnmG1hpiNhZIlx-rDtV1XEM0uwGxQef6qz8dJ724A7BKL5cPjYMLA5Di_4-4&_nc_zt=23&_nc_ht=scontent.ftun8-1.fna&_nc_gid=Akr1sLeZP0dLZ-JjE-afwYi&oh=00_AYAjfD91fKYDbB1FqX_D4lx-qx5KrgPJCj9enbH2X8cEIg&oe=67AFB8AB",
-      },
-      {
-        name: "Jane Smith",
-        email: "jane.smith@example.com",
-        facebookLink: "https://facebook.com/janesmith",
-        role: "Vice President",
-        phoneNumber: "+216 21 654 321",
-        picture:
-          "https://scontent.ftun8-1.fna.fbcdn.net/v/t39.30808-6/368248056_3599500017043298_7560987304418572974_n.jpg?_nc_cat=105&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=NYL9wzf01dQQ7kNvgH7D7YQ&_nc_oc=AdhfeQ6gaW2M6cA4_Eh98r556niOjr3kvXxX4aj4p4hJHVKcNCMD28CVpD18qoM616Q&_nc_zt=23&_nc_ht=scontent.ftun8-1.fna&_nc_gid=A1riFSJBOMrN_iuuuX5Abc_&oh=00_AYDpe5efipF2ZZCdctuSPtlhMEY8Hw7S4jfi8poVckNelQ&oe=67AFA027",
-      },
-    ],
-  });
+import axios from "axios";
+import Constants from "expo-constants";
+import { useClub } from "../../Context/ClubContext"; // Import useClub hook
 
-  useEffect(() => {
-    if (route.params?.updatedProfile) {
-      setProfile(route.params.updatedProfile);
-    }
-  }, [route.params?.updatedProfile]);
-
+const ClubProfile = ({ navigation }) => {
+  const { clubId } = useClub(); // Get clubId from context
+  const [profile, setProfile] = useState(null);
   const slideAnim = useRef(new Animated.Value(300)).current; // Start below the screen
   const branchOpacity = useRef(new Animated.Value(0)).current; // Initial opacity for branches
+
+  const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
+
+  useEffect(() => {
+    const fetchClubDetails = async () => {
+      try {
+        if (!clubId) {
+          console.warn("No club ID set in context");
+          return;
+        }
+        const response = await axios.get(
+          `http://${ipAddress}:8000/api/auth/clubs/${clubId}`
+        );
+        setProfile(response.data.club);
+      } catch (error) {
+        console.error("Error fetching club details:", error);
+      }
+    };
+
+    fetchClubDetails();
+  }, [profile]);
 
   useEffect(() => {
     Animated.parallel([
@@ -75,7 +65,9 @@ const Profile = ({ route, navigation }) => {
         <View style={[styles.profileHeader]}>
           <View style={styles.profilePictureContainer}>
             <Image
-              source={{ uri: profile.picture }}
+              source={{
+                uri: profile?.profilePicture,
+              }}
               style={styles.profilePicture}
             />
           </View>
@@ -193,6 +185,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#FFFFFF", // White text for the header
     marginTop: 10,
+    marginLeft: 10,
   },
   memberinfo: {
     fontSize: 13,
@@ -227,7 +220,7 @@ const styles = StyleSheet.create({
     borderRadius: 25, // Rounded edges
     alignItems: "center", // Center the text
     alignSelf: "center", // Center the button
-    marginTop: -10, // Spacing from the top elements
+    marginTop: 5, // Spacing from the top elements
     shadowColor: "#000", // Shadow color
     shadowOffset: { width: 0, height: 2 }, // Shadow offset for elevation
     shadowOpacity: 0.1, // Shadow opacity
@@ -328,8 +321,9 @@ const styles = StyleSheet.create({
 
   infoIcon: {
     marginRight: 10, // Add spacing between icon and text
+    paddingBottom: 6,
     color: "#007DA5", // Set icon color to match the brand
   },
 });
 
-export default Profile;
+export default ClubProfile;
