@@ -100,9 +100,7 @@ export default CalendarView = ({ lastDayOfMonth, firstDayOfMonth }) => {
               <Text style={styles.dayText}>{dayName}</Text>
               <Text style={styles.dateText}>{date.getDate()}</Text>
               <Text style={styles.monthText}>{shortMonthName}</Text>
-                <View style={styles.redCircle}>
-      <Text style={styles.circleText}>{eventCount}</Text>
-    </View>
+                
             </TouchableOpacity>
           );
         })}
