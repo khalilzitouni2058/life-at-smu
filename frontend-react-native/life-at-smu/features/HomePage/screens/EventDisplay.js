@@ -7,11 +7,15 @@ import Constants from "expo-constants";
 const screenWidth = Dimensions.get('window').width;
 const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
 const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
+
 const EventDisplay = () => {
   const [events,setEvents]  = useState([]);
+  const [message,setMessage] = useState("");
+  const [showEvent, setshowEvent] = useState(true);
   console.log(events)
+  
   const { selectedDate,seteventCount } = useUser() || "";
-  console.log(selectedDate)
+  
   useEffect(() => {
     const fetchEvents = async () => {
       try {
@@ -19,16 +23,18 @@ const EventDisplay = () => {
         
         if (!response.ok) {
           setEvents([]);
+          
+          setMessage("No events found for the specified date.");
+          setshowEvent(false)
+          return;
         }
-
         const data = await response.json();
         
-        if (data === null) {
-          setEvents([]); 
-        } else {
+        
           setEvents(data); 
           seteventCount(data.length)
-        }
+          setshowEvent(true)
+        
         
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -43,7 +49,9 @@ const EventDisplay = () => {
   
   const renderEvent = ({ item }) => (
     <>
+    
       <View style={styles.container2}>
+        
         <Image source={{ uri: item.club.profilePicture }} style={styles.circularImage} />
         <Text style={styles.text}>{item.club.clubName}</Text>
       </View>
@@ -74,13 +82,21 @@ const EventDisplay = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={events}
-        keyExtractor={(item) => item._id}
-        renderItem={renderEvent}
-        contentContainerStyle={{ paddingBottom: 50 }}
-      />
-    </View>
+      
+      {showEvent ? (
+        <FlatList
+          data={events}
+          keyExtractor={(item) => item._id}
+          renderItem={renderEvent}
+          contentContainerStyle={{ paddingBottom: 50 }}
+        />
+      ) : (
+        <View>
+        <Text style={styles.text3}>{message}</Text>
+        </View>
+      )}
+      </View>
+    
   );
 };
 
@@ -108,6 +124,12 @@ const styles = StyleSheet.create({
   text: {
     color: '#333',
     fontSize: 16,
+    fontWeight: '600',
+  },
+  text3: {
+    marginTop:10,
+    color: 'black',
+    fontSize: 32,
     fontWeight: '600',
   },
   row: {
