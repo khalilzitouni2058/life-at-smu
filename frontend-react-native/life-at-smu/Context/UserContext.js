@@ -8,11 +8,13 @@ export const useUser = () => {
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [events, setEvents] = useState([]); // Store events
-  const eventCount = events.length;
+  const [events, setEvents] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(null); // Store events
+  
+  const [eventCount, seteventCount] = useState(null);
 
   return (
-    <UserContext.Provider value={{ user, setUser, events, setEvents, eventCount }}>
+    <UserContext.Provider value={{ user, setUser, events, setEvents, eventCount, selectedDate,seteventCount ,setSelectedDate }}>
       {children}
     </UserContext.Provider>
   );

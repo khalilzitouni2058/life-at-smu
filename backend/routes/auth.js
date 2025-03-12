@@ -440,4 +440,33 @@ router.get("/clubs/:clubId/events", async (req, res) => {
   }
 });
 
+router.get('/events/:date', async (req, res) => {
+  try {
+    const { date } = req.params;
+    const events = await Event.find({ eventDate: date })
+      .populate('club', 'clubName profilePicture')  // Populate club with clubName and profilePicture
+      .select('eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club');
+    
+    if (events.length === 0) {
+      return res.status(404).json({ message: 'No events found for the specified date.' });
+    }
+
+    res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+router.get('/events', async (req, res) => {
+  try {
+      const events = await Event.find().select(
+          'eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club'
+      );
+      
+      res.status(200).json(events);
+  } catch (error) {
+      res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
 module.exports = router;
