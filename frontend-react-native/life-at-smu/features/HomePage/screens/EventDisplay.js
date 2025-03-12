@@ -2,64 +2,70 @@ import { Text, View, StyleSheet, Dimensions, FlatList, Image } from 'react-nativ
 import React, { useState, useEffect } from 'react';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useUser } from '../../../Context/UserContext';
+import Constants from "expo-constants";
 
 const screenWidth = Dimensions.get('window').width;
-
+const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
 const EventDisplay = () => {
-  const { setEvents } = useUser(); // Get setEvents from context to update global state
-  const [events, setLocalEvents] = useState([
-    {
-      id: '1',
-      name: 'Company Visit to Bako Motors',
-      date: 'Monday, February 5th',
-      location: 'Bako Motors',
-      time: '10:30AM -2:40PM',
-      organizedby: 'IEEE IAS SMU',
-      eventPhoto: { uri: 'https://i.postimg.cc/XXDcNvK5/sample-image.jpg' },
-      organizedbyPhoto: { uri: 'https://i.postimg.cc/63vMqCTh/image.png' },
-    },
-    {
-      id: '2',
-      name: 'Hack A Tune',
-      eventPhoto: { uri: 'https://i.postimg.cc/YSHh78C2/image.png' },
-      date: 'Monday, February 5th',
-      location: 'Bako Motors',
-      time: '9:00AM -2:40PM',
-      organizedby: 'Melodies Club SMU',
-      organizedbyPhoto: { uri: 'https://i.postimg.cc/cJx0TzJ3/image-removebg-preview.png' },
-    },
-  ]);
-
-  // Update global event state when component mounts
+  const [events,setEvents]  = useState([]);
+  console.log(events)
+  const { selectedDate,seteventCount } = useUser() || "";
+  console.log(selectedDate)
   useEffect(() => {
-    setEvents(events);
-  }, [events, setEvents]);
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(`http://${ipAddress}:8000/api/auth/events/${selectedDate}`);
+        
+        if (!response.ok) {
+          setEvents([]);
+        }
 
+        const data = await response.json();
+        
+        if (data === null) {
+          setEvents([]); 
+        } else {
+          setEvents(data); 
+          seteventCount(data.length)
+        }
+        
+      } catch (error) {
+        console.error('Error fetching events:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, [selectedDate]);
+
+  
   const renderEvent = ({ item }) => (
     <>
       <View style={styles.container2}>
-        <Image source={item.organizedbyPhoto} style={styles.circularImage} />
-        <Text style={styles.text}>{item.organizedby}</Text>
+        <Image source={{ uri: item.club.profilePicture }} style={styles.circularImage} />
+        <Text style={styles.text}>{item.club.clubName}</Text>
       </View>
 
       <View style={styles.eventContainer}>
-        <Image source={item.eventPhoto} style={styles.eventImageBackground} />
+        <Image source={item.eventImage} style={styles.eventImageBackground} />
         <View style={styles.eventTextContainer}>
-          <Text style={styles.eventTitle}>{item.name}</Text>
+          <Text style={styles.eventTitle}>{item.eventName}</Text>
 
           <View style={styles.row}>
             <Ionicons name="calendar-clear-outline" color={'black'} size={14} style={{ marginRight: 4 }} />
-            <Text style={styles.eventTime}>{item.date}</Text>
+            <Text style={styles.eventTime}>{item.eventDate}</Text>
           </View>
 
           <View style={styles.row}>
             <Ionicons name="location-outline" color={'black'} size={14} style={{ marginRight: 4 }} />
-            <Text style={styles.eventTime}>{item.location}</Text>
+            <Text style={styles.eventTime}>{item.eventLocation}</Text>
           </View>
 
           <View style={styles.row}>
             <Ionicons name="time-outline" color={'black'} size={14} style={{ marginRight: 4 }} />
-            <Text style={styles.eventTime}>{item.time}</Text>
+            <Text style={styles.eventTime}>{item.eventTime}</Text>
           </View>
         </View>
       </View>
@@ -70,7 +76,7 @@ const EventDisplay = () => {
     <View style={styles.container}>
       <FlatList
         data={events}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={renderEvent}
         contentContainerStyle={{ paddingBottom: 50 }}
       />

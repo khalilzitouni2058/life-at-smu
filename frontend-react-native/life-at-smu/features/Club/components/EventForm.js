@@ -1,11 +1,13 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, Image } from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Alert, ActivityIndicator, Image,ScrollView } from "react-native";
 import { useForm, Controller } from "react-hook-form";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons, FontAwesome, Entypo } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 
 // Validation schema using Yup
 const schema = yup.object().shape({
@@ -65,7 +67,9 @@ const EventForm = () => {
   };
 
   return (
+    
     <View style={styles.container}>
+      <ScrollView>
       <View style={styles.titleContainer}>
         <Text style={styles.title}>Event Proposal</Text>
       </View>
@@ -113,13 +117,7 @@ const EventForm = () => {
         </TouchableOpacity>
         {errors.date && <Text style={styles.errorText}>{errors.date.message}</Text>}
 
-        <DateTimePickerModal
-          isVisible={isDatePickerVisible}
-          mode="date"
-          display="spinner"
-          onConfirm={handleConfirm}
-          onCancel={hideDatePicker}
-        />
+        
 
         {/* Place */}
         <View style={styles.inputWrapper}>
@@ -182,6 +180,7 @@ const EventForm = () => {
           {loading ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.submitText}>Submit</Text>}
         </TouchableOpacity>
       </View>
+      </ScrollView>
     </View>
   );
 };
@@ -189,6 +188,7 @@ const EventForm = () => {
 // Styles
 const styles = {
   container: {
+    paddingTop:60,
     flex: 1,
     backgroundColor: "#f7fcff",
   },

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useUser } from '../../../Context/UserContext';
+
 export default CalendarView = ({ lastDayOfMonth, firstDayOfMonth }) => {
-  const { events = [], eventCount = 0 } = useUser() || {};
+  const { events = [], eventCount = 0,setSelectedDate ="" } = useUser() || {};
 
     
   const firstEventDate = events?.[0]?.date || "";
@@ -24,10 +25,11 @@ export default CalendarView = ({ lastDayOfMonth, firstDayOfMonth }) => {
       return { month: monthAbbr, day };
     };
     
-    console.log(extractMonthAndDay(firstEventDate))
+    
   const [selectedDates, setSelectedDates] = useState([]);
   const [isDropDownVisible, setIsDropDownVisible] = useState(false);
   const [selectedDay, setSelectedDay] = useState(0);
+  
   useEffect(() => {
     // Initialize the selected dates with today's date and the next 3 days
     const today = new Date();
@@ -83,6 +85,12 @@ export default CalendarView = ({ lastDayOfMonth, firstDayOfMonth }) => {
           const dayName = date.toLocaleString('default', { weekday: 'short' });
           const shortMonthName = date.toLocaleString('default', { month: 'short' });
           const isSelected = selectedDay === index;
+          if(isSelected){
+            const dateObj = new Date(date); 
+            const formattedDate = dateObj.toLocaleDateString('en-CA'); 
+            setSelectedDate(formattedDate)
+              
+          }
           
           return (
             <TouchableOpacity key={`selected-${index}`} style={[

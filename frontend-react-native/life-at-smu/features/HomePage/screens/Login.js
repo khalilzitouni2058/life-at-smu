@@ -41,7 +41,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      // Attempt club login first
+     
       const clubResponse = await axios.post(`http://${ipAddress}:8000/api/auth/clubs/login`, {
         email,
         password,
@@ -49,9 +49,9 @@ const Login = () => {
 
       if (clubResponse.status === 200 && clubResponse.data.club) {
         console.log("Club login successful:", clubResponse.data.club);
-        setClubId(clubResponse.data.club._id); // ✅ Save club ID to context
-        handlelogin(); // ✅ Navigate to ClubProfile
-        return; // Stop execution since club login succeeded
+        setClubId(clubResponse.data.club._id);
+        handlelogin(); 
+        return;
       }
     } catch (clubError) {
       console.log("Invalid credentials, try again");
@@ -66,8 +66,8 @@ const Login = () => {
 
       if (userResponse.status === 200 && userResponse.data.user) {
         console.log("User login successful:", userResponse.data.user);
-        setUser(userResponse.data.user); // ✅ Save user data to context
-        handlelogin() // ✅ Navigate to user home screen
+        setUser(userResponse.data.user);
+        handlelogin()
         return;
       }
     } catch (userError) {
@@ -76,7 +76,7 @@ const Login = () => {
   };
 
   useEffect(() => {
-    // Initial animations for branch images
+   
     Animated.timing(topRightAnim, {
       toValue: 30,
       duration: 2000,
@@ -125,7 +125,7 @@ const Login = () => {
             <Animated.View
               style={[styles.animatedContainer, { opacity: fadeAnim }]}
             >
-              <Text style={styles.text}>Welcome Back!</Text>
+              <Text style={styles.text}>Welcome </Text>
               <Text style={styles.text2}>Sign in to Continue</Text>
               <Image source={logo} style={styles.logo} />
               <KeyboardAvoidingView

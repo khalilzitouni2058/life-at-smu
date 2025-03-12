@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     flexDirection:"column",
     marginBottom: 20,
     gap:10,
-    zIndex:6,
+    zIndex:10,
     
   },
   inputWrapper: {
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   inputField: {
     flex: 1,
-    padding: 8,
+    padding: 20,
     fontSize: 20,
     fontWeight:400,
     color: "#333",
