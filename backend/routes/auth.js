@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/users");
 const Club = require("../models/clubs");
 const Event = require("../models/events");
+const Room = require("../models/rooms")
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -383,12 +384,11 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     eventLocation,
     additionalNotes,
     eventImage,
+    room, 
   } = req.body;
 
-  if (!eventName || !eventDate || !eventTime || !eventLocation) {
-    return res
-      .status(400)
-      .json({ message: "Event name, date, time, and location are required" });
+  if (!eventName || !eventDate || !eventTime || !eventLocation || !room) {
+    return res.status(400).json({ message: "Event name, date, time, location, and room are required" });
   }
 
   try {
@@ -406,6 +406,7 @@ router.post("/clubs/:clubId/events", async (req, res) => {
       additionalNotes,
       eventImage,
       club: clubId,
+      room, // Store room ID
     });
 
     await newEvent.save();
@@ -466,6 +467,20 @@ router.get('/events', async (req, res) => {
       res.status(200).json(events);
   } catch (error) {
       res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+router.get('/rooms', async (req, res) => {
+  try {
+    const rooms = await Room.find();
+    if (!Room.available) {
+      return res.status(200).json({ rooms: rooms });
+    } else {
+      return res.status(404).json({ msg: "No available rooms found" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ msg: "Error on getting rooms" });
   }
 });
 
