@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Constants from "expo-constants";
+import axios from "axios";
 import {
   View,
   Text,
@@ -9,13 +11,17 @@ import {
   Image,
   ScrollView,
   Platform,
+  Picker
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons, FontAwesome, Entypo } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker"; // ✅ Simple Expo-friendly date picker
+import DateTimePicker from "@react-native-community/datetimepicker"; 
+import DropDownPicker from 'react-native-dropdown-picker';
+import { useClub } from "../../../Context/ClubContext"; // Import useClub hook
+
 
 const schema = yup.object().shape({
   eventName: yup
@@ -25,6 +31,7 @@ const schema = yup.object().shape({
   date: yup.string().required("Date is required"),
   time: yup.string().required("Time is required"),
   place: yup.string().required("Place is required"),
+  room: yup.string().required("Room is required"),
   participants: yup
     .number()
     .typeError("Must be a number")
@@ -36,22 +43,104 @@ const schema = yup.object().shape({
     .required("Description is required"),
 });
 
+
+
+
 const EventForm = () => {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
+  const [roomsList, setRoomsList] = useState([]);  
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date()); // ✅ Stores selected date
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [selectedTime, setSelectedTime] = useState(new Date());
+  const { clubId } = useClub(); // Get clubId from context
+  const [eventName, seteventName] = useState("");
+  const [eventLocation, seteventLocation] = useState("");
+  const [eventDescription, seteventDescription] = useState("");
+  const [additionalNotes, setadditionalNotes] = useState("");
+  
+
+  
+  const [message, setMessage] = useState(""); // Message for empty state
 
   const {
     control,
-    handleSubmit,
     setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
   });
+
+const [open, setOpen] = useState(false);
+const [selectedRoom, setSelectedRoom] = useState(null);
+
+  const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
+
+
+  
+
+  const handleSubmitForm = async () => {
+    const formData = new FormData();
+
+    // Append form data, including the selected image and other form fields
+    formData.append('eventName', eventName);
+    formData.append('eventDescription', eventDescription);
+    formData.append('eventLocation', eventLocation);
+    formData.append('additionalNotes', additionalNotes);
+    formData.append('eventDate', selectedDate.toISOString().split('T')[0]);
+    formData.append('eventTime', selectedTime.toISOString().split('T')[1]);
+    formData.append('room', selectedRoom);
+
+    if (image) {
+      formData.append('eventImage', {
+        uri: image,
+        name: 'eventImage.jpg', // Set the file name
+        type: 'image/jpeg', // Specify image type
+      });
+    }
+
+    try {
+      const response = await axios.post(
+        `http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data', // Specify the content type
+          },
+        }
+      );
+
+      console.log('Event created successfully', response.data);
+    } catch (error) {
+      console.error('Error creating event:', error);
+    }
+  };
+  
+  
+  
+
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await axios.get(`http://${ipAddress}:8000/api/auth/rooms`);
+        if (response.data && response.data.rooms) {
+          const formattedRooms = response.data.rooms.map((room) => ({
+            label: room.number,
+            value: room._id,
+          }));
+          setRoomsList(formattedRooms);
+          console.log("This is the second log",roomsList)
+        }
+      } catch (error) {
+        console.error("Error fetching rooms:", error);
+      }
+    };
+  
+    fetchRooms();
+  }, []);
 
   // Handle Image Picker
   const pickImage = async () => {
@@ -67,23 +156,11 @@ const EventForm = () => {
     }
   };
 
-  // Handle Form Submission
-  const onSubmit = (data) => {
-    if (!image) {
-      Alert.alert("Error", "Please upload an event image.");
-      return;
-    }
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      Alert.alert("Success", "Event proposal submitted!", [{ text: "OK" }]);
-      console.log("Submitted Data:", { ...data, image });
-    }, 2000);
-  };
+  
 
   return (
     <View style={styles.container}>
-      <ScrollView>
+      <ScrollView keyboardShouldPersistTaps="handled">
         <View style={styles.titleContainer}>
           <Text style={styles.title}>Event Proposal</Text>
         </View>
@@ -227,7 +304,34 @@ const EventForm = () => {
           {errors.place && (
             <Text style={styles.errorText}>{errors.place.message}</Text>
           )}
+{/*Rooms*/}
+<View style={styles.inputWrapper}>
+    <MaterialIcons name="meeting-room" size={24} color="#007da5" style={styles.icon} />
 
+    <Controller
+      control={control}
+      name="room"
+      render={({ field: { onChange, value } }) => (
+        <DropDownPicker
+          open={open}
+          setOpen={setOpen}
+          items={roomsList}
+          value={value || selectedRoom}  // Show selected room in dropdown
+          setValue={(callback) => {
+            const newValue = callback(selectedRoom);
+            setSelectedRoom(newValue);
+            console.log(selectedRoom);
+            onChange(newValue); // Update form field
+          }}
+          placeholder="Select a room"
+          containerStyle={styles.dropdown}
+          dropDownDirection="BOTTOM"
+        />
+      )}
+    />
+  </View>
+
+{errors.room && <Text style={styles.errorText}>{errors.room.message}</Text>}
           {/* Participants */}
           <View style={styles.inputWrapper}>
             <FontAwesome
@@ -282,7 +386,7 @@ const EventForm = () => {
 
           {/* Submit Button */}
           <TouchableOpacity
-            onPress={handleSubmit(onSubmit)}
+            onPress={handleSubmitForm}
             style={styles.submitButton}
             disabled={loading}
           >
