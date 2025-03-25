@@ -73,55 +73,39 @@ const ClubProfile = ({ navigation }) => {
           </View>
 
           <View style={styles.infoContainer}>
-            <Text style={styles.infoTitle}>{profile?.clubName}</Text>
+            <Text style={styles.infoTitle}>{profile.clubName}</Text>
 
-            {profile?.email && (
-              <View style={styles.infoRow}>
-                <Ionicons
-                  name="mail-outline"
-                  size={18}
-                  style={styles.infoIcon}
-                />
-                <Text style={styles.infoText}>{profile?.email}</Text>
-              </View>
-            )}
+            <View style={styles.infoRow}>
+              <Ionicons name="mail-outline" size={18} style={styles.infoIcon} />
+              <Text style={styles.infoText}>{profile.email}</Text>
+            </View>
 
-            {profile?.category && (
-              <View style={styles.infoRow}>
-                <Ionicons
-                  name="pricetag-outline"
-                  size={18}
-                  style={styles.infoIcon}
-                />
-                <Text style={styles.infoText}>{profile?.category}</Text>
-              </View>
-            )}
+            <View style={styles.infoRow}>
+              <Ionicons
+                name="pricetag-outline"
+                size={18}
+                style={styles.infoIcon}
+              />
+              <Text style={styles.infoText}>{profile.category}</Text>
+            </View>
 
-            {profile?.clubDescription && (
-              <View style={styles.infoRow}>
-                <Ionicons
-                  name="information-circle-outline"
-                  size={18}
-                  style={styles.infoIcon}
-                />
-                <Text style={styles.infoText}>{profile?.clubDescription}</Text>
-              </View>
-            )}
+            <View style={styles.infoRow}>
+              <Ionicons
+                name="information-circle-outline"
+                size={18}
+                style={styles.infoIcon}
+              />
+              <Text style={styles.infoText}>{profile.clubDescription}</Text>
+            </View>
 
-            {profile?.contactInfo && (
-              <View style={styles.infoRow}>
-                <Ionicons
-                  name="call-outline"
-                  size={18}
-                  style={styles.infoIcon}
-                />
-                <Text style={styles.infoText}>{profile?.contactInfo}</Text>
-              </View>
-            )}
+            <View style={styles.infoRow}>
+              <Ionicons name="call-outline" size={18} style={styles.infoIcon} />
+              <Text style={styles.infoText}>{profile.contactInfo}</Text>
+            </View>
 
             <TouchableOpacity
               style={styles.editProfileButton}
-              onPress={() => navigation.navigate("ClubUpdate")}
+              onPress={() => navigation.navigate("UpdateProfile")}
             >
               <Text style={styles.editProfileText}>Edit Profile</Text>
             </TouchableOpacity>
@@ -136,31 +120,29 @@ const ClubProfile = ({ navigation }) => {
             { transform: [{ translateY: slideAnim }] },
           ]}
         >
-          {profile?.boardMembers?.map((member, index) => (
+          {profile.boardMembers.map((member, index) => (
             <TouchableOpacity key={index} style={styles.actionCard}>
               <Image
-                source={{
-                  uri: member?.profilePicture,
-                }}
+                source={{ uri: member.picture }}
                 style={styles.boardMemberImage}
               />
               <Text style={styles.cardText}>
-                <Text style={styles.memberinfo}>Name:</Text> {member?.name}
+                <Text style={styles.memberinfo}>Name:</Text> {member.name}
               </Text>
               <Text style={styles.cardText}>
-                <Text style={styles.memberinfo}>Role:</Text> {member?.role}
+                <Text style={styles.memberinfo}>Role:</Text> {member.role}
               </Text>
               <Text style={styles.cardText}>
-                <Text style={styles.memberinfo}>Email:</Text> {member?.email}
+                <Text style={styles.memberinfo}>Email:</Text> {member.email}
               </Text>
               <Text style={styles.cardText}>
-                <Text style={styles.memberinfo}>Phone:</Text>
-                {member?.phoneNumber}
+                <Text style={styles.memberinfo}>Phone:</Text>{" "}
+                {member.phoneNumber}
               </Text>
               <Text
                 style={styles.cardTextLink}
                 onPress={() => {
-                  navigation.navigate("WebView", { url: member?.facebookLink });
+                  navigation.navigate("WebView", { url: member.facebookLink });
                 }}
               >
                 Facebook Profile
