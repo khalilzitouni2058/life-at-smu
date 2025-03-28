@@ -43,7 +43,32 @@ const Profile = ({ navigation, route }) => {
   return (
     <ScrollView>
       <View style={styles.container}>
-        <Back title={"Home"} />
+        <View style={{ position: "relative" }}>
+          {/* ✅ Logout button positioned top-left of blue area */}
+          <TouchableOpacity
+            style={{
+              position: "absolute",
+              top: 100,
+              left: 12,
+              backgroundColor: "#FF5A5F",
+              paddingVertical: 6,
+              paddingHorizontal: 14,
+              borderRadius: 15,
+              zIndex: 10,
+              elevation: 10,
+            }}
+            onPress={() => {
+              setUser(null);
+              navigation.replace("Login");
+            }}
+          >
+            <Text style={{ color: "white", fontWeight: "600", fontSize: 14 }}>
+              Logout
+            </Text>
+          </TouchableOpacity>
+          <Back title={"Home"} />
+        </View>
+
         <Animated.Image
           source={branch4}
           style={[styles.image, styles.topRight, { opacity: branchOpacity }]}
