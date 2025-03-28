@@ -47,7 +47,7 @@ const AddBoardMember = ({ navigation }) => {
       phoneNumber: formattedPhoneNumber,
       profilePicture:
         profileImage ||
-        "https://scontent.ftun8-1.fna.fbcdn.net/v/t39.30808-6/469963732_2801171663397034_3870197941446985944_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=uqzP4t61bloQ7kNvgGuZweS&_nc_oc=AdiZi3rCnmG1hpiNhZIlx-rDtV1XEM0uwGxQef6qz8dJ724A7BKL5cPjYMLA5Di_4-4&_nc_zt=23&_nc_ht=scontent.ftun8-1.fna&_nc_gid=Akr1sLeZP0dLZ-JjE-afwYi&oh=00_AYAjfD91fKYDbB1FqX_D4lx-qx5KrgPJCj9enbH2X8cEIg&oe=67AFB8AB",
+        "https://scontent.ftun8-1.fna.fbcdn.net/v/t39.30808-6/469963732_2801171663397034_3870197941446985944_n.jpg?...",
     };
 
     try {
@@ -56,7 +56,7 @@ const AddBoardMember = ({ navigation }) => {
         newMember
       );
       Alert.alert("Success", "Board member added successfully!");
-      navigation.navigate("ClubUpdate"); // ✅ Navigate back to ClubUpdate
+      navigation.navigate("ClubUpdate");
     } catch (error) {
       console.error("Error adding board member:", error);
       Alert.alert("Error", "Could not add board member.");
@@ -79,17 +79,17 @@ const AddBoardMember = ({ navigation }) => {
     }
   };
 
+  {
+    /* 🔽 HIGHLIGHTED: Main return moved here from handleImageUpload */
+  }
   return (
     <View style={{ flex: 1, backgroundColor: "#f0f8ff" }}>
-      {/* Header */}
       <View style={styles.header}>
         <Image source={require("../../assets/logo.png")} style={styles.logo} />
         <Text style={styles.title}>Add Board Member</Text>
       </View>
 
-      {/* Scrollable Content */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Profile Image Upload */}
         <TouchableOpacity
           onPress={handleImageUpload}
           style={styles.imageWrapper}
@@ -101,12 +101,9 @@ const AddBoardMember = ({ navigation }) => {
           )}
         </TouchableOpacity>
 
-        {/* Form */}
         <View style={styles.formContainer}>
           <View style={styles.formGroup}>
-            <Text style={styles.label}>
-              Name <Text style={styles.required}>*</Text>
-            </Text>
+            <Text style={styles.label}>Name *</Text>
             <TextInput
               style={styles.input}
               value={name}
@@ -117,9 +114,7 @@ const AddBoardMember = ({ navigation }) => {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>
-              Email <Text style={styles.required}>*</Text>
-            </Text>
+            <Text style={styles.label}>Email *</Text>
             <TextInput
               style={styles.input}
               value={email}
@@ -142,9 +137,7 @@ const AddBoardMember = ({ navigation }) => {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>
-              Role <Text style={styles.required}>*</Text>
-            </Text>
+            <Text style={styles.label}>Role *</Text>
             <TextInput
               style={styles.input}
               value={role}
@@ -154,11 +147,8 @@ const AddBoardMember = ({ navigation }) => {
             />
           </View>
 
-          {/* Phone Number Section */}
-          <View style={styles.phoneNumberSection}>
-            <Text style={styles.label}>
-              Add Phone Number <Text style={styles.required}>*</Text>
-            </Text>
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>Phone Number *</Text>
             <View style={styles.phoneInputContainer}>
               <TouchableOpacity style={styles.dropdown}>
                 <Text style={styles.dropdownText}>{countryCode}</Text>
@@ -175,12 +165,10 @@ const AddBoardMember = ({ navigation }) => {
           </View>
         </View>
 
-        {/* Save Button */}
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Text style={styles.saveButtonText}>Save</Text>
         </TouchableOpacity>
 
-        {/* Ignore Button */}
         <TouchableOpacity
           style={styles.ignoreButton}
           onPress={() => navigation.navigate("ClubUpdate")}

@@ -5,25 +5,22 @@ import { ScrollView } from "react-native";
 import { Ionicons } from "react-native-vector-icons";
 import { Animated } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { useUser } from '../../../Context/UserContext';
-
-
+import { useUser } from "../../../Context/UserContext";
+import Back from "../../HomePage/components/Back";
 
 const Profile = ({ navigation, route }) => {
-  const { user,setUser } = useUser();
-
+  const { user, setUser } = useUser();
 
   useEffect(() => {
-    console.log(route.params?.updatedUser)
+    console.log(route.params?.updatedUser);
     if (route.params?.updatedUser) {
       setUser(route.params?.updatedUser);
     }
   }, [route.params?.updatedUser]);
 
-
   const getUserId = async () => {
-    
-    navigation.navigate("EditProfile", { user }); }
+    navigation.navigate("EditProfile", { user });
+  };
 
   const slideAnim = useRef(new Animated.Value(300)).current; // Start below the screen
   const branchOpacity = useRef(new Animated.Value(0)).current; // Initial opacity for branches
@@ -46,6 +43,32 @@ const Profile = ({ navigation, route }) => {
   return (
     <ScrollView>
       <View style={styles.container}>
+        <View style={{ position: "relative" }}>
+          {/* ✅ Logout button positioned top-left of blue area */}
+          <TouchableOpacity
+            style={{
+              position: "absolute",
+              top: 100,
+              left: 12,
+              backgroundColor: "#FF5A5F",
+              paddingVertical: 6,
+              paddingHorizontal: 14,
+              borderRadius: 15,
+              zIndex: 10,
+              elevation: 10,
+            }}
+            onPress={() => {
+              setUser(null);
+              navigation.replace("Login");
+            }}
+          >
+            <Text style={{ color: "white", fontWeight: "600", fontSize: 14 }}>
+              Logout
+            </Text>
+          </TouchableOpacity>
+          <Back title={"Home"} />
+        </View>
+
         <Animated.Image
           source={branch4}
           style={[styles.image, styles.topRight, { opacity: branchOpacity }]}
@@ -65,7 +88,10 @@ const Profile = ({ navigation, route }) => {
           <View style={{ flex: 1, gap: 20, alignItems: "center" }}>
             <Text style={styles.name}>{user.fullname}</Text>
             <Text style={styles.email}>{user.email}</Text>
-            <TouchableOpacity style={styles.editProfileButton} onPress={getUserId}>
+            <TouchableOpacity
+              style={styles.editProfileButton}
+              onPress={getUserId}
+            >
               <Text style={styles.editProfileText}>Edit Profile</Text>
             </TouchableOpacity>
           </View>
