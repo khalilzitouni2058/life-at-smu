@@ -11,7 +11,7 @@ import {
   Image,
   ScrollView,
   Platform,
-  Picker
+  
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -82,40 +82,35 @@ const [selectedRoom, setSelectedRoom] = useState(null);
   
 
   const handleSubmitForm = async () => {
-    const formData = new FormData();
+    const eventData = {
+      eventName,
+      eventDescription,
+      eventLocation,
+      additionalNotes,
+      eventImage: { uri: image },
+      eventDate: selectedDate.toISOString().split("T")[0],
+      eventTime: selectedTime.toISOString(),
+      room: selectedRoom,
+    };
 
-    // Append form data, including the selected image and other form fields
-    formData.append('eventName', eventName);
-    formData.append('eventDescription', eventDescription);
-    formData.append('eventLocation', eventLocation);
-    formData.append('additionalNotes', additionalNotes);
-    formData.append('eventDate', selectedDate.toISOString().split('T')[0]);
-    formData.append('eventTime', selectedTime.toISOString().split('T')[1]);
-    formData.append('room', selectedRoom);
+// If eventImage is a file from input
 
-    if (image) {
-      formData.append('eventImage', {
-        uri: image,
-        name: 'eventImage.jpg', // Set the file name
-        type: 'image/jpeg', // Specify image type
-      });
+
+axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+  .then(response => {
+    console.log("Event created successfully:", response.data);
+  })
+  .catch(error => {
+    if (error.response) {
+      console.error("Error creating event:", error.response.data);
+    } else {
+      console.error("Error:", error.message);
     }
-
-    try {
-      const response = await axios.post(
-        `http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`,
-        formData,
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data', // Specify the content type
-          },
-        }
-      );
-
-      console.log('Event created successfully', response.data);
-    } catch (error) {
-      console.error('Error creating event:', error);
-    }
+  });
   };
   
   
@@ -194,7 +189,10 @@ const [selectedRoom, setSelectedRoom] = useState(null);
                   style={styles.input}
                   placeholder="Event Name"
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={(val) => {
+                    onChange(val); // Update react-hook-form value
+                    seteventName(val); // Update state value
+                  }}
                 />
               )}
             />
@@ -296,7 +294,10 @@ const [selectedRoom, setSelectedRoom] = useState(null);
                   style={styles.input}
                   placeholder="Event Place"
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={(val) => {
+                    onChange(val); // Update react-hook-form value
+                    seteventLocation(val); // Update state value
+                  }}
                 />
               )}
             />
@@ -325,6 +326,7 @@ const [selectedRoom, setSelectedRoom] = useState(null);
           }}
           placeholder="Select a room"
           containerStyle={styles.dropdown}
+          listMode="MODAL"  // Prevents VirtualizedList nesting error
           dropDownDirection="BOTTOM"
         />
       )}
@@ -349,7 +351,8 @@ const [selectedRoom, setSelectedRoom] = useState(null);
                   placeholder="Estimated Participants"
                   keyboardType="numeric"
                   value={value ? String(value) : ""}
-                  onChangeText={(val) => onChange(val.replace(/[^0-9]/g, ""))}
+                  onChangeText={(val) => onChange(val.replace(/[^0-9]/g, ""))
+                  }
                 />
               )}
             />
@@ -375,7 +378,10 @@ const [selectedRoom, setSelectedRoom] = useState(null);
                   placeholder="Event Description"
                   multiline
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={(val) => {
+                    onChange(val); 
+                    seteventDescription(val); 
+                  }}
                 />
               )}
             />
