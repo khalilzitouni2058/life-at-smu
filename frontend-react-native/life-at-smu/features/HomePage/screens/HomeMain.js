@@ -1,14 +1,20 @@
-
-import React,{useState} from 'react';
-import { Text, View ,StyleSheet,TextInput,TouchableOpacity,Pressable } from 'react-native';
-import { useUser } from '../../../Context/UserContext';
-import { useClub } from '../../../Context/ClubContext';
-import Footer from '../components/Footer';
-import CalendarView from '../components/CalendarView';
-import EventDisplay from './EventDisplay';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Button } from 'react-native-paper';
+import React, { useState } from "react";
+import {
+  Text,
+  View,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Pressable,
+} from "react-native";
+import { useUser } from "../../../Context/UserContext";
+import { useClub } from "../../../Context/ClubContext";
+import CalendarView from "../components/CalendarView";
+import EventDisplay from "./EventDisplay";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import { Button } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+
 const Addproposal = () => {
   const { clubId } = useClub() || {}; // Default to an empty object to avoid errors
 
@@ -19,17 +25,22 @@ const Addproposal = () => {
   return (
     <View style={{ display: "flex", flexDirection: "row" }}>
       <Text style={styles.text}>Events</Text>
-      <Pressable style={styles.button} onPress={() => navigation.navigate("eventForm")}>
+      <Pressable
+        style={styles.button}
+        onPress={() => navigation.navigate("eventForm")}
+      >
         <Text style={styles.text2}>Create an event proposal</Text>
       </Pressable>
     </View>
   );
 };
 const HomeMain = () => {
+
   const { user } = useUser();
   
  const navigation = useNavigation();
  
+
   const [now, setNow] = useState(new Date());
 
   const [firstDayOfMonth, setFirstDayOfMonth] = useState(
@@ -73,21 +84,11 @@ const HomeMain = () => {
         lastDayOfMonth={lastDayOfMonth}
         firstDayOfMonth={firstDayOfMonth}
         selectedIndex={selectedIndex}
+        setSelectedIndex={setSelectedIndex}
+      />
+      <Addproposal />
 
-        setSelectedIndex = {setSelectedIndex}
-        
-        />
-        <Addproposal  />
-
-        
-        <EventDisplay  />
-        
-        
-        
-        
-        
-
-      <Footer />
+      <EventDisplay />
     </View>
   );
 };
@@ -98,15 +99,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     borderRadius: 0,
     alignItems: "center",
-    marginLeft:20
-    
+    marginLeft: 20,
   },
   text2: {
     color: "black",
     fontSize: 16,
     fontWeight: "bold",
-    alignSelf:"right",
-    paddingTop:15
+    alignSelf: "right",
+    paddingTop: 15,
   },
   text: {
     color: "black",
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
   drawerText: {
     fontSize: 16,
   },
-  
+
   placeholder: {
     height: 200,
     backgroundColor: "#ddd",
