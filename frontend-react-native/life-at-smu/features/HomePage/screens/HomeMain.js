@@ -35,9 +35,11 @@ const Addproposal = () => {
   );
 };
 const HomeMain = () => {
-  const { user, eventCount } = useUser();
 
-  const navigation = useNavigation();
+  const { user } = useUser();
+  
+ const navigation = useNavigation();
+ 
 
   const [now, setNow] = useState(new Date());
 
