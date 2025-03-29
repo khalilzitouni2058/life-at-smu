@@ -26,7 +26,7 @@ const Addproposal = () => {
   );
 };
 const HomeMain = () => {
-  const { user,eventCount } = useUser();
+  const { user } = useUser();
   
  const navigation = useNavigation();
  
