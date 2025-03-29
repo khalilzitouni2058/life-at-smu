@@ -1,32 +1,57 @@
-import React from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { Calendar } from "react-native-calendars";
 import Back from "../components/Back";
-
-const mockScheduleData = [
-  { id: "1", title: "Team Meeting", time: "10:00 AM", location: "Room A102" },
-  { id: "2", title: "Club Fair", time: "1:30 PM", location: "Main Hall" },
-  {
-    id: "3",
-    title: "Guest Speaker: Innovation Talk",
-    time: "3:00 PM",
-    location: "Auditorium",
-  },
-];
+import axios from "axios";
+import Constants from "expo-constants";
 
 const Schedule = () => {
+  const [selectedDate, setSelectedDate] = useState("2025-03-28");
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "localhost";
+
+  const fetchEventsByDate = async (date) => {
+    setLoading(true);
+    try {
+      const res = await axios.get(
+        `http://${ipAddress}:8000/api/auth/events/${date}`
+      );
+
+      setEvents(res.data);
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      setEvents([]); // fallback
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEventsByDate(selectedDate);
+  }, [selectedDate]);
+
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <Ionicons
         name="calendar-outline"
         size={24}
-        color="#007DA5"
+        color="#FF6B6B"
         style={styles.icon}
       />
       <View style={styles.info}>
-        <Text style={styles.title}>{item.title}</Text>
+        <Text style={styles.title}>{item.eventName}</Text>
         <Text style={styles.subText}>
-          {item.time} | {item.location}
+          {item.eventTime} | {item.eventLocation}
         </Text>
       </View>
     </View>
@@ -34,14 +59,44 @@ const Schedule = () => {
 
   return (
     <View style={styles.container}>
-      <Back title={"Home"} />
-      <Text style={styles.header}>Today's Schedule</Text>
-      <FlatList
-        data={mockScheduleData}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-        contentContainerStyle={styles.list}
+      <View style={styles.backWrapper}>
+        <Back title="Home" />
+      </View>
+
+      <Calendar
+        onDayPress={(day) => setSelectedDate(day.dateString)}
+        markedDates={{
+          [selectedDate]: {
+            selected: true,
+            selectedColor: "#FF6B6B",
+          },
+        }}
+        style={styles.calendar}
+        theme={{
+          calendarBackground: "#F4F6FA",
+          selectedDayBackgroundColor: "#FF6B6B",
+          selectedDayTextColor: "#fff",
+          todayTextColor: "#FF6B6B",
+          dayTextColor: "#333",
+          textDisabledColor: "#ccc",
+        }}
       />
+
+      <Text style={styles.header}>Schedule for {selectedDate}</Text>
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#FF6B6B" />
+      ) : (
+        <FlatList
+          data={events}
+          keyExtractor={(item) => item._id}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={
+            <Text style={styles.noEvents}>No events for this day</Text>
+          }
+        />
+      )}
     </View>
   );
 };
@@ -51,26 +106,35 @@ export default Schedule;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#E9F8FF",
+    backgroundColor: "#F4F6FA",
     paddingTop: 50,
     paddingHorizontal: 20,
   },
-  header: {
-    fontSize: 24,
-    color: "#007DA5",
-    fontWeight: "bold",
+  calendar: {
+    borderRadius: 12,
+    elevation: 2,
     marginBottom: 20,
   },
+  header: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 10,
+  },
   list: {
-    paddingBottom: 40,
+    paddingBottom: 30,
   },
   itemContainer: {
     flexDirection: "row",
     backgroundColor: "#fff",
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 16,
     marginBottom: 12,
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
   },
   icon: {
     marginRight: 16,
@@ -85,7 +149,18 @@ const styles = StyleSheet.create({
   },
   subText: {
     fontSize: 14,
-    color: "#777",
+    color: "#888",
     marginTop: 4,
+  },
+  noEvents: {
+    textAlign: "center",
+    color: "#aaa",
+    marginTop: 20,
+    fontStyle: "italic",
+  },
+  backWrapper: {
+    borderRadius: 50,
+    overflow: "hidden",
+    alignSelf: "flex-start",
   },
 });
