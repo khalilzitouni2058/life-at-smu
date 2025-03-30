@@ -16,6 +16,7 @@ const Schedule = () => {
   const [selectedDate, setSelectedDate] = useState("2025-03-28");
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [allEventDates, setAllEventDates] = useState({});
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "localhost";
@@ -26,7 +27,6 @@ const Schedule = () => {
       const res = await axios.get(
         `http://${ipAddress}:8000/api/auth/events/${date}`
       );
-
       setEvents(res.data);
     } catch (err) {
       console.error("Error fetching events:", err);
@@ -36,9 +36,40 @@ const Schedule = () => {
     }
   };
 
+  const fetchAllEventDates = async () => {
+    try {
+      const res = await axios.get(`http://${ipAddress}:8000/api/auth/events`);
+      const dateMap = {};
+
+      res.data.forEach((event) => {
+        const date = event.eventDate;
+        if (!dateMap[date]) {
+          dateMap[date] = {
+            marked: true,
+            dots: [{ color: "#FF6B6B" }],
+          };
+        }
+      });
+
+      setAllEventDates(dateMap);
+    } catch (err) {
+      console.error("Error fetching all events:", err);
+    }
+  };
+
   useEffect(() => {
     fetchEventsByDate(selectedDate);
+    fetchAllEventDates();
   }, [selectedDate]);
+
+  const mergedMarkedDates = {
+    ...allEventDates,
+    [selectedDate]: {
+      ...(allEventDates[selectedDate] || {}),
+      selected: true,
+      selectedColor: "#FF6B6B",
+    },
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
@@ -59,18 +90,10 @@ const Schedule = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.backWrapper}>
-        <Back title="Home" />
-      </View>
-
       <Calendar
         onDayPress={(day) => setSelectedDate(day.dateString)}
-        markedDates={{
-          [selectedDate]: {
-            selected: true,
-            selectedColor: "#FF6B6B",
-          },
-        }}
+        markedDates={mergedMarkedDates}
+        markingType={"multi-dot"}
         style={styles.calendar}
         theme={{
           calendarBackground: "#F4F6FA",
