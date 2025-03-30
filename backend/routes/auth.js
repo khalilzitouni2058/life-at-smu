@@ -7,6 +7,35 @@ const Club = require("../models/clubs");
 const Event = require("../models/events");
 const Room = require("../models/rooms")
 
+const studentLifeDeps = require("../models/studentLifeDeps")
+
+router.post('/student-life-dep', async (req, res) => {
+  try {
+    const { email, fullname, role } = req.body;
+    let user = await studentLifeDeps.findOne({ email });
+
+    if (user) {
+      return res.status(400).json({ message: 'User already exists in Student Life Department' });
+    }
+
+    user = new studentLifeDeps({ email, fullname, role });
+    await user.save();
+
+    res.status(201).json({ message: 'User added to Student Life Department', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Error adding user', error });
+  }
+});
+router.get('/student-life-dep', async (req, res) => {
+  try {
+    const users = await studentLifeDeps.find(); 
+    res.status(200).json({ users });
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
