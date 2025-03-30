@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/users");
 const Club = require("../models/clubs");
 const Event = require("../models/events");
-const Room = require("../models/rooms")
+const Room = require("../models/rooms");
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -384,11 +384,13 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     eventLocation,
     additionalNotes,
     eventImage,
-    room, 
+    room,
   } = req.body;
 
   if (!eventName || !eventDate || !eventTime || !eventLocation || !room) {
-    return res.status(400).json({ message: "Event name, date, time, location, and room are required" });
+    return res.status(400).json({
+      message: "Event name, date, time, location, and room are required",
+    });
   }
 
   try {
@@ -441,36 +443,35 @@ router.get("/clubs/:clubId/events", async (req, res) => {
   }
 });
 
-router.get('/events/:date', async (req, res) => {
+router.get("/events/:date", async (req, res) => {
   try {
     const { date } = req.params;
     const events = await Event.find({ eventDate: date })
-      .populate('club', 'clubName profilePicture')  // Populate club with clubName and profilePicture
-      .select('eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club');
-    
-    if (events.length === 0) {
-      return res.status(404).json({ message: 'No events found for the specified date.' });
-    }
+      .populate("club", "clubName profilePicture")
+      .select(
+        "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club"
+      );
+
+    // ✅ Always return 200 with the data (even if empty)
+    res.status(200).json(events);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+router.get("/events", async (req, res) => {
+  try {
+    const events = await Event.find().select(
+      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club"
+    );
 
     res.status(200).json(events);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.json({ message: "Server error", error: error.message });
   }
 });
 
-router.get('/events', async (req, res) => {
-  try {
-      const events = await Event.find().select(
-          'eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club'
-      );
-      
-      res.status(200).json(events);
-  } catch (error) {
-      res.status(500).json({ message: 'Server error', error: error.message });
-  }
-});
-
-router.get('/rooms', async (req, res) => {
+router.get("/rooms", async (req, res) => {
   try {
     const rooms = await Room.find();
     if (!Room.available) {
