@@ -1,127 +1,93 @@
 import React, { useEffect, useState } from 'react';
-
 import '../styles/Dashboard/Products.css';
-import user from '../assets/user.png'
-import admin from '../assets/admin.png'
 import axios from 'axios';
+import { Box, Flex, Heading, Text, Table,  } from "@chakra-ui/react";
 
-function ListOfUsers({ isSidebarOpen }) {
+function ListOfUsers() {
+  const [users, setusers] = useState([]);
 
-    
-        const [users, setusers] = useState([]); 
-      
-        
-        useEffect(() => {
-          const fetchUsers = async () => {
-            try {
-              const response = await axios.get('http://localhost:8000/api/auth/users');
-              const fetchedUsers = Array.isArray(response.data.users) ? response.data.users : [];
-              console.log(response)
-              setusers(fetchedUsers);
-            } catch (error) {
-              console.error('Error fetching users:', error);
-            }
-          };
-      
-          fetchUsers();
-        }, []);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/auth/users');
+        const fetchedUsers = Array.isArray(response.data.users) ? response.data.users : [];
+        console.log(response);
+        setusers(fetchedUsers);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
 
-        
-          
-          
-    
-    
+    fetchUsers();
+  }, []);
+
+  const totalUsers = users.length;
+  const totalAdmins = users.filter(user => user.role === "Admin").length;
+
   return (
-  <>
-  
-    <span className='span-da'>
-        <div class={`card-da ${isSidebarOpen ? 'open' : ''}`}>
-            <div class="card-content">
-                <div class="card-number">{users.length}</div>
-                <div class="card-text">Users</div>
-            </div>
-            <div class="card-icon">
-                <img src={user} alt="icon" />
-            </div>
-        </div>
+    <Box>
+      <Heading as="h2" size="lg" mb={6}>
+        Users Management
+      </Heading>
 
-        <div class={`card1-da ${isSidebarOpen ? 'open' : ''}`}>
-            <div class="card-content">
-                <div class="card-number">1</div>
-                <div class="card-text"> Admin</div>
-            </div>
-            <div class="card-icon">
-                <img src={admin} alt="icon" />
-            </div>
-        </div>
-    </span>
+      {/* Boxes for User Count */}
+      <Flex mb={6} justify="space-between">
+        <Box
+          bg="gray.400"
+          color="black"
+          p={6}
+          borderRadius="md"
+          width="48%"
+          textAlign="center"
+        >
+          <Text fontSize="2xl" fontWeight="bold" color={"white"}>
+            {totalUsers}
+          </Text>
+          <Text color={"white"}>Users</Text>
+        </Box>
 
-    <div className={`table-container ${isSidebarOpen ? 'open' : ''}`}>
-  
-        <table className={`table-da ${isSidebarOpen ? 'open' : ''}`}>
-            <thead>
-            <tr>
-                <th>USER NAME</th>
-                <th>EMAIL</th>
-                
-                
-                <th>PROGRAM</th>
-                <th>MAJOR</th>
-                {/* <th>ACTION</th> */}
-                
-                
-            </tr>
-            </thead>
-            <tbody>
-            {Array.isArray(users) && users.length > 0 ? (
-                users.map((user, index) => (
-                <tr key={index}>
-                    <td style={{ //display: 'flex',
-                    alignItems: 'center', width: '250px' }}>
-                        <div style={{display:'flex',alignItems: 'center'}}>
-                    
-                    {user.fullname}
-                    </div>
-                    </td>
-                    <td>{user.email}</td>
-                    
-                    
-                    <td> {user.program}</td>
-                    <td> {user.major}</td>
-                    {/* <td>
-                    <button 
-                            onClick={(e) => { 
-                                e.stopPropagation(); 
-                                handleEdit(user); 
-                            }} 
-                            style={{
-                                padding: '6px 10px', 
-                                borderRadius: '5px', 
-                                border: 'none',
-                                backgroundColor: '#ffc107',
-                                color: 'white',
-                                cursor: 'pointer',
-                                boxSizing: 'border-box', 
-                            }}
-                            title="Edit User Role"
-                        >
-                            <i className="fas fa-pencil-alt"></i>
-                        </button>
-                    </td> */}
-                    
-                    
-                </tr>
-                ))
-            ) : (
-                <tr><td colSpan="8">No users available</td></tr>
-            )}
-            </tbody>
-        </table>
-        
-    </div>
-  </>
-    
-  );}
+        <Box
+          bg="blue.500"
+          color="white"
+          p={6}
+          borderRadius="md"
+          width="48%"
+          textAlign="center"
+        >
+          <Text fontSize="2xl" fontWeight="bold">
+            {totalAdmins}
+          </Text>
+          <Text>Admins</Text>
+        </Box>
+      </Flex>
 
+      {/* Table for Users Information */}
+      <Box bg="white" p={6} borderRadius="md" boxShadow="md">
+        <Table.Root variant="simple">
+        <Table.Header>
+    <Table.Row>
+     
+      <Table.ColumnHeader>Email</Table.ColumnHeader>
+      <Table.ColumnHeader>Full Name</Table.ColumnHeader>
+      <Table.ColumnHeader>Major</Table.ColumnHeader>
+      <Table.ColumnHeader>Program</Table.ColumnHeader>
+    </Table.Row>
+  </Table.Header>
+
+  <Table.Body>
+    {users.map((user) => (
+      <Table.Row key={user._id}>
+        <Table.Cell>{user.email}</Table.Cell>
+        <Table.Cell>{user.fullname}</Table.Cell>
+        <Table.Cell>{user.major}</Table.Cell>
+        <Table.Cell>{user.program}</Table.Cell>
+      </Table.Row>
+    ))}
+  </Table.Body>
+        </Table.Root>
+      </Box>
+    </Box>
+  );
+}
 
 export default ListOfUsers;
