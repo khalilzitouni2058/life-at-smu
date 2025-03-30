@@ -3,48 +3,48 @@ import '../styles/Dashboard/Dashboard.css';
 import logo from '../assets/logo.png'
 import ListOfUsers from '../components/ListOfUsers';
 import ListOfClubs from '../components/ListOfClubs';
+import { Box, Heading ,Flex} from '@chakra-ui/react';
+import Header from '../components/Header';
+import Sidebar from '../components/Sidebar';
+import ListOfStudentLifeM from '../components/ListOfStudentLifeM';
+import EventCalendar from '../components/EventCalendar';
 
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('addItem'); 
+  const [activeSection, setActiveSection] = useState("users");
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  console.log(activeSection)
  
   const renderContent = () => {
-    switch (activeTab) {
-      case 'users':
-        return( 
-          <>
-            <div className={`content ${isSidebarOpen ? 'open' : ''}`}> Users</div>;
-            <ListOfUsers isSidebarOpen={isSidebarOpen}/>
-          </>
-        )
-        case 'clubs':
-        return( 
-          <>
-            <div className={`content ${isSidebarOpen ? 'open' : ''}`}> clubs</div>;
-            <ListOfClubs isSidebarOpen={isSidebarOpen}/>
-          </>
-        )
+    switch (activeSection) {
+      case "users":
+        return <ListOfUsers />;
+      case "clubs":
+        return <ListOfClubs />;
+      case "Student Life Members":
+        return <ListOfStudentLifeM/>;
+      case "Events":
+        return <EventCalendar/>;
       default:
-        return( 
-            <>
-              <div className={`content ${isSidebarOpen ? 'open' : ''}`}> Users</div>;
-              <ListOfUsers isSidebarOpen={isSidebarOpen}/>
-            </>
-          )
+        return <div>Welcome to the Dashboard!</div>;
     }
   };
 
   return (
-    <div className={`dashboard ${isSidebarOpen ? 'open' : ''}`}>
-      <button className={`toggle-btn ${isSidebarOpen ? 'open' : ''}`} onClick={toggleSidebar}>
-      {isSidebarOpen ? '✖' : '☰'}
-      </button>
+    <>
+     
+   <Header />
+   <Flex>
+      {/* Sidebar */}
+      <Sidebar onSelectSection={setActiveSection} />
+      
+      {/* Main Content */}
+      <Box ml="250px" p={6} flex="1">
+        
+        {renderContent()}
+      </Box>
+    </Flex>
+       {/**
       <div className={`sidebar ${isSidebarOpen ? 'open' : ''}`} >
         <div className={`header ${isSidebarOpen ? 'open' : ''}`} >
           <img src={logo} alt='logo' style={{width: "80px",height: "80px",objectFit: "cover", borderRadius: "4px"}}/>
@@ -67,12 +67,18 @@ const Dashboard = () => {
           </li>
         </ul>
       </div>
-
+ */}
+ {/**
       <div className="main-content">
         {renderContent()}
       </div>
-    </div>
+      */}
+    
+  
+    </>
   );
+  
 };
+
 
 export default Dashboard;
