@@ -387,9 +387,7 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     room, 
   } = req.body;
 
-  if (!eventName || !eventDate || !eventTime || !eventLocation || !room) {
-    return res.status(400).json({ message: "Event name, date, time, location, and room are required" });
-  }
+  
 
   try {
     const club = await Club.findById(clubId);
