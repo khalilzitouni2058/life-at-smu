@@ -6,7 +6,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  Alert,
   ActivityIndicator,
   Image,
   ScrollView,
@@ -19,29 +18,24 @@ import * as yup from "yup";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons, FontAwesome, Entypo } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker"; 
-import DropDownPicker from 'react-native-dropdown-picker';
 import { useClub } from "../../../Context/ClubContext"; // Import useClub hook
+import DropDownPicker from 'react-native-dropdown-picker';
 
 
 const schema = yup.object().shape({
-  eventName: yup
-    .string()
-    .min(3, "Must be at least 3 characters")
-    .required("Event Name is required"),
+  eventName: yup.string().min(3, "Must be at least 3 characters").required("Event Name is required"),
   date: yup.string().required("Date is required"),
   time: yup.string().required("Time is required"),
+  eventEndTime: yup.string().required("End time is required"), // ✅ New field
   place: yup.string().required("Place is required"),
   room: yup.string().required("Room is required"),
-  participants: yup
-    .number()
-    .typeError("Must be a number")
-    .min(1, "Must be at least 1")
-    .required("Participants are required"),
-  description: yup
-    .string()
-    .min(10, "Description must be at least 10 characters")
-    .required("Description is required"),
+  participants: yup.number().typeError("Must be a number").min(1, "Must be at least 1").required("Participants are required"),
+  description: yup.string().min(10, "Description must be at least 10 characters").required("Description is required"),
+  mandatoryParentalAgreement: yup.boolean().oneOf([true], "Parental Agreement is required"), // ✅ Checkbox validation
+  transportationProvided: yup.boolean(), // ✅ No validation needed, optional checkbox
 });
+
+
 
 
 
@@ -51,18 +45,27 @@ const EventForm = () => {
   const [image, setImage] = useState(null);
   const [roomsList, setRoomsList] = useState([]);  
   const [showDatePicker, setShowDatePicker] = useState(false);
+
   const [selectedDate, setSelectedDate] = useState(new Date()); // ✅ Stores selected date
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [showTimePicker2, setShowTimePicker2] = useState(false);
+
   const [selectedTime, setSelectedTime] = useState(new Date());
   const { clubId } = useClub(); // Get clubId from context
   const [eventName, seteventName] = useState("");
   const [eventLocation, seteventLocation] = useState("");
   const [eventDescription, seteventDescription] = useState("");
   const [additionalNotes, setadditionalNotes] = useState("");
+  const [eventEndTime, setEventEndTime] = useState(new Date(null)); // ✅ New State
+const [mandatoryParentalAgreement, setMandatoryParentalAgreement] = useState(false); // ✅ New State
+const [transportationProvided, setTransportationProvided] = useState(false); // ✅ New State
+const [open, setOpen] = useState(false);
+
+
+
   
 
   
-  const [message, setMessage] = useState(""); // Message for empty state
 
   const {
     control,
@@ -72,7 +75,6 @@ const EventForm = () => {
     resolver: yupResolver(schema),
   });
 
-const [open, setOpen] = useState(false);
 const [selectedRoom, setSelectedRoom] = useState(null);
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
@@ -89,11 +91,10 @@ const [selectedRoom, setSelectedRoom] = useState(null);
       additionalNotes,
       eventImage: { uri: image },
       eventDate: selectedDate.toISOString().split("T")[0],
-      eventTime: selectedTime.toISOString(),
+      eventTime: `${selectedTime.getHours().toString().padStart(2, "0")}:${selectedTime.getMinutes().toString().padStart(2, "0")} - ${eventEndTime.getHours().toString().padStart(2, "0")}:${eventEndTime.getMinutes().toString().padStart(2, "0")}`,
       room: selectedRoom,
     };
-
-// If eventImage is a file from input
+      console.log(eventData)
 
 
 axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData, {
@@ -248,11 +249,14 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
               color="#007da5"
               style={styles.icon}
             />
-            <Text style={[styles.input, { color: "#000" }]}>
-              {selectedTime.getHours().toString().padStart(2, "0") +
-                ":" +
-                selectedTime.getMinutes().toString().padStart(2, "0")}
-            </Text>
+           <Text style={[styles.input, { color: "#000" }]}>
+    Event Start Time:{" "}
+    {selectedTime
+      ? selectedTime.getHours().toString().padStart(2, "0") +
+        ":" +
+        selectedTime.getMinutes().toString().padStart(2, "0")
+      : "Not set"}
+  </Text>
           </TouchableOpacity>
 
           {/* Show Time Picker */}
@@ -269,6 +273,7 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
                     time.getHours().toString().padStart(2, "0") +
                     ":" +
                     time.getMinutes().toString().padStart(2, "0");
+                    
                   setValue("time", formattedTime); // ✅ Store time
                 }
               }}
@@ -277,6 +282,47 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
           {errors.time && (
             <Text style={styles.errorText}>{errors.time.message}</Text>
           )}
+          {/*Event End time*/}
+          <TouchableOpacity
+            onPress={() => setShowTimePicker2(true)}
+            style={styles.inputWrapper}
+          >
+            <MaterialIcons name="access-time" size={24} color="#007da5" style={styles.icon} />
+            <Text style={[styles.input, { color: "#000" }]}>
+    Event End Time:{" "}
+    {eventEndTime
+      ? eventEndTime.getHours().toString().padStart(2, "0") +
+        ":" +
+        eventEndTime.getMinutes().toString().padStart(2, "0")
+      : "Not set"}
+  </Text>
+          </TouchableOpacity>
+
+          {/* Show Time Picker */}
+          {showTimePicker2 && (
+            <DateTimePicker
+              value={eventEndTime}
+              mode="time"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={(event, time) => {
+                setShowTimePicker2(false);
+                if (time) {
+                  setEventEndTime(time);
+                  const formattedTime =
+                    time.getHours().toString().padStart(2, "0") +
+                    ":" +
+                    time.getMinutes().toString().padStart(2, "0");
+                   
+                  setValue("time", formattedTime); // ✅ Store time
+                }
+              }}
+            />
+          )}
+          {errors.time && (
+            <Text style={styles.errorText}>{errors.time.message}</Text>
+          )}
+          
+          
 
           {/* Place */}
           <View style={styles.inputWrapper}>
@@ -328,14 +374,15 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
           containerStyle={styles.dropdown}
           listMode="MODAL"  // Prevents VirtualizedList nesting error
           dropDownDirection="BOTTOM"
+          style={styles.dropdownInput}
         />
       )}
     />
   </View>
 
 {errors.room && <Text style={styles.errorText}>{errors.room.message}</Text>}
-          {/* Participants */}
-          <View style={styles.inputWrapper}>
+{/* Participants */}
+<View style={styles.inputWrapper}>
             <FontAwesome
               name="users"
               size={24}
@@ -389,6 +436,56 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
           {errors.description && (
             <Text style={styles.errorText}>{errors.description.message}</Text>
           )}
+          <View style={styles.checkboxContainer}>
+  <Controller
+    control={control}
+    name="mandatoryParentalAgreement"
+    render={({ field: { onChange, value } }) => (
+      <TouchableOpacity
+  style={styles.checkbox}
+  onPress={() => {
+    setMandatoryParentalAgreement(!mandatoryParentalAgreement);
+    setValue("mandatoryParentalAgreement", !mandatoryParentalAgreement); // ✅ Sync with react-hook-form
+  }}
+>
+  <MaterialIcons
+    name={mandatoryParentalAgreement ? "check-box" : "check-box-outline-blank"}
+    size={24}
+    color="#007da5"
+  />
+  <Text style={styles.checkboxLabel}>Mandatory Parental Agreement</Text>
+</TouchableOpacity>
+    )}
+  />
+
+{errors.mandatoryParentalAgreement && (
+  <Text style={styles.errorText}>{errors.mandatoryParentalAgreement.message}</Text>
+)}
+
+  <Controller
+    control={control}
+    name="transportationProvided"
+    render={({ field: { onChange, value } }) => (
+      <TouchableOpacity
+  style={styles.checkbox}
+  onPress={() => {
+    setTransportationProvided(!transportationProvided);
+    setValue("transportationProvided", !transportationProvided); // ✅ Sync with react-hook-form
+  }}
+>
+  <MaterialIcons
+    name={transportationProvided ? "check-box" : "check-box-outline-blank"}
+    size={24}
+    color="#007da5"
+  />
+  <Text style={styles.checkboxLabel}>Transportation Provided</Text>
+</TouchableOpacity>
+
+    )}
+  />
+</View>
+
+
 
           {/* Submit Button */}
           <TouchableOpacity
@@ -406,6 +503,7 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
       </ScrollView>
     </View>
   );
+  
 };
 
 // Styles
@@ -492,6 +590,50 @@ const styles = {
   submitText: {
     color: "#fff",
     fontSize: 18,
+  },
+  checkboxContainer:{
+    marginBottom:30,
+    marginLeft:20,
+  },
+
+  checkbox: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  checkboxLabel: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: "#333",
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 4,
+    fontSize: 12,
+  },
+  dropdown: {
+    width: '100%', // Ensures it matches the width of the parent container
+    marginBottom: 10, // Optional margin to separate the input from other components
+  },
+  dropdownInput: {
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    width:250,
+    borderColor: '#ccc', // Adjust this for border color
+    backgroundColor: 'white',
+  },
+  dropdownContainer: {
+    marginTop: 10,
+    zIndex: 99, // Ensure the dropdown is above other elements
+    backgroundColor: 'white', // Make sure it has a white background for visibility
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 5, // Adds elevation for Android (shadow effect)
   },
 };
 
