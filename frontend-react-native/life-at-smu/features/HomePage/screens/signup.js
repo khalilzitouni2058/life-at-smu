@@ -6,12 +6,15 @@ import {
   StyleSheet,
   TextInput,
   Image,
+
+
   Pressable,
   Alert,
   Modal,
   FlatList,
 } from "react-native";
 import branch from "../../../assets/branch.png";
+
 import { useUser } from "../../../Context/UserContext";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
@@ -37,6 +40,7 @@ export default function SignUpPage() {
   const navigation = useNavigation();
   const { setUser } = useUser();
 
+
   const programOptions = ["MSB", "Medtech"];
   const medtechMajors = [
     "Software Engineering",
@@ -48,6 +52,7 @@ export default function SignUpPage() {
     "Finance",
     "Business Analytics",
     "Management",
+
   ];
 
   const getMajorsForProgram = (program) => {
@@ -65,13 +70,17 @@ export default function SignUpPage() {
     email: email,
     fullname: fullname,
     password: password,
+
     picture: photo || defaultPhotoUrl,
     program: value,
     major: major,
   };
   const handleMain = () => {
+
     navigation.navigate("HomeMain");
+
   };
+
   const signupUser = async (signupData) => {
     try {
       const response = await axios.post(
@@ -99,6 +108,7 @@ export default function SignUpPage() {
       } else {
         console.error("Error setting up signup request:", error.message);
         alert("Something went wrong. Please try again.");
+
       }
     }
   };

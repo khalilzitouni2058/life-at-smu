@@ -19,7 +19,8 @@ import {
 import branch from "../../../assets/branch.png";
 import logo from "../../../assets/logo.png";
 import { useUser } from "../../../Context/UserContext";
-import { useClub } from "../../../Context/ClubContext"
+import { useClub } from "../../../Context/ClubContext";
+import { CommonActions } from "@react-navigation/native";
 
 const Login = () => {
   const { setUser } = useUser();
@@ -56,10 +57,13 @@ const Login = () => {
 
     try {
       // If club login fails, attempt user login
-      const userResponse = await axios.post(`http://${ipAddress}:8000/api/auth/login`, {
-        email,
-        password,
-      });
+      const userResponse = await axios.post(
+        `http://${ipAddress}:8000/api/auth/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       if (userResponse.status === 200 && userResponse.data.user) {
         console.log("User login successful:", userResponse.data.user);
@@ -74,7 +78,6 @@ const Login = () => {
   };
 
   useEffect(() => {
-   
     Animated.timing(topRightAnim, {
       toValue: 30,
       duration: 2000,
@@ -104,7 +107,12 @@ const Login = () => {
     navigation.navigate("signup");
   };
   const handlelogin = () => {
-    navigation.navigate("HomeMain");
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: "MainTabs", params: { screen: "HomeMain" } }],
+      })
+    );
   };
 
   return (

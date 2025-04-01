@@ -36,3 +36,6 @@
     transform: rotate(360deg);
   }
 }
+/* Remove hover effect for dayGrid and timeGrid events */
+
+

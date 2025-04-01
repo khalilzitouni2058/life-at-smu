@@ -27,6 +27,7 @@ app.use('/api/auth', authRoutes);
 const clubRoutes = require("./routes/clubRoutes");
 app.use("/api", clubRoutes); 
 
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
