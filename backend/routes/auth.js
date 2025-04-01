@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/users");
 const Club = require("../models/clubs");
 const Event = require("../models/events");
-const Room = require("../models/rooms")
+const Room = require("../models/rooms");
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -67,14 +67,15 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Hash the password
+    const defaultProfilePic =
+      "https://img.freepik.com/free-vector/user-blue-gradient_78370-4692.jpg";
 
     // Create new user
     const newUser = new User({
       email,
       fullname,
       password,
-      picture,
+      picture: picture || defaultProfilePic,
       program,
       major,
     });
@@ -89,6 +90,13 @@ router.post("/signup", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
+
+router.post("/check-email", async (req, res) => {
+  const { email } = req.body;
+  const existing = await User.findOne({ email });
+  res.json({ exists: !!existing });
+});
+
 
 router.get("/users", async (req, res) => {
   try {
@@ -154,8 +162,7 @@ router.post("/clubs/signup", async (req, res) => {
       clubDescription: "",
       category: "",
       contactInfo: "",
-      profilePicture:
-        "https://scontent.ftun8-1.fna.fbcdn.net/v/t39.30808-6/469963732_2801171663397034_3870197941446985944_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=uqzP4t61bloQ7kNvgGuZweS&_nc_oc=AdiZi3rCnmG1hpiNhZIlx-rDtV1XEM0uwGxQef6qz8dJ724A7BKL5cPjYMLA5Di_4-4&_nc_zt=23&_nc_ht=scontent.ftun8-1.fna&_nc_gid=Akr1sLeZP0dLZ-JjE-afwYi&oh=00_AYAjfD91fKYDbB1FqX_D4lx-qx5KrgPJCj9enbH2X8cEIg&oe=67AFB8AB",
+      profilePicture: "https://cdn-icons-png.flaticon.com/128/16745/16745734.png",
       boardMembers: [],
     });
 
@@ -238,6 +245,18 @@ router.post("/clubs/login", async (req, res) => {
   }
 });
 
+// Get All Clubs
+router.get("/clubs", async (req, res) => {
+  try {
+    const clubs = await Club.find();
+    res.status(200).json({ clubs });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+
 // Update Club
 router.put("/clubs/:id", async (req, res) => {
   const { id } = req.params;
@@ -310,6 +329,9 @@ router.put("/clubs/:id/add-board-member", async (req, res) => {
   const { name, email, facebookLink, role, phoneNumber, profilePicture } =
     req.body;
 
+  const DEFAULT_IMAGE_URL =
+    "https://static.vecteezy.com/system/resources/previews/005/544/718/non_2x/profile-icon-design-free-vector.jpg";
+
   try {
     const club = await Club.findById(id);
     if (!club) {
@@ -323,7 +345,7 @@ router.put("/clubs/:id/add-board-member", async (req, res) => {
       facebookLink,
       role,
       phoneNumber,
-      profilePicture,
+      profilePicture: profilePicture || DEFAULT_IMAGE_URL,
     });
 
     await club.save(); // ✅ Save the updated club
@@ -353,13 +375,15 @@ router.put("/clubs/:clubId/update-board-member", async (req, res) => {
       return res.status(404).json({ message: "Board member not found" });
     }
 
+    // Merge updated fields with existing member data
+    const existingMember = club.boardMembers[memberIndex];
     club.boardMembers[memberIndex] = {
-      name,
-      email,
-      facebookLink,
-      role,
-      phoneNumber,
-      profilePicture,
+      ...existingMember,
+      ...(name && { name }),
+      ...(facebookLink && { facebookLink }),
+      ...(role && { role }),
+      ...(phoneNumber && { phoneNumber }),
+      ...(profilePicture && { profilePicture }),
     };
 
     await club.save();
@@ -384,11 +408,13 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     eventLocation,
     additionalNotes,
     eventImage,
-    room, 
+    room,
   } = req.body;
 
   if (!eventName || !eventDate || !eventTime || !eventLocation || !room) {
-    return res.status(400).json({ message: "Event name, date, time, location, and room are required" });
+    return res.status(400).json({
+      message: "Event name, date, time, location, and room are required",
+    });
   }
 
   try {
@@ -441,36 +467,40 @@ router.get("/clubs/:clubId/events", async (req, res) => {
   }
 });
 
-router.get('/events/:date', async (req, res) => {
+router.get("/events/:date", async (req, res) => {
   try {
     const { date } = req.params;
     const events = await Event.find({ eventDate: date })
-      .populate('club', 'clubName profilePicture')  // Populate club with clubName and profilePicture
-      .select('eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club');
-    
+      .populate("club", "clubName profilePicture") // Populate club with clubName and profilePicture
+      .select(
+        "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club"
+      );
+
     if (events.length === 0) {
-      return res.status(404).json({ message: 'No events found for the specified date.' });
+      return res
+        .status(404)
+        .json({ message: "No events found for the specified date." });
     }
 
     res.status(200).json(events);
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
-router.get('/events', async (req, res) => {
+router.get("/events", async (req, res) => {
   try {
-      const events = await Event.find().select(
-          'eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club'
-      );
-      
-      res.status(200).json(events);
+    const events = await Event.find().select(
+      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club"
+    );
+
+    res.status(200).json(events);
   } catch (error) {
-      res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
-router.get('/rooms', async (req, res) => {
+router.get("/rooms", async (req, res) => {
   try {
     const rooms = await Room.find();
     if (!Room.available) {

@@ -33,15 +33,11 @@ const Login = () => {
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
 
-  
-  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  console.log(ipAddress)
 
   const handleLogin = async () => {
     try {
-     
       const clubResponse = await axios.post(`http://${ipAddress}:8000/api/auth/clubs/login`, {
         email,
         password,
@@ -50,11 +46,12 @@ const Login = () => {
       if (clubResponse.status === 200 && clubResponse.data.club) {
         console.log("Club login successful:", clubResponse.data.club);
         setClubId(clubResponse.data.club._id);
+        setUser(null); // Clear user if logging in as club
         handlelogin(); 
         return;
       }
     } catch (clubError) {
-      console.log("Invalid credentials, try again");
+      console.log("Invalid credentials. Try again");
     }
 
     try {
@@ -67,11 +64,12 @@ const Login = () => {
       if (userResponse.status === 200 && userResponse.data.user) {
         console.log("User login successful:", userResponse.data.user);
         setUser(userResponse.data.user);
+        setClubId(null); // Clear club if logging in as user
         handlelogin()
         return;
       }
     } catch (userError) {
-      console.error("Invalid credentials, try again");
+      console.error("Invalid Credentials. Try again");
     }
   };
 
@@ -190,6 +188,7 @@ const styles = StyleSheet.create({
   signupText: {
     color: "#007DA5",
     fontWeight: "bold",
+    fontSize: 16,
     marginLeft: 5,
     marginTop: 10,
   },
@@ -204,6 +203,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     textAlign: "center",
+    fontWeight: "bold"
   },
   container: {
     flex: 1,
@@ -238,14 +238,14 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 16,
     fontWeight: "bold",
-    marginLeft: 100,
+    marginLeft: 80,
     marginTop: 20,
   },
   text5: {
     color: "black",
     fontSize: 16,
     fontWeight: "bold",
-    marginLeft: 90,
+    marginLeft: 60,
   },
   text3: {
     color: "#007DA5",
