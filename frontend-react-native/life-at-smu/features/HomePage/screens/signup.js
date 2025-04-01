@@ -30,6 +30,7 @@ export default function SignUpPage() {
   const [confirmpassword, setconfirmpassword] = useState("");
   const [fullname, setfullname] = useState("");
   const [photo, setPhoto] = useState(null);
+  const[urlphoto,setUrlphoto] = useState("")
   const [value, setValue] = useState(null);
   const [major, setmajor] = useState(null);
   const [showProgramModal, setShowProgramModal] = useState(false);
@@ -132,20 +133,61 @@ export default function SignUpPage() {
 
   const handleUploadPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
+  
     if (status !== "granted") {
       Alert.alert("Permission denied", "We need access to your gallery.");
       return;
     }
-
+  
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
     });
+  
+    if (result.canceled) {
+      return;
+    }
+  
+    const uri = result.assets[0].uri;
+    
+    setPhoto(uri);
 
-    if (!result.canceled) {
-      setPhoto(result.assets[0].uri);
+    const uploadedImageUrl = await uploadImage(uri);
+    if (uploadedImageUrl) {
+      console.log("Uploaded Image URL:", uploadedImageUrl);
+      // Use uploadedImageUrl instead of result.uri
+    } 
+  };
+  
+  const uploadImage = async (uri) => {
+    const formData = new FormData();
+    formData.append("source", {
+      uri,
+      name: "photo.jpg", // Required for FormData
+    type: "image/jpeg",
+    });
+  
+    try {
+      const response = await fetch("https://postimage.me/api/1/upload", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "X-API-Key":"chv_ZtFY_1d68e60bdc2a3a9f47650fa766b07390e1b69aac2a4ee7d94a3d52e0b853cd8783e54a37fef88448278f2c92526b7f87b9da5acdc486f91f784f0891e651454a"
+        },
+      });
+  
+      const data = await response.json();
+      
+      if (data) {
+       
+        setUrlphoto(data.image.url)
+        return data.image.url;
+      } 
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
     }
   };
   const handleNextStep = () => {
@@ -184,7 +226,7 @@ export default function SignUpPage() {
       }
     }
 
-    if (currentStep < 4) {
+    if (currentStep <= 4) {
       setCurrentStep(currentStep + 1);
     }
   };
