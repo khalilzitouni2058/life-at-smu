@@ -78,7 +78,7 @@ export default function SignUpPage() {
   };
   const handleMain = () => {
 
-    navigation.navigate("HomeMain");
+    navigation.navigate("Home");
 
   };
 
