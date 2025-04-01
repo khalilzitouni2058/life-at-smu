@@ -91,37 +91,28 @@ const [selectedRoom, setSelectedRoom] = useState(null);
       additionalNotes,
       eventImage: { uri: image },
       eventDate: selectedDate.toISOString().split("T")[0],
-
       eventTime: `${selectedTime.getHours().toString().padStart(2, "0")}:${selectedTime.getMinutes().toString().padStart(2, "0")} - ${eventEndTime.getHours().toString().padStart(2, "0")}:${eventEndTime.getMinutes().toString().padStart(2, "0")}`,
       room: selectedRoom,
     };
-      eventTime: selectedTime.toISOString(),
-      room: selectedRoom,
-    };
-
-
-
-
-axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-  .then(response => {
-    console.log("Event created successfully:", response.data);
-  })
-  .catch(error => {
-    if (error.response) {
-      console.error("Error creating event:", error.response.data);
-    } else {
-      console.error("Error:", error.message);
-    }
-  });
+  
+    axios
+      .post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+        console.log("Event created successfully:", response.data);
+      })
+      .catch((error) => {
+        if (error.response) {
+          console.error("Error creating event:", error.response.data);
+        } else {
+          console.error("Error:", error.message);
+        }
+      });
   };
   
-  
-  
-
 
   useEffect(() => {
     const fetchRooms = async () => {
