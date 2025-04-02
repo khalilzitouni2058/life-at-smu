@@ -59,9 +59,16 @@ const ClubProfile = ({ navigation }) => {
 
   if (!profile) {
     return (
-      <View style={styles.container}>
-        <Text style={{ color: "white", padding: 20, fontSize: 18 }}>
-          Loading...
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#007DA5",
+        }}
+      >
+        <Text style={{ color: "white", fontSize: 16 }}>
+          Loading club profile...
         </Text>
       </View>
     );
@@ -112,33 +119,49 @@ const ClubProfile = ({ navigation }) => {
           <View style={styles.infoContainer}>
             <Text style={styles.infoTitle}>{profile.clubName}</Text>
 
-            <View style={styles.infoRow}>
-              <Ionicons name="mail-outline" size={18} style={styles.infoIcon} />
-              <Text style={styles.infoText}>{profile.email}</Text>
-            </View>
+            {profile.email ? (
+              <View style={styles.infoRow}>
+                <Ionicons
+                  name="mail-outline"
+                  size={18}
+                  style={styles.infoIcon}
+                />
+                <Text style={styles.infoText}>{profile.email}</Text>
+              </View>
+            ) : null}
 
-            <View style={styles.infoRow}>
-              <Ionicons
-                name="pricetag-outline"
-                size={18}
-                style={styles.infoIcon}
-              />
-              <Text style={styles.infoText}>{profile.category}</Text>
-            </View>
+            {profile.category ? (
+              <View style={styles.infoRow}>
+                <Ionicons
+                  name="pricetag-outline"
+                  size={18}
+                  style={styles.infoIcon}
+                />
+                <Text style={styles.infoText}>{profile.category}</Text>
+              </View>
+            ) : null}
 
-            <View style={styles.infoRow}>
-              <Ionicons
-                name="information-circle-outline"
-                size={18}
-                style={styles.infoIcon}
-              />
-              <Text style={styles.infoText}>{profile.clubDescription}</Text>
-            </View>
+            {profile.clubDescription ? (
+              <View style={styles.infoRow}>
+                <Ionicons
+                  name="information-circle-outline"
+                  size={18}
+                  style={styles.infoIcon}
+                />
+                <Text style={styles.infoText}>{profile.clubDescription}</Text>
+              </View>
+            ) : null}
 
-            <View style={styles.infoRow}>
-              <Ionicons name="call-outline" size={18} style={styles.infoIcon} />
-              <Text style={styles.infoText}>{profile.contactInfo}</Text>
-            </View>
+            {profile.contactInfo ? (
+              <View style={styles.infoRow}>
+                <Ionicons
+                  name="call-outline"
+                  size={18}
+                  style={styles.infoIcon}
+                />
+                <Text style={styles.infoText}>{profile.contactInfo}</Text>
+              </View>
+            ) : null}
 
             <TouchableOpacity
               style={styles.editProfileButton}
@@ -160,7 +183,7 @@ const ClubProfile = ({ navigation }) => {
           {profile.boardMembers.map((member, index) => (
             <TouchableOpacity key={index} style={styles.actionCard}>
               <Image
-                source={{ uri: member.picture }}
+                source={{ uri: member.profilePicture }}
                 style={styles.boardMemberImage}
               />
               <Text style={styles.cardText}>

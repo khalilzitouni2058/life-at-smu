@@ -20,11 +20,17 @@ const EditBoardMember = ({ navigation, route }) => {
   const { editingMember } = route.params || {};
   const [name, setName] = useState(editingMember?.name || "");
   const [email, setEmail] = useState(editingMember?.email || "");
-  const [facebookLink, setFacebookLink] = useState(editingMember?.facebookLink || "");
+  const [facebookLink, setFacebookLink] = useState(
+    editingMember?.facebookLink || ""
+  );
   const [role, setRole] = useState(editingMember?.role || "");
-  const [phoneNumber, setPhoneNumber] = useState(editingMember?.phoneNumber || "");
-  const [countryCode, setCountryCode] = useState("TN +216")
-  const [profileImage, setProfileImage] = useState(editingMember?.profileImage || "");
+  const [phoneNumber, setPhoneNumber] = useState(
+    editingMember?.phoneNumber || ""
+  );
+  const [countryCode, setCountryCode] = useState("TN +216");
+  const [profileImage, setProfileImage] = useState(
+    editingMember?.profileImage || ""
+  );
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
@@ -46,16 +52,17 @@ const EditBoardMember = ({ navigation, route }) => {
       return;
     }
     try {
-      const response = await axios.put(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/update-board-member`, {
-        name,
-        email,
-        facebookLink,
-        role,
-        phoneNumber,
-        profilePicture:
-        profileImage ||
-        "https://scontent.ftun8-1.fna.fbcdn.net/v/t39.30808-6/469963732_2801171663397034_3870197941446985944_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=106&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=uqzP4t61bloQ7kNvgGuZweS&_nc_oc=AdiZi3rCnmG1hpiNhZIlx-rDtV1XEM0uwGxQef6qz8dJ724A7BKL5cPjYMLA5Di_4-4&_nc_zt=23&_nc_ht=scontent.ftun8-1.fna&_nc_gid=Akr1sLeZP0dLZ-JjE-afwYi&oh=00_AYAjfD91fKYDbB1FqX_D4lx-qx5KrgPJCj9enbH2X8cEIg&oe=67AFB8AB",
-      });
+      const response = await axios.put(
+        `http://${ipAddress}:8000/api/auth/clubs/${clubId}/update-board-member`,
+        {
+          name,
+          email,
+          facebookLink,
+          role,
+          phoneNumber,
+          profilePicture: profileImage,
+        }
+      );
 
       if (response.status === 200) {
         Alert.alert("Success", "Board member updated successfully.");
@@ -204,12 +211,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#007DA5",
     paddingVertical: 20,
+    paddingTop: 30,
   },
   logo: {
     position: "absolute",
-    left: 10,
-    width: 50,
-    height: 50,
+    left: 0,
+    top: 18,
+    width: 90,
+    height: 60,
     resizeMode: "contain",
   },
   title: {
@@ -217,6 +226,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     textAlign: "center",
+    marginLeft: 10,
   },
   scrollContent: {
     padding: 20,
@@ -318,7 +328,7 @@ const styles = StyleSheet.create({
   },
   ignoreButton: {
     backgroundColor: "#f0f0f0",
-    padding: 10,
+    padding: 15,
     borderRadius: 5,
     alignItems: "center",
     marginTop: 10,

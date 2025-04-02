@@ -79,9 +79,6 @@ const AddBoardMember = ({ navigation }) => {
     }
   };
 
-  {
-    /* 🔽 HIGHLIGHTED: Main return moved here from handleImageUpload */
-  }
   return (
     <View style={{ flex: 1, backgroundColor: "#f0f8ff" }}>
       <View style={styles.header}>
