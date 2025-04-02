@@ -1,17 +1,17 @@
-import React, { useEffect } from 'react';
-import { Text, View,StyleSheet,Image  } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import logo from "../../../assets/logo.png"
+import React, { useEffect } from "react";
+import { Text, View, StyleSheet, Image } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import logo from "../../../assets/logo.png";
+
 const Home = () => {
   const navigation = useNavigation();
-  
-  useEffect(() => {
-    
-    const timer = setTimeout(() => {
-      navigation.replace('Login');
-    }, 2000); 
 
-    return () => clearTimeout(timer); 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigation.replace("Login");
+    }, 2000);
+
+    return () => clearTimeout(timer);
   }, [navigation]);
 
   return (
@@ -24,28 +24,28 @@ const Home = () => {
 };
 const styles = StyleSheet.create({
   container: {
-    flex: 1, 
-    backgroundColor: "#007DA5", 
-    justifyContent: 'flex-start',
-    alignItems: 'center', 
+    flex: 1,
+    backgroundColor: "#007DA5",
+    justifyContent: "flex-start",
+    alignItems: "center",
   },
   logo: {
     width: 200,
-    height: 200, 
-    resizeMode: 'contain', 
+    height: 200,
+    resizeMode: "contain",
     marginTop: 200,
   },
   tit: {
-    color:"white",
+    color: "white",
     fontSize: 32,
-    fontWeight: 'bold',
-    
+    fontWeight: "bold",
   },
   tit2: {
-    color:"white",
+    color: "white",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 10,
   },
 });
+
 export default Home;

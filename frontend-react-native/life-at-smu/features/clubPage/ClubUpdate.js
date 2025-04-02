@@ -234,7 +234,7 @@ const ClubUpdate = ({ navigation }) => {
               clubData.boardMembers.map((member, index) => (
                 <View key={index} style={styles.boardMemberCard}>
                   <Image
-                    source={{uri: member?.profilePicture}}
+                    source={{ uri: member?.profilePicture }}
                     style={styles.boardMemberPicture}
                   />
                   <View style={styles.boardMemberDetails}>
@@ -311,13 +311,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#007DA5",
     paddingVertical: 20,
     paddingHorizontal: 10,
+    paddingTop: 30,
   },
 
   appLogo: {
     position: "absolute",
     left: 10,
-    width: 50,
-    height: 50,
+    top: 18,
+    width: 90,
+    height: 60,
     resizeMode: "contain",
   },
   title: {
@@ -462,10 +464,16 @@ const styles = StyleSheet.create({
   },
   updateButton: {
     backgroundColor: "#007DA5",
-    padding: 15,
-    borderRadius: 5,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 25,
     alignItems: "center",
-    marginVertical: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+    marginBottom: 10,
   },
   updateButtonText: {
     color: "#fff",
