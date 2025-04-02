@@ -15,6 +15,18 @@ const studentLifeDepsepSchema = new mongoose.Schema({
     enum: ['Student Life Member', 'Officer'],
     required: true,
   },
+  picture: {
+    type: String,
+    required: true,
+  },
+  program: {
+    type: String,
+    required: true,
+  },
+  major: {
+    type: String,
+    required: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   Linking,
 } from "react-native";
-import Footer from "../HomePage/components/Footer";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -94,7 +93,6 @@ const ClubDetailsScreen = ({ route }) => {
           </View>
         )}
       </Animated.ScrollView>
-      <Footer />
     </View>
   );
 };

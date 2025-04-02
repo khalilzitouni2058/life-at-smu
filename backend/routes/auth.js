@@ -11,14 +11,14 @@ const studentLifeDeps = require("../models/studentLifeDeps")
 
 router.post('/student-life-dep', async (req, res) => {
   try {
-    const { email, fullname, role } = req.body;
+    const { email, fullname, role,picture,program,major} = req.body;
     let user = await studentLifeDeps.findOne({ email });
 
     if (user) {
       return res.status(400).json({ message: 'User already exists in Student Life Department' });
     }
 
-    user = new studentLifeDeps({ email, fullname, role });
+    user = new studentLifeDeps({ email, fullname, role,picture,program,major });
     await user.save();
 
     res.status(201).json({ message: 'User added to Student Life Department', user });

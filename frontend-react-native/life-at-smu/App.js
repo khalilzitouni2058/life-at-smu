@@ -1,8 +1,4 @@
-import EventForm from "./features/Club/components/EventForm";
 import { StyleSheet } from "react-native";
-import Home from "./features/HomePage/screens/Home";
-import Login from "./features/HomePage/screens/Login";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { UserProvider } from "./Context/UserContext";
@@ -20,6 +16,12 @@ import AddBoardMember from "./features/clubPage/AddBoardMember";
 import EditBoardMember from "./features/clubPage/EditBoardMember";
 import ClubsScreen from "./features/Club/ClubsScreen";
 import ClubDetailsScreen from "./features/Club/ClubDetailsScreen";
+import HomeMain from "./features/HomePage/screens/HomeMain";
+import EventForm from "./features/Club/components/EventForm";
+
+const Stack = createNativeStackNavigator();
+
+import TabNavigator from "./navigation/TabNavigator"; // <-- Create this file
 
 export default function App() {
   return (
@@ -27,6 +29,7 @@ export default function App() {
       <UserProvider>
         <ClubProvider>
           <Stack.Navigator initialRouteName="Home">
+            <Stack.Screen name="MainTabs" component={TabNavigator} />
             <Stack.Screen
               name="Home"
               component={Home}
