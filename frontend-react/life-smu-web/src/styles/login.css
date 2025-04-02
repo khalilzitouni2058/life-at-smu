@@ -1,6 +1,4 @@
-body {
-    
-  }
+
   
   .container {
     display: flex;
@@ -48,28 +46,7 @@ body {
     font-weight: bold;
   }
   
-  label {
-    display: flex;
-    justify-content: flex-start;
-    font-size: 14px;
-    color: #007da5;
-    font-weight: bold;
-    margin-bottom: 5px;
-  }
   
-  input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 15px;
-    border: 2px solid #007da5;
-    border-radius: 6px;
-    outline: none;
-    transition: border-color 0.3s;
-  }
-  
-  input:focus {
-    border-color: #005b75;
-  }
   
   .error {
     color: red;
@@ -85,7 +62,7 @@ body {
     text-align: center;
   }
   
-  .dashboard-container h2 {
+  .dashboard-container  {
     margin-bottom: 20px;
     color: #007da5;
     font-weight: bold;
@@ -101,10 +78,7 @@ body {
     border-radius: 6px;
     transition: background-color 0.3s ease-in-out, transform 0.2s;
   }
-  button{
-    background-color: none;
-    color: black;
-  }
+  
   .dashboard-container{
     background-color: #d32f2f;
     transform: scale(1.05);
