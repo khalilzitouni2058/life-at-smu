@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,8 +11,6 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-
-import { toaster } from "../components/ui/toaster.jsx"
 
 const Login = ({ setIsAuthenticated }) => {
   const [username, setUsername] = useState("");
@@ -36,47 +34,52 @@ const Login = ({ setIsAuthenticated }) => {
       setLoading(false);
       if (username === validUser.username && password === validUser.password) {
         setIsAuthenticated(true);
-        console.log()
         navigate("/dashboard");
       } else {
-        toaster.error({
-          title: "Login Successful",
-        })
-        console.log(toaster.title)
         setError(true);
       }
     }, 1000);
-    
-    console.log(error)
+
+    console.log(error);
   };
 
   return (
-    
     <Box
-      bg="gray.100"
       height="100vh"
       display="flex"
       flexDirection={"column"}
       alignItems="center"
       justifyContent="top-center"
+      bgImage="url('https://i.postimg.cc/bwWYBzxt/output-onlinepngtools.png')"
+      bgSize="cover"
+      bgPosition="center"
+      w="100vw"
+      h="100vh"
     >
-      
-      <Text
-        fontSize="xl"
-        fontWeight="bold"
-        textAlign="center"
-        mb={8}
-        color="#007da5"
-        mt={24}
-      >
-        WELCOME TO LIFE AT SMU ADMIN DASHBOARD
-      </Text>
       <Box
         bg="white"
+        mt={50}
+        p={4} 
+        borderRadius="lg"
+        boxShadow="lg"
+        textAlign="center"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        minH="71px" 
+      >
+        <Text fontSize="xl" fontWeight="bold" color="#007da5">
+          WELCOME TO LIFE AT SMU ADMIN DASHBOARD
+        </Text>
+      </Box>
+
+      <Box
+        bg="white"
+        mt={8}
         p={8}
         borderRadius="lg"
         boxShadow="lg"
-        maxW="400px"
+        maxW="500px"
         width="100%"
       >
         <form onSubmit={handleLogin}>
@@ -126,7 +129,6 @@ const Login = ({ setIsAuthenticated }) => {
                 isLoading={loading}
                 backgroundColor="#007da5"
                 color={"white"}
-
               >
                 Login
               </Button>
