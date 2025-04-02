@@ -2,17 +2,14 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  ScrollView,
   Image,
   StyleSheet,
   ActivityIndicator,
   TextInput,
-  TouchableOpacity,
 } from "react-native";
 import { Card } from "react-native-paper";
 import axios from "axios";
 import Constants from "expo-constants";
-import Footer from "../HomePage/components/Footer";
 import { useNavigation } from "@react-navigation/native";
 import Animated, {
   useSharedValue,
@@ -111,7 +108,6 @@ const ClubsScreen = () => {
           ))}
         </Animated.ScrollView>
       )}
-      <Footer />
     </View>
   );
 };

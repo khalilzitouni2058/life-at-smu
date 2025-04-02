@@ -8,7 +8,6 @@ import {
   Pressable,
 } from "react-native";
 import { useClub } from "../../../Context/ClubContext";
-import Footer from "../components/Footer";
 import CalendarView from "../components/CalendarView";
 import EventDisplay from "./EventDisplay";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -114,7 +113,6 @@ const HomeMain = () => {
 
       <EventDisplay selectedDate={selectedDate} />
 
-      <Footer />
     </View>
   );
 };
