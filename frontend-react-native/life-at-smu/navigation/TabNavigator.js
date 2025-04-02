@@ -2,11 +2,9 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import HomeMain from "../features/HomePage/screens/HomeMain";
-import ClubProfile from "../features/clubPage/ClubProfile";
-import Profile from "../features/ProfilePage/screens/Profile";
-import { View, Text } from "react-native";
 import ProfileStack from "./ProfileStack";
 import Schedule from "../features/HomePage/screens/Schedule";
+import ClubsScreen from "../features/Club/ClubsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -47,7 +45,8 @@ const TabNavigator = () => {
         tabBarIcon: ({ color, size }) => {
           let iconName = "home-outline";
           if (route.name === "HomeMain") iconName = "home-outline";
-          else if (route.name === "Clubs") iconName = "people-circle-outline";
+          else if (route.name === "ClubsScreen")
+            iconName = "people-circle-outline";
           else if (route.name === "Schedule") iconName = "calendar-outline";
           else if (route.name === "Profile") iconName = "person-outline";
           return <Ionicons name={iconName} size={30} color={color} />;
@@ -59,7 +58,7 @@ const TabNavigator = () => {
         component={HomeMain}
         options={{ title: "Home" }}
       />
-      <Tab.Screen name="Clubs" component={ClubProfile} />
+      <Tab.Screen name="Clubs" component={ClubsScreen} />
       <Tab.Screen name="Schedule" component={Schedule} />
       <Tab.Screen name="Profile" component={ProfileStack} />
     </Tab.Navigator>

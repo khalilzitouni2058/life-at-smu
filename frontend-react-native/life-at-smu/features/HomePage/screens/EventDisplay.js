@@ -1,6 +1,3 @@
-import { Text, View, StyleSheet, Dimensions, FlatList, Image ,Modal,TouchableOpacity,TouchableWithoutFeedback } from 'react-native';
-import React, { useState, useEffect } from 'react';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
   Text,
   View,
@@ -8,8 +5,11 @@ import {
   Dimensions,
   FlatList,
   ActivityIndicator,
+  Modal,
   Image,
+  TouchableOpacity,
 } from "react-native";
+import { TouchableWithoutFeedback } from "react-native";
 import React, { useState, useEffect } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Constants from "expo-constants";
@@ -18,13 +18,30 @@ import axios from "axios";
 const screenWidth = Dimensions.get("window").width;
 const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
 const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
-
+  
 const EventDisplay = ({ selectedDate }) => {
-  const [events, setEvents] = useState([]);
+  const [events,setEvents]  = useState([]);
+  const [message,setMessage] = useState("");
+  const [showEvent, setshowEvent] = useState(true);
+  
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(true);
 
+
+  const openModal = (event) => {
+    setSelectedEvent(event);
+    console.log(event)
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedEvent(null);
+  };  
+
   useEffect(() => {
-    setEvents([]); 
+    setEvents([]); // 🔁 clear previous events
     const fetchEventsForDate = async () => {
       try {
         setLoading(true);
@@ -34,10 +51,13 @@ const EventDisplay = ({ selectedDate }) => {
           }`
         );
         setEvents(response.data);
+        setshowEvent(true)
       } catch (error) {
         if (error.response?.status === 404) {
           // No events for this day
           setEvents([]); // ✅ explicitly reset
+          setMessage("No events found for the specified date.");
+          setshowEvent(false)
         } else {
           console.error("Error fetching events:", error.message);
         }
@@ -52,11 +72,8 @@ const EventDisplay = ({ selectedDate }) => {
   const renderEvent = ({ item }) => (
     <>
       <View style={styles.container2}>
-        <Image
-          source={{ uri: item.club?.profilePicture }}
-          style={styles.circularImage}
-        />
-        <Text style={styles.text}>{item.club?.clubName}</Text>
+        <Image source={{ uri: item.club.profilePicture }} style={styles.circularImage} />
+        <Text style={styles.text}>{item.club.clubName}</Text>
       </View>
 
       {/* Clickable Event Container */}
@@ -96,9 +113,11 @@ const EventDisplay = ({ selectedDate }) => {
             <Text style={styles.eventTime}>{item.eventTime}</Text>
           </View>
         </View>
+        </View>
       </TouchableOpacity>
     </>
   );
+  
 
   if (loading) {
     return (
@@ -120,7 +139,9 @@ const EventDisplay = ({ selectedDate }) => {
           contentContainerStyle={{ paddingBottom: 50 }}
         />
       ) : (
-        <Text style={styles.text3}>No events found for this day.</Text>
+        <View>
+          <Text style={styles.text3}>No events found for this day.</Text>
+        </View>
       )}
 
       {/* Overlay Modal */}
@@ -192,8 +213,10 @@ const EventDisplay = ({ selectedDate }) => {
         </TouchableWithoutFeedback>
       </Modal>
     </View>
-  );
+  ); 
 };
+
+
 const styles = StyleSheet.create({
   eventImageBackground: {
     resizeMode: "repeat",
