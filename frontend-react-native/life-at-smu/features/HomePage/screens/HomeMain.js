@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Text,
   View,
@@ -7,24 +7,20 @@ import {
   TouchableOpacity,
   Pressable,
 } from "react-native";
-import { useUser } from "../../../Context/UserContext";
 import { useClub } from "../../../Context/ClubContext";
+import Footer from "../components/Footer";
 import CalendarView from "../components/CalendarView";
 import EventDisplay from "./EventDisplay";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { Button } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
+import Constants from "expo-constants";
+import axios from "axios";
 
 const Addproposal = () => {
-  const { clubId } = useClub() || {}; // Default to an empty object to avoid errors
-
   const navigation = useNavigation(); // Get navigation from context
-
-  if (!clubId) return null;
 
   return (
     <View style={{ display: "flex", flexDirection: "row" }}>
-      <Text style={styles.text}>Events</Text>
       <Pressable
         style={styles.button}
         onPress={() => navigation.navigate("eventForm")}
@@ -34,29 +30,46 @@ const Addproposal = () => {
     </View>
   );
 };
+
 const HomeMain = () => {
-
-  const { user } = useUser();
-  
- const navigation = useNavigation();
- 
-
-  const [now, setNow] = useState(new Date());
-
-  const [firstDayOfMonth, setFirstDayOfMonth] = useState(
-    new Date(now.getFullYear(), now.getMonth(), 1)
-  );
-  const [lastDayOfMonth, setLastDayOfMonth] = useState(
-    new Date(now.getFullYear(), now.getMonth() + 1, 0)
-  );
-  const [selectedIndex, setSelectedIndex] = useState(now.getDate() - 1);
-
-  const getRandomColor = (colors) => {
-    const randomIndex = Math.floor(Math.random() * colors.length);
-    return colors[randomIndex];
-  };
+  const { clubId } = useClub() || {};
   const [searchQuery, setSearchQuery] = useState("");
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(new Date().toDateString());
+  const [eventsByDate, setEventsByDate] = useState({});
+
+  const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await axios.get(`http://${ipAddress}:8000/api/auth/events`);
+        const grouped = res.data.reduce((acc, event) => {
+          const key = new Date(event.eventDate).toISOString().split("T")[0];
+          if (!acc[key]) acc[key] = [];
+          acc[key].push(event);
+          return acc;
+        }, {});
+        setEventsByDate(grouped);
+      } catch (error) {
+        console.error("Failed to fetch events:", error.message);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  // Get 14 days from start of current week
+  const today = new Date();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+  const twoWeeks = Array.from({ length: 14 }, (_, i) => {
+    const date = new Date(startOfWeek);
+    date.setDate(date.getDate() + i);
+    return date;
+  });
+
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
@@ -68,7 +81,12 @@ const HomeMain = () => {
           onChangeText={(text) => setSearchQuery(text)}
         />
         <TouchableOpacity onPress={() => setDrawerVisible(!drawerVisible)}>
-          <Ionicons name="notifications-outline" size={24} color="#333" />
+          <Ionicons
+            name="notifications-outline"
+            size={24}
+            color="#333"
+            marginRight={12}
+          />
         </TouchableOpacity>
       </View>
       {drawerVisible && (
@@ -81,17 +99,26 @@ const HomeMain = () => {
         </View>
       )}
       <CalendarView
-        lastDayOfMonth={lastDayOfMonth}
-        firstDayOfMonth={firstDayOfMonth}
+        days={twoWeeks}
         selectedIndex={selectedIndex}
-        setSelectedIndex={setSelectedIndex}
+        setSelectedIndex={(index) => {
+          setSelectedIndex(index);
+          setSelectedDate(twoWeeks[index].toISOString().split("T")[0]);
+        }}
+        eventsByDate={eventsByDate}
       />
-      <Addproposal />
 
-      <EventDisplay />
+      <Text style={styles.text}>Upcoming Events</Text>
+
+      {clubId && <Addproposal />}
+
+      <EventDisplay selectedDate={selectedDate} />
+
+      <Footer />
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   button: {
     backgroundColor: "#E9F8FC",
@@ -99,14 +126,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 25,
     borderRadius: 0,
     alignItems: "center",
-    marginLeft: 20,
   },
   text2: {
     color: "black",
     fontSize: 16,
     fontWeight: "bold",
     alignSelf: "right",
-    paddingTop: 15,
+    padding: 10,
   },
   text: {
     color: "black",
