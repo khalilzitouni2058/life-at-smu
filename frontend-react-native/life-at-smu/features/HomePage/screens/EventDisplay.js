@@ -355,6 +355,25 @@ const styles = StyleSheet.create({
     width: "90%",
     alignSelf: "center",
   },
+  button: {
+    backgroundColor: '#007BFF', // Blue color
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+     width:"90%",
+    marginTop:10
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   statusSuccess: {
     backgroundColor: "rgba(76, 175, 80, 0.2)", // Light green background
     borderColor: "green",
