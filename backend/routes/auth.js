@@ -437,16 +437,10 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     eventLocation,
     additionalNotes,
     eventImage,
-    room,
+    room, 
+    mandatoryParentalAgreement, 
+    transportationProvided, 
   } = req.body;
-
-
-  if (!eventName || !eventDate || !eventTime || !eventLocation || !room) {
-    return res.status(400).json({
-      message: "Event name, date, time, location, and room are required",
-    });
-  }
-
 
   try {
     const club = await Club.findById(clubId);
@@ -463,12 +457,14 @@ router.post("/clubs/:clubId/events", async (req, res) => {
       additionalNotes,
       eventImage,
       club: clubId,
-      room, // Store room ID
+      room, 
+      mandatoryParentalAgreement: mandatoryParentalAgreement ?? false, 
+      transportationProvided: transportationProvided ?? false, 
+      status: "Waiting", // ✅ Default status is "Waiting"
     });
 
     await newEvent.save();
 
-    // Add event to the club's event list
     club.events.push(newEvent._id);
     await club.save();
 
@@ -480,6 +476,7 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
+
 
 // Get all events for a club
 router.get("/clubs/:clubId/events", async (req, res) => {
@@ -502,11 +499,9 @@ router.get("/events/:date", async (req, res) => {
   try {
     const { date } = req.params;
     const events = await Event.find({ eventDate: date })
-      .populate("club", "clubName profilePicture") // Populate club with clubName and profilePicture
-      .select(
-        "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club"
-      );
-
+      .populate('club', 'clubName profilePicture')  // Populate club with clubName and profilePicture
+      .select('eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status');
+    
     if (events.length === 0) {
       return res
         .status(404)
@@ -521,11 +516,11 @@ router.get("/events/:date", async (req, res) => {
 
 router.get("/events", async (req, res) => {
   try {
-    const events = await Event.find().select(
-      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club"
-    );
-
-    res.status(200).json(events);
+      const events = await Event.find().select(
+          'eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status'
+      );
+      
+      res.status(200).json(events);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
