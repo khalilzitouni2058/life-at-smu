@@ -11,10 +11,8 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   return (
-    
     <Router>
       <Routes>
-        
         <Route path="/" element={<Login setIsAuthenticated={setIsAuthenticated} />} />
         <Route
           path="/dashboard"
