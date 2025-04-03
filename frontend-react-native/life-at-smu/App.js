@@ -29,7 +29,11 @@ export default function App() {
       <UserProvider>
         <ClubProvider>
           <Stack.Navigator initialRouteName="Home">
-            <Stack.Screen name="MainTabs" component={TabNavigator} />
+            <Stack.Screen
+              name="MainTabs"
+              component={TabNavigator}
+              options={{ headerShown: false }}
+            />
             <Stack.Screen
               name="Home"
               component={Home}
@@ -63,7 +67,7 @@ export default function App() {
             <Stack.Screen
               name="ClubDetailsScreen"
               component={ClubDetailsScreen}
-              options={{ headerShown: false }}
+              options={{ headerShown: false, presentation: "card" }}
             />
             <Stack.Screen
               name="Profile"

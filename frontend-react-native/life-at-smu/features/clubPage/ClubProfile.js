@@ -148,7 +148,13 @@ const ClubProfile = ({ navigation }) => {
                   size={18}
                   style={styles.infoIcon}
                 />
-                <Text style={styles.infoText}>{profile.clubDescription}</Text>
+                <Text
+                  style={styles.infoText}
+                  numberOfLines={3}
+                  ellipsizeMode="tail"
+                >
+                  {profile.clubDescription}
+                </Text>
               </View>
             ) : null}
 
@@ -174,42 +180,48 @@ const ClubProfile = ({ navigation }) => {
 
         <Text style={[styles.name, { marginTop: 20 }]}>Our Board Members</Text>
 
-        <Animated.View
-          style={[
-            styles.actionGrid,
-            { transform: [{ translateY: slideAnim }] },
-          ]}
-        >
-          {profile.boardMembers.map((member, index) => (
-            <TouchableOpacity key={index} style={styles.actionCard}>
-              <Image
-                source={{ uri: member.profilePicture }}
-                style={styles.boardMemberImage}
-              />
-              <Text style={styles.cardText}>
-                <Text style={styles.memberinfo}>Name:</Text> {member.name}
-              </Text>
-              <Text style={styles.cardText}>
-                <Text style={styles.memberinfo}>Role:</Text> {member.role}
-              </Text>
-              <Text style={styles.cardText}>
-                <Text style={styles.memberinfo}>Email:</Text> {member.email}
-              </Text>
-              <Text style={styles.cardText}>
-                <Text style={styles.memberinfo}>Phone:</Text>{" "}
-                {member.phoneNumber}
-              </Text>
-              <Text
-                style={styles.cardTextLink}
-                onPress={() => {
-                  navigation.navigate("WebView", { url: member.facebookLink });
-                }}
-              >
-                Facebook Profile
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </Animated.View>
+        {profile.boardMembers?.length > 0 && (
+          <>
+            <Animated.View
+              style={[
+                styles.actionGrid,
+                { transform: [{ translateY: slideAnim }] },
+              ]}
+            >
+              {profile.boardMembers.map((member, index) => (
+                <TouchableOpacity key={index} style={styles.actionCard}>
+                  <Image
+                    source={{ uri: member.profilePicture }}
+                    style={styles.boardMemberImage}
+                  />
+                  <Text style={styles.cardText}>
+                    <Text style={styles.memberinfo}>Name:</Text> {member.name}
+                  </Text>
+                  <Text style={styles.cardText}>
+                    <Text style={styles.memberinfo}>Role:</Text> {member.role}
+                  </Text>
+                  <Text style={styles.cardText}>
+                    <Text style={styles.memberinfo}>Email:</Text> {member.email}
+                  </Text>
+                  <Text style={styles.cardText}>
+                    <Text style={styles.memberinfo}>Phone:</Text>{" "}
+                    {member.phoneNumber}
+                  </Text>
+                  <Text
+                    style={styles.cardTextLink}
+                    onPress={() => {
+                      navigation.navigate("WebView", {
+                        url: member.facebookLink,
+                      });
+                    }}
+                  >
+                    Facebook Profile
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </Animated.View>
+          </>
+        )}
       </View>
     </ScrollView>
   );
@@ -221,6 +233,7 @@ const styles = StyleSheet.create({
     gap: -200,
     justifyContent: "flex-start",
     backgroundColor: "#007DA5",
+    paddingBottom: 100,
   },
   profileHeader: {
     alignItems: "center",

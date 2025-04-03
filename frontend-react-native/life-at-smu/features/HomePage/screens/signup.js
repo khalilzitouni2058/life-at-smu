@@ -6,8 +6,6 @@ import {
   StyleSheet,
   TextInput,
   Image,
-
-
   Pressable,
   Alert,
   Modal,
@@ -19,6 +17,7 @@ import { useUser } from "../../../Context/UserContext";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
+import { CommonActions } from "@react-navigation/native";
 import axios from "axios";
 
 export default function SignUpPage() {
@@ -30,7 +29,7 @@ export default function SignUpPage() {
   const [confirmpassword, setconfirmpassword] = useState("");
   const [fullname, setfullname] = useState("");
   const [photo, setPhoto] = useState(null);
-  const[urlphoto,setUrlphoto] = useState("")
+  const [urlphoto, setUrlphoto] = useState("");
   const [value, setValue] = useState(null);
   const [major, setmajor] = useState(null);
   const [showProgramModal, setShowProgramModal] = useState(false);
@@ -40,7 +39,6 @@ export default function SignUpPage() {
   const [passwordTooShort, setPasswordTooShort] = useState(false);
   const navigation = useNavigation();
   const { setUser } = useUser();
-
 
   const programOptions = ["MSB", "Medtech"];
   const medtechMajors = [
@@ -53,7 +51,6 @@ export default function SignUpPage() {
     "Finance",
     "Business Analytics",
     "Management",
-
   ];
 
   const getMajorsForProgram = (program) => {
@@ -77,9 +74,12 @@ export default function SignUpPage() {
     major: major,
   };
   const handleMain = () => {
-
-    navigation.navigate("Home");
-
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: "MainTabs", params: { screen: "HomeMain" } }],
+      })
+    );
   };
 
   const signupUser = async (signupData) => {
@@ -109,7 +109,6 @@ export default function SignUpPage() {
       } else {
         console.error("Error setting up signup request:", error.message);
         alert("Something went wrong. Please try again.");
-
       }
     }
   };
@@ -133,58 +132,58 @@ export default function SignUpPage() {
 
   const handleUploadPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  
+
     if (status !== "granted") {
       Alert.alert("Permission denied", "We need access to your gallery.");
       return;
     }
-  
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
     });
-  
+
     if (result.canceled) {
       return;
     }
-  
+
     const uri = result.assets[0].uri;
-    
+
     setPhoto(uri);
 
     const uploadedImageUrl = await uploadImage(uri);
     if (uploadedImageUrl) {
       console.log("Uploaded Image URL:", uploadedImageUrl);
       // Use uploadedImageUrl instead of result.uri
-    } 
+    }
   };
-  
+
   const uploadImage = async (uri) => {
     const formData = new FormData();
     formData.append("source", {
       uri,
       name: "photo.jpg", // Required for FormData
-    type: "image/jpeg",
+      type: "image/jpeg",
     });
-  
+
     try {
       const response = await fetch("https://postimage.me/api/1/upload", {
         method: "POST",
         body: formData,
         headers: {
           "Content-Type": "multipart/form-data",
-          "X-API-Key":"chv_ZtFY_1d68e60bdc2a3a9f47650fa766b07390e1b69aac2a4ee7d94a3d52e0b853cd8783e54a37fef88448278f2c92526b7f87b9da5acdc486f91f784f0891e651454a"
+          "X-API-Key":
+            "chv_ZtFY_1d68e60bdc2a3a9f47650fa766b07390e1b69aac2a4ee7d94a3d52e0b853cd8783e54a37fef88448278f2c92526b7f87b9da5acdc486f91f784f0891e651454a",
         },
       });
-  
+
       const data = await response.json();
-      
+
       if (data) {
-       
-        setUrlphoto(data.image.url)
+        setUrlphoto(data.image.url);
         return data.image.url;
-      } 
+      }
     } catch (error) {
       console.error("Error uploading image:", error);
       return null;
@@ -228,6 +227,14 @@ export default function SignUpPage() {
 
     if (currentStep <= 4) {
       setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    } else {
+      navigation.goBack();
     }
   };
 
@@ -400,6 +407,13 @@ export default function SignUpPage() {
       >
         <Text style={styles.buttonText}>
           {currentStep === 3 ? "Submit" : "Next Step"}
+        </Text>
+      </TouchableOpacity>
+
+      {/* Back Button */}
+      <TouchableOpacity onPress={handlePreviousStep} style={styles.backButton}>
+        <Text style={styles.backButtonText}>
+          {currentStep === 1 ? "Back to Login" : "Back"}
         </Text>
       </TouchableOpacity>
 
@@ -639,4 +653,19 @@ const styles = StyleSheet.create({
     color: "#007DA5",
     textAlign: "center",
   },
+
+  backButton: {
+    backgroundColor: "#ccc",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  
+  backButtonText: {
+    color: "#333",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  
 });

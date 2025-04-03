@@ -185,12 +185,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: "#007DA5",
     paddingVertical: 20,
+    paddingTop: 30,
   },
   logo: {
     position: "absolute",
-    left: 10,
-    width: 50,
-    height: 50,
+    top: 18,
+    left: 0,
+    width: 90,
+    height: 60,
     resizeMode: "contain",
   },
   title: {
@@ -198,6 +200,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     textAlign: "center",
+    marginLeft: 10,
   },
   scrollContent: {
     padding: 20,
@@ -299,7 +302,7 @@ const styles = StyleSheet.create({
   },
   ignoreButton: {
     backgroundColor: "#f0f0f0",
-    padding: 10,
+    padding: 15,
     borderRadius: 5,
     alignItems: "center",
     marginTop: 10,

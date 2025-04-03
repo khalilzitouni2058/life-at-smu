@@ -3,7 +3,6 @@ import {
   View,
   Text,
   Image,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
   Linking,
@@ -13,9 +12,11 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
+import { useNavigation } from "@react-navigation/native";
 
 const ClubDetailsScreen = ({ route }) => {
   const { club } = route.params || {};
+  const navigation = useNavigation();
 
   const fadeIn = useSharedValue(0);
 
@@ -45,11 +46,29 @@ const ClubDetailsScreen = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <Animated.ScrollView contentContainerStyle={styles.scroll} style={fadeStyle}>
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{
+          marginLeft: 16,
+          marginBottom: 10,
+          paddingVertical: 8,
+          paddingHorizontal: 14,
+          backgroundColor: "#007DA5",
+          borderRadius: 10,
+          alignSelf: "flex-start",
+        }}
+      >
+        <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 14 }}>
+          Back to Clubs
+        </Text>
+      </TouchableOpacity>
+      <Animated.ScrollView
+        contentContainerStyle={styles.scroll}
+        style={fadeStyle}
+      >
         <Image
           source={{
-            uri:
-              club?.profilePicture
+            uri: club?.profilePicture,
           }}
           style={styles.image}
         />
@@ -79,8 +98,7 @@ const ClubDetailsScreen = ({ route }) => {
               <View key={index} style={styles.memberCard}>
                 <Image
                   source={{
-                    uri:
-                      member?.profilePicture
+                    uri: member?.profilePicture,
                   }}
                   style={styles.memberImage}
                 />
@@ -102,7 +120,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
     paddingTop: 40,
-    paddingBottom: 80,
   },
   scroll: {
     alignItems: "center",
