@@ -18,27 +18,26 @@ import axios from "axios";
 const screenWidth = Dimensions.get("window").width;
 const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
 const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
-  
-const EventDisplay = ({ selectedDate }) => {
-  const [events,setEvents]  = useState([]);
-  const [message,setMessage] = useState("");
+
+const EventDisplay = ({ selectedDate, searchQuery = "" }) => {
+  const [events, setEvents] = useState([]);
+  const [message, setMessage] = useState("");
   const [showEvent, setshowEvent] = useState(true);
-  
+
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(true);
 
-
   const openModal = (event) => {
     setSelectedEvent(event);
-    console.log(event)
+    console.log(event);
     setModalVisible(true);
   };
 
   const closeModal = () => {
     setModalVisible(false);
     setSelectedEvent(null);
-  };  
+  };
 
   useEffect(() => {
     setEvents([]); // 🔁 clear previous events
@@ -46,18 +45,16 @@ const EventDisplay = ({ selectedDate }) => {
       try {
         setLoading(true);
         const response = await axios.get(
-          `http://${ipAddress}:8000/api/auth/events/${
-            new Date(selectedDate).toISOString().split("T")[0]
-          }`
+          `http://${ipAddress}:8000/api/auth/events/${selectedDate}`
         );
         setEvents(response.data);
-        setshowEvent(true)
+        setshowEvent(true);
       } catch (error) {
         if (error.response?.status === 404) {
           // No events for this day
-          setEvents([]); // ✅ explicitly reset
+          setEvents([]);
           setMessage("No events found for the specified date.");
-          setshowEvent(false)
+          setshowEvent(false);
         } else {
           console.error("Error fetching events:", error.message);
         }
@@ -69,71 +66,85 @@ const EventDisplay = ({ selectedDate }) => {
     if (selectedDate) fetchEventsForDate();
   }, [selectedDate]);
 
+  const filteredEvents = events.filter((event) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      event.eventName?.toLowerCase().includes(query) ||
+      event.eventLocation?.toLowerCase().includes(query) ||
+      event.club?.clubName?.toLowerCase().includes(query)
+    );
+  });
+
   const renderEvent = ({ item }) => (
     <>
       <View style={styles.container2}>
-        <Image source={{ uri: item.club.profilePicture }} style={styles.circularImage} />
-        <Text style={styles.text}>{item.club.clubName}</Text>
+        <Image
+          source={{
+            uri:
+              item.club?.profilePicture ||
+              "https://cdn-icons-png.flaticon.com/128/16745/16745734.png",
+          }}
+          style={styles.circularImage}
+        />
+        <Text style={styles.text}>{item.club?.clubName || "Unknown Club"}</Text>
       </View>
 
       {/* Clickable Event Container */}
       <TouchableOpacity onPress={() => openModal(item)}>
         <View style={styles.eventContainer}>
-              <Image source={item.eventImage} style={styles.eventImageBackground} />
+          <Image source={item.eventImage} style={styles.eventImageBackground} />
           <View style={styles.eventTextContainer}>
             <Text style={styles.eventTitle}>{item.eventName}</Text>
 
-          <View style={styles.row}>
-            <Ionicons
-              name="calendar-clear-outline"
-              color={"black"}
-              size={14}
-              style={{ marginRight: 4 }}
-            />
-            <Text style={styles.eventTime}>{item.eventDate}</Text>
-          </View>
+            <View style={styles.row}>
+              <Ionicons
+                name="calendar-clear-outline"
+                color={"black"}
+                size={14}
+                style={{ marginRight: 4 }}
+              />
+              <Text style={styles.eventTime}>{item.eventDate}</Text>
+            </View>
 
-          <View style={styles.row}>
-            <Ionicons
-              name="location-outline"
-              color={"black"}
-              size={14}
-              style={{ marginRight: 4 }}
-            />
-            <Text style={styles.eventTime}>{item.eventLocation}</Text>
-          </View>
+            <View style={styles.row}>
+              <Ionicons
+                name="location-outline"
+                color={"black"}
+                size={14}
+                style={{ marginRight: 4 }}
+              />
+              <Text style={styles.eventTime}>{item.eventLocation}</Text>
+            </View>
 
-          <View style={styles.row}>
-            <Ionicons
-              name="time-outline"
-              color={"black"}
-              size={14}
-              style={{ marginRight: 4 }}
-            />
-            <Text style={styles.eventTime}>{item.eventTime}</Text>
+            <View style={styles.row}>
+              <Ionicons
+                name="time-outline"
+                color={"black"}
+                size={14}
+                style={{ marginRight: 4 }}
+              />
+              <Text style={styles.eventTime}>{item.eventTime}</Text>
+            </View>
           </View>
-        </View>
         </View>
       </TouchableOpacity>
     </>
   );
-  
 
   if (loading) {
     return (
-      <View style={styles.loaderContainer}>
+      <View>
         <ActivityIndicator size="large" color="#007DA5" />
         <Text style={styles.loadingText}>Loading events...</Text>
       </View>
     );
   }
-  
 
   return (
     <View style={styles.container}>
-      {events.length > 0 ? (
+      {filteredEvents.length > 0 ? (
         <FlatList
-          data={events}
+          data={filteredEvents}
           keyExtractor={(item) => item._id}
           renderItem={renderEvent}
           contentContainerStyle={{ paddingBottom: 50 }}
@@ -145,77 +156,123 @@ const EventDisplay = ({ selectedDate }) => {
       )}
 
       {/* Overlay Modal */}
-      <Modal visible={modalVisible} transparent animationType="slide"  >
+      <Modal visible={modalVisible} transparent animationType="slide">
         <TouchableWithoutFeedback onPress={closeModal}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              {selectedEvent && (
+                <>
+                  <Image
+                    source={selectedEvent.eventImage}
+                    style={styles.modalImage}
+                  />
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>
+                      {selectedEvent.eventName}
+                    </Text>
+                    <Text style={styles.modalDescription}>
+                      {selectedEvent.eventDescription}
+                    </Text>
+                  </View>
+                  <View style={styles.modalleft}>
+                    <View style={styles.modalDetails}>
+                      <View style={styles.detailRow}>
+                        <Ionicons
+                          name="calendar-clear-outline"
+                          size={18}
+                          color="#007da5"
+                        />
+                        <Text style={styles.modalText}>
+                          {selectedEvent.eventDate}
+                        </Text>
+                      </View>
 
-            {selectedEvent && (
-              <>
-                <Image source={ selectedEvent.eventImage } style={styles.modalImage} />
-                <View style={styles.modalHeader}>
-  <Text style={styles.modalTitle}>{selectedEvent.eventName}</Text>
-  <Text style={styles.modalDescription}>{selectedEvent.eventDescription}</Text>
-</View>
-<View style={styles.modalleft}>
-<View style={styles.modalDetails}>
-  <View style={styles.detailRow}>
-    <Ionicons name="calendar-clear-outline" size={18} color="#007da5" />
-    <Text style={styles.modalText}>{selectedEvent.eventDate}</Text>
-  </View>
+                      <View style={styles.detailRow}>
+                        <Ionicons
+                          name="location-outline"
+                          size={18}
+                          color="#007da5"
+                        />
+                        <Text style={styles.modalText}>
+                          {selectedEvent.eventLocation}
+                        </Text>
+                      </View>
 
-  <View style={styles.detailRow}>
-    <Ionicons name="location-outline" size={18} color="#007da5" />
-    <Text style={styles.modalText}>{selectedEvent.eventLocation}</Text>
-  </View>
+                      <View style={styles.detailRow}>
+                        <Ionicons
+                          name="time-outline"
+                          size={18}
+                          color="#007da5"
+                        />
+                        <Text style={styles.modalText}>
+                          {selectedEvent.eventTime}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
 
-  <View style={styles.detailRow}>
-    <Ionicons name="time-outline" size={18} color="#007da5" />
-    <Text style={styles.modalText}>{selectedEvent.eventTime}</Text>
-  </View>
-</View>
-</View>
+                  <View
+                    style={[
+                      styles.statusContainer,
+                      selectedEvent.mandatoryParentalAgreement
+                        ? styles.statusSuccess
+                        : styles.statusError,
+                    ]}
+                  >
+                    <Ionicons
+                      name={
+                        selectedEvent.mandatoryParentalAgreement
+                          ? "checkmark-circle"
+                          : "close-circle"
+                      }
+                      size={20}
+                      color="white"
+                      style={styles.statusIcon}
+                    />
+                    <Text style={styles.statusText}>
+                      {selectedEvent.mandatoryParentalAgreement
+                        ? "Mandatory Parental Agreement"
+                        : "No Parental Agreement Required"}
+                    </Text>
+                  </View>
 
+                  <View
+                    style={[
+                      styles.statusContainer,
+                      selectedEvent.transportationProvided
+                        ? styles.statusSuccess
+                        : styles.statusError,
+                    ]}
+                  >
+                    <Ionicons
+                      name={
+                        selectedEvent.transportationProvided
+                          ? "checkmark-circle"
+                          : "close-circle"
+                      }
+                      size={20}
+                      color="white"
+                      style={styles.statusIcon}
+                    />
+                    <Text style={styles.statusText}>
+                      {selectedEvent.transportationProvided
+                        ? "Transportation Provided"
+                        : "No Transportation Provided"}
+                    </Text>
+                  </View>
 
-                <View style={[styles.statusContainer, selectedEvent.mandatoryParentalAgreement ? styles.statusSuccess : styles.statusError]}>
-  <Ionicons 
-    name={selectedEvent.mandatoryParentalAgreement ? "checkmark-circle" : "close-circle"} 
-    size={20} 
-    color="white" 
-    style={styles.statusIcon} 
-  /> 
-  <Text style={styles.statusText}>
-    {selectedEvent.mandatoryParentalAgreement ? "Mandatory Parental Agreement" : "No Parental Agreement Required"}
-  </Text>
-</View>
-
-<View style={[styles.statusContainer, selectedEvent.transportationProvided ? styles.statusSuccess : styles.statusError]}>
-  <Ionicons 
-    name={selectedEvent.transportationProvided ? "checkmark-circle" : "close-circle"} 
-    size={20} 
-    color="white" 
-    style={styles.statusIcon} 
-  /> 
-  <Text style={styles.statusText}>
-    {selectedEvent.transportationProvided ? "Transportation Provided" : "No Transportation Provided"}
-  </Text>
-</View>
-
-<TouchableOpacity style={styles.button}>
-  <Text style={styles.buttonText}>Join the Event</Text>
-</TouchableOpacity>
-
-              </>
-            )}
+                  <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>Join the Event</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
           </View>
-        </View>
         </TouchableWithoutFeedback>
       </Modal>
     </View>
-  ); 
+  );
 };
-
 
 const styles = StyleSheet.create({
   eventImageBackground: {
@@ -264,7 +321,8 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     marginVertical: 0,
     marginBottom: 15,
-    borderRadius: 12,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
     alignItems: "flex-start",
   },
   eventTextContainer: {
@@ -284,51 +342,51 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   modalContainer: {
-    width: '100%',
-    backgroundColor: '#fff',
+    width: "100%",
+    backgroundColor: "#fff",
     padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 10, // Adds a shadow on Android
   },
   closeButton: {
-    position: 'absolute',
-    zIndex:1,
+    position: "absolute",
+    zIndex: 1,
     top: 10,
     right: 10,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: "#f2f2f2",
     borderRadius: 20,
     padding: 6,
   },
   modalImage: {
-    resizeMode:"cover",
-    width: '100%',
-    height:"150",
+    resizeMode: "cover",
+    width: "100%",
+    height: "150",
     borderRadius: 10,
     marginBottom: 15,
   },
   modalTitle: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   modalDescription: {
     fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    color: "#666",
+    textAlign: "center",
     marginBottom: 15,
     lineHeight: 22,
   },
   modalText: {
     fontSize: 18,
-    color: '#444',
-    flexDirection: 'row',
-    alignItems: 'center',
+    color: "#444",
+    flexDirection: "row",
+    alignItems: "center",
     marginVertical: 4,
   },
   icon: {
@@ -347,7 +405,7 @@ const styles = StyleSheet.create({
   },
   statusContainer: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
@@ -356,23 +414,23 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   button: {
-    backgroundColor: '#007BFF', // Blue color
+    backgroundColor: "#007BFF", // Blue color
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
-     width:"90%",
-    marginTop:10
+    width: "90%",
+    marginTop: 10,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   statusSuccess: {
     backgroundColor: "rgba(76, 175, 80, 0.2)", // Light green background
@@ -391,9 +449,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#333",
+    flex: 1,
+    flexWrap: "wrap",
   },
-  modalleft:{
-    right:80,
+  modalleft: {
+    right: 80,
   },
   modalHeader: {
     alignItems: "flex-start", // Aligns text to the left
@@ -417,7 +477,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f9fa",
     borderRadius: 10,
     alignItems: "flex-start",
-    marginBottom:10, // Ensures text & icons are aligned left
+    marginBottom: 10, // Ensures text & icons are aligned left
   },
   detailRow: {
     flexDirection: "row",

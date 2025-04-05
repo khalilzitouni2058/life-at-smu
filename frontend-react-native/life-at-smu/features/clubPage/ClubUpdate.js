@@ -51,7 +51,10 @@ const ClubUpdate = ({ navigation }) => {
         clubData
       );
       Alert.alert("Success", "Profile updated successfully!");
-      navigation.navigate("ClubProfile");
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "MainTabs", params: { screen: "Profile" } }],
+      });    
     } catch (error) {
       console.error("Error updating profile:", error);
       Alert.alert("Error", "Could not update profile.");
@@ -313,7 +316,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingTop: 30,
   },
-
   appLogo: {
     position: "absolute",
     left: 10,

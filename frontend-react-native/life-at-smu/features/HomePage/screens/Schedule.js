@@ -8,7 +8,6 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Calendar } from "react-native-calendars";
-import Back from "../components/Back";
 import axios from "axios";
 import Constants from "expo-constants";
 
@@ -29,7 +28,6 @@ const Schedule = () => {
       );
       setEvents(res.data);
     } catch (err) {
-      console.error("Error fetching events:", err);
       setEvents([]); // fallback
     } finally {
       setLoading(false);
@@ -90,6 +88,7 @@ const Schedule = () => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.pageTitle}>My Schedule</Text>
       <Calendar
         onDayPress={(day) => setSelectedDate(day.dateString)}
         markedDates={mergedMarkedDates}
@@ -106,7 +105,6 @@ const Schedule = () => {
       />
 
       <Text style={styles.header}>Schedule for {selectedDate}</Text>
-
       {loading ? (
         <ActivityIndicator size="large" color="#FF6B6B" />
       ) : (
@@ -145,7 +143,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   list: {
-    paddingBottom: 30,
+    paddingBottom: 100,
   },
   itemContainer: {
     flexDirection: "row",
@@ -169,6 +167,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
+  },
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#007DA5",
+    alignSelf: "center",
+    marginBottom: 12,
   },
   subText: {
     fontSize: 14,

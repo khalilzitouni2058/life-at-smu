@@ -35,8 +35,11 @@ const HomeMain = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(new Date().toDateString());
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [eventsByDate, setEventsByDate] = useState({});
+  
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
@@ -46,7 +49,7 @@ const HomeMain = () => {
       try {
         const res = await axios.get(`http://${ipAddress}:8000/api/auth/events`);
         const grouped = res.data.reduce((acc, event) => {
-          const key = new Date(event.eventDate).toISOString().split("T")[0];
+          const key = event.eventDate;
           if (!acc[key]) acc[key] = [];
           acc[key].push(event);
           return acc;
@@ -68,6 +71,15 @@ const HomeMain = () => {
     date.setDate(date.getDate() + i);
     return date;
   });
+
+  useEffect(() => {
+    const todayISO = new Date().toISOString().split("T")[0];
+    const todayIndex = twoWeeks.findIndex(
+      (d) => d.toISOString().split("T")[0] === todayISO
+    );
+    setSelectedIndex(todayIndex);
+    setSelectedDate(todayISO);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -111,8 +123,7 @@ const HomeMain = () => {
 
       {clubId && <Addproposal />}
 
-      <EventDisplay selectedDate={selectedDate} />
-
+      <EventDisplay selectedDate={selectedDate} se  archQuery={searchQuery} />
     </View>
   );
 };
