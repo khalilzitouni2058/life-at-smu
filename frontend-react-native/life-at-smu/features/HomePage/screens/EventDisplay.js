@@ -14,6 +14,7 @@ import React, { useState, useEffect } from "react";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Constants from "expo-constants";
 import axios from "axios";
+import EventModal from "../components/EventModal"; // update the path accordingly
 
 const screenWidth = Dimensions.get("window").width;
 const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
@@ -150,126 +151,24 @@ const EventDisplay = ({ selectedDate, searchQuery = "" }) => {
           contentContainerStyle={{ paddingBottom: 50 }}
         />
       ) : (
-        <View>
-          <Text style={styles.text3}>No events found for this day.</Text>
+        <View style={styles.noEventsContainer}>
+          <Image
+            source={{
+              uri: "https://cdn-icons-png.flaticon.com/512/742/742751.png", // ✅ Cute image that loads correctly
+            }}
+            style={styles.noEventsIcon}
+            resizeMode="contain"
+          />
+          <Text style={styles.noEventsText}>No events found today!</Text>
         </View>
       )}
 
       {/* Overlay Modal */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <TouchableWithoutFeedback onPress={closeModal}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContainer}>
-              {selectedEvent && (
-                <>
-                  <Image
-                    source={selectedEvent.eventImage}
-                    style={styles.modalImage}
-                  />
-                  <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>
-                      {selectedEvent.eventName}
-                    </Text>
-                    <Text style={styles.modalDescription}>
-                      {selectedEvent.eventDescription}
-                    </Text>
-                  </View>
-                  <View style={styles.modalleft}>
-                    <View style={styles.modalDetails}>
-                      <View style={styles.detailRow}>
-                        <Ionicons
-                          name="calendar-clear-outline"
-                          size={18}
-                          color="#007da5"
-                        />
-                        <Text style={styles.modalText}>
-                          {selectedEvent.eventDate}
-                        </Text>
-                      </View>
-
-                      <View style={styles.detailRow}>
-                        <Ionicons
-                          name="location-outline"
-                          size={18}
-                          color="#007da5"
-                        />
-                        <Text style={styles.modalText}>
-                          {selectedEvent.eventLocation}
-                        </Text>
-                      </View>
-
-                      <View style={styles.detailRow}>
-                        <Ionicons
-                          name="time-outline"
-                          size={18}
-                          color="#007da5"
-                        />
-                        <Text style={styles.modalText}>
-                          {selectedEvent.eventTime}
-                        </Text>
-                      </View>
-                    </View>
-                  </View>
-
-                  <View
-                    style={[
-                      styles.statusContainer,
-                      selectedEvent.mandatoryParentalAgreement
-                        ? styles.statusSuccess
-                        : styles.statusError,
-                    ]}
-                  >
-                    <Ionicons
-                      name={
-                        selectedEvent.mandatoryParentalAgreement
-                          ? "checkmark-circle"
-                          : "close-circle"
-                      }
-                      size={20}
-                      color="white"
-                      style={styles.statusIcon}
-                    />
-                    <Text style={styles.statusText}>
-                      {selectedEvent.mandatoryParentalAgreement
-                        ? "Mandatory Parental Agreement"
-                        : "No Parental Agreement Required"}
-                    </Text>
-                  </View>
-
-                  <View
-                    style={[
-                      styles.statusContainer,
-                      selectedEvent.transportationProvided
-                        ? styles.statusSuccess
-                        : styles.statusError,
-                    ]}
-                  >
-                    <Ionicons
-                      name={
-                        selectedEvent.transportationProvided
-                          ? "checkmark-circle"
-                          : "close-circle"
-                      }
-                      size={20}
-                      color="white"
-                      style={styles.statusIcon}
-                    />
-                    <Text style={styles.statusText}>
-                      {selectedEvent.transportationProvided
-                        ? "Transportation Provided"
-                        : "No Transportation Provided"}
-                    </Text>
-                  </View>
-
-                  <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Join the Event</Text>
-                  </TouchableOpacity>
-                </>
-              )}
-            </View>
-          </View>
-        </TouchableWithoutFeedback>
-      </Modal>
+      <EventModal
+        visible={modalVisible}
+        event={selectedEvent}
+        onClose={closeModal}
+      />
     </View>
   );
 };
@@ -488,6 +387,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#333",
     marginLeft: 8, // Ensures spacing from the icon
+  },
+  noEventsContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 50,
+    padding: 20,
+  },
+
+  noEventsIcon: {
+    width: 100,
+    height: 100,
+    marginBottom: 10,
+    opacity: 0.8,
+  },
+
+  noEventsText: {
+    fontSize: 16,
+    color: "#555",
+    fontStyle: "italic",
+    textAlign: "center",
   },
 });
 
