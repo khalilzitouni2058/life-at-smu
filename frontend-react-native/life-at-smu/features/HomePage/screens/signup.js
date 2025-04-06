@@ -132,24 +132,31 @@ export default function SignUpPage() {
 
   const handleUploadPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
+  
     if (status !== "granted") {
       Alert.alert("Permission denied", "We need access to your gallery.");
       return;
     }
-
+  
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       quality: 1,
     });
+  
+    if (result.canceled) {
+      return;
+    }
+  
+    const uri = result.assets[0].uri;
+    
+    setPhoto(uri);
 
     if (result.canceled) {
       return;
     }
 
-    const uri = result.assets[0].uri;
-
+    
     setPhoto(uri);
 
     const uploadedImageUrl = await uploadImage(uri);
