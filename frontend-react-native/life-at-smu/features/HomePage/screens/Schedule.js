@@ -5,17 +5,31 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { Calendar } from "react-native-calendars";
 import axios from "axios";
 import Constants from "expo-constants";
+import EventModal from "../components/EventModal";
 
 const Schedule = () => {
   const [selectedDate, setSelectedDate] = useState("2025-03-28");
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [allEventDates, setAllEventDates] = useState({});
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  const openModal = (event) => {
+    setSelectedEvent(event);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedEvent(null);
+  };
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "localhost";
@@ -70,20 +84,22 @@ const Schedule = () => {
   };
 
   const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <Ionicons
-        name="calendar-outline"
-        size={24}
-        color="#FF6B6B"
-        style={styles.icon}
-      />
-      <View style={styles.info}>
-        <Text style={styles.title}>{item.eventName}</Text>
-        <Text style={styles.subText}>
-          {item.eventTime} | {item.eventLocation}
-        </Text>
+    <TouchableOpacity onPress={() => openModal(item)}>
+      <View style={styles.itemContainer}>
+        <Ionicons
+          name="calendar-outline"
+          size={24}
+          color="#FF6B6B"
+          style={styles.icon}
+        />
+        <View style={styles.info}>
+          <Text style={styles.title}>{item.eventName}</Text>
+          <Text style={styles.subText}>
+            {item.eventTime} | {item.eventLocation}
+          </Text>
+        </View>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   return (
@@ -118,6 +134,11 @@ const Schedule = () => {
           }
         />
       )}
+      <EventModal
+        visible={modalVisible}
+        event={selectedEvent}
+        onClose={closeModal}
+      />
     </View>
   );
 };
