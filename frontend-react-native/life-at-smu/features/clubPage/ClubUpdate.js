@@ -54,7 +54,7 @@ const ClubUpdate = ({ navigation }) => {
       navigation.reset({
         index: 0,
         routes: [{ name: "MainTabs", params: { screen: "Profile" } }],
-      });    
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
       Alert.alert("Error", "Could not update profile.");
@@ -237,11 +237,13 @@ const ClubUpdate = ({ navigation }) => {
               clubData.boardMembers.map((member, index) => (
                 <View key={index} style={styles.boardMemberCard}>
                   <Image
-                    source={{ uri: member?.profilePicture }}
+                    source={{ uri: member?.user?.picture }}
                     style={styles.boardMemberPicture}
                   />
                   <View style={styles.boardMemberDetails}>
-                    <Text style={styles.boardMemberName}>{member?.name}</Text>
+                    <Text style={styles.boardMemberName}>
+                      {member?.user?.fullname}
+                    </Text>
                     <Text style={styles.boardMemberRole}>{member?.role}</Text>
                   </View>
                   <TouchableOpacity

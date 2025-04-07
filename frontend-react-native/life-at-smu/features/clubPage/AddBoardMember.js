@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,7 +9,6 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
 import { useClub } from "../../Context/ClubContext";
 import Constants from "expo-constants";
 import axios from "axios";
@@ -22,10 +21,33 @@ const AddBoardMember = ({ navigation }) => {
   const [role, setRole] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryCode, setCountryCode] = useState("TN +216");
-  const [profileImage, setProfileImage] = useState(null);
+  const [profilePicture, setProfilePicture] = useState(null);
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (!email.trim()) return;
+
+      try {
+        const response = await axios.get(
+          `http://${ipAddress}:8000/api/auth/user-by-email/${email
+            .trim()
+            .toLowerCase()}`
+        );
+        const user = response.data.user;
+        setName(user.fullname);
+        setProfilePicture(user.picture);
+      } catch (err) {
+        setName("");
+        setProfilePicture(null);
+        console.log("No user found for this email");
+      }
+    };
+
+    fetchUserInfo();
+  }, [email]);
 
   const handleSave = async () => {
     if (!clubId) {
@@ -33,49 +55,42 @@ const AddBoardMember = ({ navigation }) => {
       return;
     }
 
-    if (!name.trim() || !email.trim() || !role.trim() || !phoneNumber.trim()) {
-      Alert.alert("Error", "All fields are required.");
+    if (!email.trim()) {
+      Alert.alert("Error", "Email is required.");
       return;
     }
-    const formattedPhoneNumber = `${countryCode} ${phoneNumber}`;
 
-    const newMember = {
-      name,
-      email,
-      facebookLink,
-      role,
-      phoneNumber: formattedPhoneNumber,
-      profilePicture:
-        profileImage ||
-        "https://scontent.ftun8-1.fna.fbcdn.net/v/t39.30808-6/469963732_2801171663397034_3870197941446985944_n.jpg?...",
-    };
+    if (!role.trim()) {
+      Alert.alert("Error", "Role is required.");
+      return;
+    }
+
+    if (!phoneNumber.trim()) {
+      Alert.alert("Error", "Phone number is required.");
+      return;
+    }
 
     try {
-      await axios.put(
+      const newMember = {
+        email: email.trim().toLowerCase(),
+        role: role.trim(),
+        phoneNumber: phoneNumber.trim(),
+        facebookLink: facebookLink.trim() || "",
+      };
+
+      const response = await axios.put(
         `http://${ipAddress}:8000/api/auth/clubs/${clubId}/add-board-member`,
         newMember
       );
+
       Alert.alert("Success", "Board member added successfully!");
       navigation.navigate("ClubUpdate");
     } catch (error) {
       console.error("Error adding board member:", error);
-      Alert.alert("Error", "Could not add board member.");
-    }
-  };
-
-  const handleImageUpload = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission denied", "We need access to your gallery.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setProfileImage(result.assets[0].uri);
+      Alert.alert(
+        "Error",
+        error.response?.data?.message || "Could not add board member."
+      );
     }
   };
 
@@ -87,31 +102,22 @@ const AddBoardMember = ({ navigation }) => {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <TouchableOpacity
-          onPress={handleImageUpload}
-          style={styles.imageWrapper}
-        >
-          {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+        <View style={styles.imageWrapper}>
+          {profilePicture ? (
+            <Image
+              source={{ uri: profilePicture }}
+              style={styles.profileImage}
+            />
           ) : (
             <Text style={styles.placeholderText}>+</Text>
           )}
-        </TouchableOpacity>
+        </View>
 
         <View style={styles.formContainer}>
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Name *</Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter Name"
-              placeholderTextColor="#888"
-            />
-          </View>
-
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>Email *</Text>
+            <Text style={styles.label}>
+              Email <Text style={styles.required}>*</Text>
+            </Text>
             <TextInput
               style={styles.input}
               value={email}
@@ -119,6 +125,20 @@ const AddBoardMember = ({ navigation }) => {
               placeholder="Enter Email"
               placeholderTextColor="#888"
               keyboardType="email-address"
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>
+              Name <Text style={styles.required}>*</Text>
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter Name"
+              placeholderTextColor="#888"
+              editable={false}
             />
           </View>
 
@@ -134,7 +154,9 @@ const AddBoardMember = ({ navigation }) => {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Role *</Text>
+            <Text style={styles.label}>
+              Role <Text style={styles.required}>*</Text>
+            </Text>
             <TextInput
               style={styles.input}
               value={role}
@@ -145,7 +167,9 @@ const AddBoardMember = ({ navigation }) => {
           </View>
 
           <View style={styles.formGroup}>
-            <Text style={styles.label}>Phone Number *</Text>
+            <Text style={styles.label}>
+              Phone Number <Text style={styles.required}>*</Text>
+            </Text>
             <View style={styles.phoneInputContainer}>
               <TouchableOpacity style={styles.dropdown}>
                 <Text style={styles.dropdownText}>{countryCode}</Text>

@@ -191,20 +191,22 @@ const ClubProfile = ({ navigation }) => {
               {profile.boardMembers.map((member, index) => (
                 <TouchableOpacity key={index} style={styles.actionCard}>
                   <Image
-                    source={{ uri: member.profilePicture }}
+                    source={{ uri: member.user?.picture }}
                     style={styles.boardMemberImage}
                   />
                   <Text style={styles.cardText}>
-                    <Text style={styles.memberinfo}>Name:</Text> {member.name}
+                    <Text style={styles.memberinfo}>Name:</Text>
+                    {member.user?.fullname}
                   </Text>
                   <Text style={styles.cardText}>
                     <Text style={styles.memberinfo}>Role:</Text> {member.role}
                   </Text>
                   <Text style={styles.cardText}>
-                    <Text style={styles.memberinfo}>Email:</Text> {member.email}
+                    <Text style={styles.memberinfo}>Email:</Text>
+                    {member.user?.email}
                   </Text>
                   <Text style={styles.cardText}>
-                    <Text style={styles.memberinfo}>Phone:</Text>{" "}
+                    <Text style={styles.memberinfo}>Phone:</Text>
                     {member.phoneNumber}
                   </Text>
                   <Text
