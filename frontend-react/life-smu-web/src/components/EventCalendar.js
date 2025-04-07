@@ -64,7 +64,7 @@ const EventCalendar = () => {
       start: eventDetails.start,
       end: eventDetails.end,
       location: eventDetails.extendedProps.location,
-      status: eventDetails.extendedProps.status,
+      status: eventDetails.extendedProps.status ,
       image:eventDetails.extendedProps.image
     });
     console.log("hello")
@@ -113,51 +113,52 @@ const EventCalendar = () => {
       />
 
       {/* Dialog for event details */}
-      <Dialog.Root open={isDialogOpen} motionPreset="slide-in-bottom" size="cover" placement="center"> 
-        <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-        <Dialog.Content>
-          <Dialog.Header fontWeight="bold" fontSize="4xl">{selectedEvent?.title}</Dialog.Header>
-          <Dialog.Body>
+      <Dialog.Root open={isDialogOpen}  motionPreset="slide-in-bottom" size={"lg"}   placement="center" > 
+        <Portal  >
+        <Dialog.Backdrop  />
+        <Dialog.Positioner >
+        <Dialog.Content >
+          <Dialog.Header   fontWeight="bold" color={"blackAlpha.950"} fontSize="4xl">{selectedEvent?.title}</Dialog.Header>
+          <Dialog.Body alignItems={"center"}  >
             {selectedEvent && (
-              <Flex direction="row" align="center" spacing={6}>
+              <Flex direction="row" align="center" spacing={2}>
                 {/* Left side: Image */}
-                <Box flex="1" mr={4}>
+                <Box    bgColor="gray.200" >
                   <Image 
                     src={selectedEvent.image} 
                     alt="Event Image" 
-                    boxSize="90%"
-                    alignSelf={"center"}
-                    mt={10}
-                    ml={5}
+                    boxSize="100%"
+                    width={350}
+                    
+                    
                     objectFit="cover" 
+                    
                      
                   />
                 </Box>
                 
                 {/* Right side: Event details */}
-                <Box flex="2" bgColor="gray.100" p={20}>
-                  <VStack spacing={5} align="start" color="gray.700">
+                <Box  bgColor="cyan.800" p={6} alignSelf={"center"} mr={20} >
+                  <VStack spacing={5}  color="gray.700">
                     
                   <Box w="100%">
-        <Text fontWeight="bold" fontSize="lg" color="teal.600">Location:</Text>
-        <Text fontSize="md" color="gray.600">{selectedEvent.location}</Text>
+        <Text fontWeight="bold" fontSize="lg" color="cyan.400">Location:</Text>
+        <Text fontSize="md" color="whiteAlpha.950">{selectedEvent.location}</Text>
       </Box>
 
       <Box w="100%">
-        <Text fontWeight="bold" fontSize="lg" color="teal.600">Start Time:</Text>
-        <Text fontSize="md" color="gray.600">{new Date(selectedEvent.start).toLocaleString()}</Text>
+        <Text fontWeight="bold" fontSize="lg" color="cyan.400">Start Time:</Text>
+        <Text fontSize="md" color="whiteAlpha.950">{new Date(selectedEvent.start).toLocaleString()}</Text>
       </Box>
 
       <Box w="100%">
-        <Text fontWeight="bold" fontSize="lg" color="teal.600">End Time:</Text>
-        <Text fontSize="md" color="gray.600">{new Date(selectedEvent.end).toLocaleString()}</Text>
+        <Text fontWeight="bold" fontSize="lg" color="cyan.400">End Time:</Text>
+        <Text fontSize="md" color="whiteAlpha.950">{new Date(selectedEvent.end).toLocaleString()}</Text>
       </Box>
 
       <Box w="100%">
-        <Text fontWeight="bold" fontSize="lg" color="teal.600">Status:</Text>
-        <Text fontSize="md" color="gray.600">{selectedEvent.status}</Text>
+        <Text fontWeight="bold" fontSize="lg" color="cyan.400">Status:</Text>
+        <Text fontSize="md" color="whiteAlpha.950">{selectedEvent.status}</Text>
       </Box>
                   </VStack>
                 </Box>
@@ -165,12 +166,34 @@ const EventCalendar = () => {
             )}
           </Dialog.Body>
           <Dialog.Footer>
-            <HStack spacing={4}>
-            <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Close</Button>
-              <Button colorPalette="red" variant="subtle" onClick={handleDecline}>Decline</Button>
-              
-              <Button colorPalette="green"variant="subtle"  onClick={handleApproval}>Approve</Button>
-            </HStack>
+          {selectedEvent && (
+  <HStack spacing={4}>
+    {selectedEvent.status === 'Waiting' ? (
+      <>
+        <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
+          Close
+        </Button>
+        <Button colorPalette="red" variant="subtle" onClick={handleDecline}>
+          Decline
+        </Button>
+        <Button colorPalette="green" variant="subtle" onClick={handleApproval}>
+          Approve
+        </Button>
+      </>
+    ) : selectedEvent.status === 'Approved' ? (
+      <>
+        <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
+          Close
+        </Button>
+        <Button colorPalette="green" variant="solid" disabled >
+          Approved
+        </Button>
+      </>
+    ) : null}
+  </HStack>
+)}
+
+
           </Dialog.Footer>
           </Dialog.Content>
         </Dialog.Positioner>
