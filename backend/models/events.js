@@ -8,7 +8,7 @@ const eventSchema = new mongoose.Schema({
   eventLocation: { type: String, required: true },
   additionalNotes: { type: String },
   eventImage: { uri: String }, // Store image URL or file path
-  room: { type: mongoose.Schema.Types.ObjectId, ref: "Room", required: true }, 
+  room: { type: mongoose.Schema.Types.ObjectId, ref: "Room", required: true },
   club: { type: mongoose.Schema.Types.ObjectId, ref: "Club", required: true }, // Reference to Club
   mandatoryParentalAgreement: { type: Boolean, default: false }, // New Boolean field
   transportationProvided: { type: Boolean, default: false }, // New Boolean field
@@ -16,6 +16,10 @@ const eventSchema = new mongoose.Schema({
     type: String,
     enum: ["Waiting", "Approved", "Refused"], // Only allows these values
     default: "Waiting", // Default value if none is provided
+  },
+  formLink: {
+    type: String,
+    required: true,
   },
 });
 

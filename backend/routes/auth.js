@@ -7,32 +7,43 @@ const Club = require("../models/clubs");
 const Event = require("../models/events");
 const Room = require("../models/rooms");
 
-const studentLifeDeps = require("../models/studentLifeDeps")
+const studentLifeDeps = require("../models/studentLifeDeps");
 
-router.post('/student-life-dep', async (req, res) => {
+router.post("/student-life-dep", async (req, res) => {
   try {
-    const { email, fullname, role,picture,program,major} = req.body;
+    const { email, fullname, role, picture, program, major } = req.body;
     let user = await studentLifeDeps.findOne({ email });
 
     if (user) {
-      return res.status(400).json({ message: 'User already exists in Student Life Department' });
+      return res
+        .status(400)
+        .json({ message: "User already exists in Student Life Department" });
     }
 
-    user = new studentLifeDeps({ email, fullname, role,picture,program,major });
+    user = new studentLifeDeps({
+      email,
+      fullname,
+      role,
+      picture,
+      program,
+      major,
+    });
     await user.save();
 
-    res.status(201).json({ message: 'User added to Student Life Department', user });
+    res
+      .status(201)
+      .json({ message: "User added to Student Life Department", user });
   } catch (error) {
-    res.status(500).json({ message: 'Error adding user', error });
+    res.status(500).json({ message: "Error adding user", error });
   }
 });
-router.get('/student-life-dep', async (req, res) => {
+router.get("/student-life-dep", async (req, res) => {
   try {
-    const users = await studentLifeDeps.find(); 
+    const users = await studentLifeDeps.find();
     res.status(200).json({ users });
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 });
 
@@ -126,7 +137,6 @@ router.post("/check-email", async (req, res) => {
   res.json({ exists: !!existing });
 });
 
-
 router.get("/users", async (req, res) => {
   try {
     const users = await User.find();
@@ -191,7 +201,8 @@ router.post("/clubs/signup", async (req, res) => {
       clubDescription: "",
       category: "",
       contactInfo: "",
-      profilePicture: "https://cdn-icons-png.flaticon.com/128/16745/16745734.png",
+      profilePicture:
+        "https://cdn-icons-png.flaticon.com/128/16745/16745734.png",
       boardMembers: [],
     });
 
@@ -284,7 +295,6 @@ router.get("/clubs", async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
-
 
 // Update Club
 router.put("/clubs/:id", async (req, res) => {
@@ -437,9 +447,10 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     eventLocation,
     additionalNotes,
     eventImage,
-    room, 
-    mandatoryParentalAgreement, 
-    transportationProvided, 
+    room,
+    mandatoryParentalAgreement,
+    transportationProvided,
+    formLink,
   } = req.body;
 
   try {
@@ -456,10 +467,11 @@ router.post("/clubs/:clubId/events", async (req, res) => {
       eventLocation,
       additionalNotes,
       eventImage,
+      formLink,
       club: clubId,
-      room, 
-      mandatoryParentalAgreement: mandatoryParentalAgreement ?? false, 
-      transportationProvided: transportationProvided ?? false, 
+      room,
+      mandatoryParentalAgreement: mandatoryParentalAgreement ?? false,
+      transportationProvided: transportationProvided ?? false,
       status: "Waiting", // ✅ Default status is "Waiting"
     });
 
@@ -476,7 +488,6 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
-
 
 // Get all events for a club
 router.get("/clubs/:clubId/events", async (req, res) => {
@@ -499,9 +510,11 @@ router.get("/events/:date", async (req, res) => {
   try {
     const { date } = req.params;
     const events = await Event.find({ eventDate: date })
-      .populate('club', 'clubName profilePicture')  // Populate club with clubName and profilePicture
-      .select('eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status');
-    
+      .populate("club", "clubName profilePicture") // Populate club with clubName and profilePicture
+      .select(
+        "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status formLink"
+      );
+
     if (events.length === 0) {
       return res
         .status(404)
@@ -516,11 +529,11 @@ router.get("/events/:date", async (req, res) => {
 
 router.get("/events", async (req, res) => {
   try {
-      const events = await Event.find().select(
-          'eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status'
-      );
-      
-      res.status(200).json(events);
+    const events = await Event.find().select(
+      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status formLink"
+    );
+
+    res.status(200).json(events);
   } catch (error) {
     res.status(500).json({ message: "Server error", error: error.message });
   }
