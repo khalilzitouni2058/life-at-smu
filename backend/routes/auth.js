@@ -475,6 +475,7 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     room,
     mandatoryParentalAgreement,
     transportationProvided,
+    formLink,
   } = req.body;
 
   try {
@@ -491,6 +492,7 @@ router.post("/clubs/:clubId/events", async (req, res) => {
       eventLocation,
       additionalNotes,
       eventImage,
+      formLink,
       club: clubId,
       room,
       mandatoryParentalAgreement: mandatoryParentalAgreement ?? false,
@@ -535,7 +537,7 @@ router.get("/events/:date", async (req, res) => {
     const events = await Event.find({ eventDate: date })
       .populate("club", "clubName profilePicture") // Populate club with clubName and profilePicture
       .select(
-        "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status"
+        "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status formLink"
       );
 
     if (events.length === 0) {
@@ -553,7 +555,7 @@ router.get("/events/:date", async (req, res) => {
 router.get("/events", async (req, res) => {
   try {
     const events = await Event.find().select(
-      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status"
+      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status formLink"
     );
 
     res.status(200).json(events);

@@ -7,11 +7,22 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   StyleSheet,
+  Linking, // <-- Import Linking
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 const EventModal = ({ visible, event, onClose }) => {
   if (!event) return null;
+
+  const handleJoinEvent = () => {
+    // Use the dynamic event.formLink here
+    const formLink = event.formLink;
+    if (formLink) {
+      Linking.openURL(formLink).catch((err) =>
+        console.error("An error occurred while opening the URL", err)
+      );
+    }
+  };
 
   return (
     <Modal visible={visible} transparent animationType="slide">
@@ -95,7 +106,7 @@ const EventModal = ({ visible, event, onClose }) => {
               </Text>
             </View>
 
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={handleJoinEvent}>
               <Text style={styles.buttonText}>Join the Event</Text>
             </TouchableOpacity>
           </View>
