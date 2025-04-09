@@ -40,37 +40,28 @@ const Dashboard = () => {
       {/* Sidebar */}
       <Sidebar setActiveSection={setActiveSection} activeSection={activeSection} />
 
-      {/* Main Content */}
-      
-      <div style={{
-
-        marginLeft: '250px',  
-        padding: '20px',
-        width: 'calc(100% - 250px)',
-        
-        
-      }}>
-        {renderContent()}
-
-          marginLeft: '250px',
-          paddingLeft:'4px',
-          paddingRight:'5px',
-          paddingTop:'5px',
-          paddingBottom:'5px',
-          width: 'calc(100% - 250px)',
-          height: '100vh',
-          overflowY: 'auto', 
-          }}>
-      <Header />
-        <div style={{
-          padding: '20px',
-          }}>
-          
-          {renderContent()}
-        </div>
+{/* Main Content */}
+{/* Main Content */}
+<div
+  style={{
+    marginLeft: '250px',
+    paddingLeft: '4px',
+    paddingRight: '5px',
+    paddingTop: '5px',
+    paddingBottom: '5px',
+    width: 'calc(100% - 250px)',
+    height: '100vh',
+    overflowY: 'auto',
+  }}
+>
+  <Header />
+  <div style={{ padding: '20px' }}>
+    {renderContent()}
+  </div>
+</div>
 
       </div>
-    </div>
+   
     </>
   );
 };
