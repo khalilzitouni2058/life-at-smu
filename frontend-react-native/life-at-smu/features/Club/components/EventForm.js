@@ -10,40 +10,49 @@ import {
   Image,
   ScrollView,
   Platform,
-  
 } from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons, FontAwesome, Entypo } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker"; 
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useClub } from "../../../Context/ClubContext"; // Import useClub hook
-import DropDownPicker from 'react-native-dropdown-picker';
-
+import DropDownPicker from "react-native-dropdown-picker";
 
 const schema = yup.object().shape({
-  eventName: yup.string().min(3, "Must be at least 3 characters").required("Event Name is required"),
+  eventName: yup
+    .string()
+    .min(3, "Must be at least 3 characters")
+    .required("Event Name is required"),
   date: yup.string().required("Date is required"),
   time: yup.string().required("Time is required"),
   eventEndTime: yup.string().required("End time is required"), // ✅ New field
   place: yup.string().required("Place is required"),
   room: yup.string().required("Room is required"),
-  participants: yup.number().typeError("Must be a number").min(1, "Must be at least 1").required("Participants are required"),
-  description: yup.string().min(10, "Description must be at least 10 characters").required("Description is required"),
-  mandatoryParentalAgreement: yup.boolean().oneOf([true], "Parental Agreement is required"), // ✅ Checkbox validation
+  participants: yup
+    .number()
+    .typeError("Must be a number")
+    .min(1, "Must be at least 1")
+    .required("Participants are required"),
+  description: yup
+    .string()
+    .min(10, "Description must be at least 10 characters")
+    .required("Description is required"),
+  mandatoryParentalAgreement: yup
+    .boolean()
+    .oneOf([true], "Parental Agreement is required"), // ✅ Checkbox validation
   transportationProvided: yup.boolean(), // ✅ No validation needed, optional checkbox
+  formLink: yup
+    .string()
+    .url("Invalid URL format")
+    .required("Event link is required"),
 });
-
-
-
-
-
 
 const EventForm = () => {
   const [loading, setLoading] = useState(false);
   const [image, setImage] = useState(null);
-  const [roomsList, setRoomsList] = useState([]);  
+  const [roomsList, setRoomsList] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   const [selectedDate, setSelectedDate] = useState(new Date()); // ✅ Stores selected date
@@ -57,15 +66,12 @@ const EventForm = () => {
   const [eventDescription, seteventDescription] = useState("");
   const [additionalNotes, setadditionalNotes] = useState("");
   const [eventEndTime, setEventEndTime] = useState(new Date(null)); // ✅ New State
-const [mandatoryParentalAgreement, setMandatoryParentalAgreement] = useState(false); // ✅ New State
-const [transportationProvided, setTransportationProvided] = useState(false); // ✅ New State
-const [open, setOpen] = useState(false);
+  const [mandatoryParentalAgreement, setMandatoryParentalAgreement] =
+    useState(false); // ✅ New State
+  const [transportationProvided, setTransportationProvided] = useState(false); // ✅ New State
+  const [formLink, setformLink] = useState(false); // ✅ New State
 
-
-
-  
-
-  
+  const [open, setOpen] = useState(false);
 
   const {
     control,
@@ -75,13 +81,10 @@ const [open, setOpen] = useState(false);
     resolver: yupResolver(schema),
   });
 
-const [selectedRoom, setSelectedRoom] = useState(null);
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
-
-
-  
 
   const handleSubmitForm = async () => {
     const eventData = {
@@ -91,50 +94,68 @@ const [selectedRoom, setSelectedRoom] = useState(null);
       additionalNotes,
       eventImage: { uri: image },
       eventDate: selectedDate.toISOString().split("T")[0],
-      eventTime: `${selectedTime.getHours().toString().padStart(2, "0")}:${selectedTime.getMinutes().toString().padStart(2, "0")} - ${eventEndTime.getHours().toString().padStart(2, "0")}:${eventEndTime.getMinutes().toString().padStart(2, "0")}`,
+      eventTime: `${selectedTime
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${selectedTime
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")} - ${eventEndTime
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${eventEndTime
+        .getMinutes()
+        .toString()
+        .padStart(2, "0")}`,
       room: selectedRoom,
-      mandatoryParentalAgreement,  
-      transportationProvided,      
+      mandatoryParentalAgreement,
+      transportationProvided,
+      formLink, // Add the formLink data here
     };
 
     console.log(eventData);
 
-
-axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-  .then(response => {
-    console.log("Event created successfully:", response.data);
-  })
-  .catch(error => {
-    if (error.response) {
-      console.error("Error creating event:", error.response.data);
-    } else {
-      console.error("Error:", error.message);
-    }
-  });
+    axios
+      .post(
+        `http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`,
+        eventData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        console.log("Event created successfully:", response.data);
+      })
+      .catch((error) => {
+        if (error.response) {
+          console.error("Error creating event:", error.response.data);
+        } else {
+          console.error("Error:", error.message);
+        }
+      });
   };
-  
 
   useEffect(() => {
     const fetchRooms = async () => {
       try {
-        const response = await axios.get(`http://${ipAddress}:8000/api/auth/rooms`);
+        const response = await axios.get(
+          `http://${ipAddress}:8000/api/auth/rooms`
+        );
         if (response.data && response.data.rooms) {
           const formattedRooms = response.data.rooms.map((room) => ({
             label: room.number,
             value: room._id,
           }));
           setRoomsList(formattedRooms);
-          console.log("This is the second log",roomsList)
+          console.log("This is the second log", roomsList);
         }
       } catch (error) {
         console.error("Error fetching rooms:", error);
       }
     };
-  
+
     fetchRooms();
   }, []);
 
@@ -151,8 +172,6 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
       setImage(result.assets[0].uri);
     }
   };
-
-  
 
   return (
     <View style={styles.container}>
@@ -249,14 +268,14 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
               color="#007da5"
               style={styles.icon}
             />
-           <Text style={[styles.input, { color: "#000" }]}>
-    Event Start Time:{" "}
-    {selectedTime
-      ? selectedTime.getHours().toString().padStart(2, "0") +
-        ":" +
-        selectedTime.getMinutes().toString().padStart(2, "0")
-      : "Not set"}
-  </Text>
+            <Text style={[styles.input, { color: "#000" }]}>
+              Event Start Time:{" "}
+              {selectedTime
+                ? selectedTime.getHours().toString().padStart(2, "0") +
+                  ":" +
+                  selectedTime.getMinutes().toString().padStart(2, "0")
+                : "Not set"}
+            </Text>
           </TouchableOpacity>
 
           {/* Show Time Picker */}
@@ -273,7 +292,7 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
                     time.getHours().toString().padStart(2, "0") +
                     ":" +
                     time.getMinutes().toString().padStart(2, "0");
-                    
+
                   setValue("time", formattedTime); // ✅ Store time
                 }
               }}
@@ -287,15 +306,20 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
             onPress={() => setShowTimePicker2(true)}
             style={styles.inputWrapper}
           >
-            <MaterialIcons name="access-time" size={24} color="#007da5" style={styles.icon} />
+            <MaterialIcons
+              name="access-time"
+              size={24}
+              color="#007da5"
+              style={styles.icon}
+            />
             <Text style={[styles.input, { color: "#000" }]}>
-    Event End Time:{" "}
-    {eventEndTime
-      ? eventEndTime.getHours().toString().padStart(2, "0") +
-        ":" +
-        eventEndTime.getMinutes().toString().padStart(2, "0")
-      : "Not set"}
-  </Text>
+              Event End Time:{" "}
+              {eventEndTime
+                ? eventEndTime.getHours().toString().padStart(2, "0") +
+                  ":" +
+                  eventEndTime.getMinutes().toString().padStart(2, "0")
+                : "Not set"}
+            </Text>
           </TouchableOpacity>
 
           {/* Show Time Picker */}
@@ -312,7 +336,7 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
                     time.getHours().toString().padStart(2, "0") +
                     ":" +
                     time.getMinutes().toString().padStart(2, "0");
-                   
+
                   setValue("time", formattedTime); // ✅ Store time
                 }
               }}
@@ -321,8 +345,6 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
           {errors.time && (
             <Text style={styles.errorText}>{errors.time.message}</Text>
           )}
-          
-          
 
           {/* Place */}
           <View style={styles.inputWrapper}>
@@ -351,38 +373,45 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
           {errors.place && (
             <Text style={styles.errorText}>{errors.place.message}</Text>
           )}
-{/*Rooms*/}
-<View style={styles.inputWrapper}>
-    <MaterialIcons name="meeting-room" size={24} color="#007da5" style={styles.icon} />
+          {/*Rooms*/}
+          <View style={styles.inputWrapper}>
+            <MaterialIcons
+              name="meeting-room"
+              size={24}
+              color="#007da5"
+              style={styles.icon}
+            />
 
-    <Controller
-      control={control}
-      name="room"
-      render={({ field: { onChange, value } }) => (
-        <DropDownPicker
-          open={open}
-          setOpen={setOpen}
-          items={roomsList}
-          value={value || selectedRoom}  // Show selected room in dropdown
-          setValue={(callback) => {
-            const newValue = callback(selectedRoom);
-            setSelectedRoom(newValue);
-            console.log(selectedRoom);
-            onChange(newValue); // Update form field
-          }}
-          placeholder="Select a room"
-          containerStyle={styles.dropdown}
-          listMode="MODAL"  // Prevents VirtualizedList nesting error
-          dropDownDirection="BOTTOM"
-          style={styles.dropdownInput}
-        />
-      )}
-    />
-  </View>
+            <Controller
+              control={control}
+              name="room"
+              render={({ field: { onChange, value } }) => (
+                <DropDownPicker
+                  open={open}
+                  setOpen={setOpen}
+                  items={roomsList}
+                  value={value || selectedRoom} // Show selected room in dropdown
+                  setValue={(callback) => {
+                    const newValue = callback(selectedRoom);
+                    setSelectedRoom(newValue);
+                    console.log(selectedRoom);
+                    onChange(newValue); // Update form field
+                  }}
+                  placeholder="Select a room"
+                  containerStyle={styles.dropdown}
+                  listMode="MODAL" // Prevents VirtualizedList nesting error
+                  dropDownDirection="BOTTOM"
+                  style={styles.dropdownInput}
+                />
+              )}
+            />
+          </View>
 
-{errors.room && <Text style={styles.errorText}>{errors.room.message}</Text>}
-{/* Participants */}
-<View style={styles.inputWrapper}>
+          {errors.room && (
+            <Text style={styles.errorText}>{errors.room.message}</Text>
+          )}
+          {/* Participants */}
+          <View style={styles.inputWrapper}>
             <FontAwesome
               name="users"
               size={24}
@@ -398,8 +427,7 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
                   placeholder="Estimated Participants"
                   keyboardType="numeric"
                   value={value ? String(value) : ""}
-                  onChangeText={(val) => onChange(val.replace(/[^0-9]/g, ""))
-                  }
+                  onChangeText={(val) => onChange(val.replace(/[^0-9]/g, ""))}
                 />
               )}
             />
@@ -426,8 +454,8 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
                   multiline
                   value={value}
                   onChangeText={(val) => {
-                    onChange(val); 
-                    seteventDescription(val); 
+                    onChange(val);
+                    seteventDescription(val);
                   }}
                 />
               )}
@@ -436,56 +464,99 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
           {errors.description && (
             <Text style={styles.errorText}>{errors.description.message}</Text>
           )}
+
+          {/* Event Link (formLink) */}
+          <View style={styles.inputWrapper}>
+            <MaterialIcons
+              name="link"
+              size={24}
+              color="#007da5"
+              style={styles.icon}
+            />
+            <Controller
+              control={control}
+              name="formLink"
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={styles.input}
+                  placeholder="Event Link (Google Form URL)"
+                  value={value}
+                  onChangeText={(val) => {
+                    setformLink(val);
+                    onChange(val); // Update react-hook-form value
+                  }}
+                />
+              )}
+            />
+          </View>
+          {errors.formLink && (
+            <Text style={styles.errorText}>{errors.formLink.message}</Text>
+          )}
+
           <View style={styles.checkboxContainer}>
-  <Controller
-    control={control}
-    name="mandatoryParentalAgreement"
-    render={({ field: { onChange, value } }) => (
-      <TouchableOpacity
-  style={styles.checkbox}
-  onPress={() => {
-    setMandatoryParentalAgreement(!mandatoryParentalAgreement);
-    setValue("mandatoryParentalAgreement", !mandatoryParentalAgreement); // ✅ Sync with react-hook-form
-  }}
->
-  <MaterialIcons
-    name={mandatoryParentalAgreement ? "check-box" : "check-box-outline-blank"}
-    size={24}
-    color="#007da5"
-  />
-  <Text style={styles.checkboxLabel}>Mandatory Parental Agreement</Text>
-</TouchableOpacity>
-    )}
-  />
+            <Controller
+              control={control}
+              name="mandatoryParentalAgreement"
+              render={({ field: { onChange, value } }) => (
+                <TouchableOpacity
+                  style={styles.checkbox}
+                  onPress={() => {
+                    setMandatoryParentalAgreement(!mandatoryParentalAgreement);
+                    setValue(
+                      "mandatoryParentalAgreement",
+                      !mandatoryParentalAgreement
+                    ); // ✅ Sync with react-hook-form
+                  }}
+                >
+                  <MaterialIcons
+                    name={
+                      mandatoryParentalAgreement
+                        ? "check-box"
+                        : "check-box-outline-blank"
+                    }
+                    size={24}
+                    color="#007da5"
+                  />
+                  <Text style={styles.checkboxLabel}>
+                    Mandatory Parental Agreement
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
 
-{errors.mandatoryParentalAgreement && (
-  <Text style={styles.errorText}>{errors.mandatoryParentalAgreement.message}</Text>
-)}
+            {errors.mandatoryParentalAgreement && (
+              <Text style={styles.errorText}>
+                {errors.mandatoryParentalAgreement.message}
+              </Text>
+            )}
 
-  <Controller
-    control={control}
-    name="transportationProvided"
-    render={({ field: { onChange, value } }) => (
-      <TouchableOpacity
-  style={styles.checkbox}
-  onPress={() => {
-    setTransportationProvided(!transportationProvided);
-    setValue("transportationProvided", !transportationProvided); // ✅ Sync with react-hook-form
-  }}
->
-  <MaterialIcons
-    name={transportationProvided ? "check-box" : "check-box-outline-blank"}
-    size={24}
-    color="#007da5"
-  />
-  <Text style={styles.checkboxLabel}>Transportation Provided</Text>
-</TouchableOpacity>
-
-    )}
-  />
-</View>
-
-
+            <Controller
+              control={control}
+              name="transportationProvided"
+              render={({ field: { onChange, value } }) => (
+                <TouchableOpacity
+                  style={styles.checkbox}
+                  onPress={() => {
+                    setTransportationProvided(!transportationProvided);
+                    setValue("transportationProvided", !transportationProvided); // ✅ Sync with react-hook-form
+                  }}
+                >
+                  <MaterialIcons
+                    name={
+                      transportationProvided
+                        ? "check-box"
+                        : "check-box-outline-blank"
+                    }
+                    size={24}
+                    color="#007da5"
+                  />
+                  <Text style={styles.checkboxLabel}>
+                    Transportation Provided
+                  </Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
 
           {/* Submit Button */}
           <TouchableOpacity
@@ -503,7 +574,6 @@ axios.post(`http://${ipAddress}:8000/api/auth/clubs/${clubId}/events`, eventData
       </ScrollView>
     </View>
   );
-  
 };
 
 // Styles
@@ -591,9 +661,9 @@ const styles = {
     color: "#fff",
     fontSize: 18,
   },
-  checkboxContainer:{
-    marginBottom:30,
-    marginLeft:20,
+  checkboxContainer: {
+    marginBottom: 30,
+    marginLeft: 20,
   },
 
   checkbox: {
@@ -607,12 +677,12 @@ const styles = {
     color: "#333",
   },
   errorText: {
-    color: 'red',
+    color: "red",
     marginTop: 4,
     fontSize: 12,
   },
   dropdown: {
-    width: '100%', // Ensures it matches the width of the parent container
+    width: "100%", // Ensures it matches the width of the parent container
     marginBottom: 10, // Optional margin to separate the input from other components
   },
   dropdownInput: {
@@ -620,16 +690,16 @@ const styles = {
     paddingVertical: 10,
     borderRadius: 8,
     borderWidth: 1,
-    width:250,
-    borderColor: '#ccc', // Adjust this for border color
-    backgroundColor: 'white',
+    width: 250,
+    borderColor: "#ccc", // Adjust this for border color
+    backgroundColor: "white",
   },
   dropdownContainer: {
     marginTop: 10,
     zIndex: 99, // Ensure the dropdown is above other elements
-    backgroundColor: 'white', // Make sure it has a white background for visibility
+    backgroundColor: "white", // Make sure it has a white background for visibility
     borderRadius: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,

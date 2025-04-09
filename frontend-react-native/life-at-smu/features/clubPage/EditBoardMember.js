@@ -37,12 +37,12 @@ const EditBoardMember = ({ navigation, route }) => {
 
   useEffect(() => {
     if (editingMember) {
-      setName(editingMember.name);
-      setEmail(editingMember.email);
-      setFacebookLink(editingMember.facebookLink);
-      setRole(editingMember.role);
-      setPhoneNumber(editingMember.phoneNumber);
-      setProfileImage(editingMember.profilePicture);
+      setName(editingMember.user?.fullname || "");
+      setEmail(editingMember.user?.email || "");
+      setProfileImage(editingMember.user?.picture || "");
+      setFacebookLink(editingMember.facebookLink || "");
+      setRole(editingMember.role || "");
+      setPhoneNumber(editingMember.phoneNumber || "");
     }
   }, [editingMember]);
 
@@ -55,12 +55,10 @@ const EditBoardMember = ({ navigation, route }) => {
       const response = await axios.put(
         `http://${ipAddress}:8000/api/auth/clubs/${clubId}/update-board-member`,
         {
-          name,
-          email,
-          facebookLink,
+          userId,
           role,
           phoneNumber,
-          profilePicture: profileImage,
+          facebookLink,
         }
       );
 
@@ -74,22 +72,6 @@ const EditBoardMember = ({ navigation, route }) => {
     }
   };
 
-  const handleImageUpload = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission denied", "We need access to your gallery.");
-      return;
-    }
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-    if (!result.canceled && result.assets && result.assets.length > 0) {
-      setProfileImage(result.assets[0].uri);
-    }
-  };
-
   return (
     <View style={{ flex: 1, backgroundColor: "#f0f8ff" }}>
       {/* Header */}
@@ -100,33 +82,16 @@ const EditBoardMember = ({ navigation, route }) => {
 
       {/* Scrollable Content */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Profile Image Upload */}
-        <TouchableOpacity
-          onPress={handleImageUpload}
-          style={styles.imageWrapper}
-        >
+        <View style={styles.imageWrapper}>
           {profileImage ? (
             <Image source={{ uri: profileImage }} style={styles.profileImage} />
           ) : (
             <Text style={styles.placeholderText}>+</Text>
           )}
-        </TouchableOpacity>
+        </View>
 
         {/* Form */}
         <View style={styles.formContainer}>
-          <View style={styles.formGroup}>
-            <Text style={styles.label}>
-              Name <Text style={styles.required}>*</Text>
-            </Text>
-            <TextInput
-              style={styles.input}
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter Name"
-              placeholderTextColor="#888"
-            />
-          </View>
-
           <View style={styles.formGroup}>
             <Text style={styles.label}>
               Email <Text style={styles.required}>*</Text>
@@ -138,6 +103,21 @@ const EditBoardMember = ({ navigation, route }) => {
               placeholder="Enter Email"
               placeholderTextColor="#888"
               keyboardType="email-address"
+              editable={false}
+            />
+          </View>
+
+          <View style={styles.formGroup}>
+            <Text style={styles.label}>
+              Name <Text style={styles.required}>*</Text>
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter Name"
+              placeholderTextColor="#888"
+              editable={false}
             />
           </View>
 
@@ -149,6 +129,7 @@ const EditBoardMember = ({ navigation, route }) => {
               onChangeText={setFacebookLink}
               placeholder="Enter Facebook Link"
               placeholderTextColor="#888"
+              editable={true}
             />
           </View>
 
@@ -162,13 +143,14 @@ const EditBoardMember = ({ navigation, route }) => {
               onChangeText={setRole}
               placeholder="Enter Role"
               placeholderTextColor="#888"
+              editable={true}
             />
           </View>
 
           {/* Phone Number Section */}
           <View style={styles.phoneNumberSection}>
             <Text style={styles.label}>
-              Add Phone Number <Text style={styles.required}>*</Text>
+              Phone Number <Text style={styles.required}>*</Text>
             </Text>
             <View style={styles.phoneInputContainer}>
               <TouchableOpacity style={styles.dropdown}>
@@ -181,6 +163,7 @@ const EditBoardMember = ({ navigation, route }) => {
                 placeholder="Enter Phone Number"
                 placeholderTextColor="#888"
                 keyboardType="phone-pad"
+                editable={false}
               />
             </View>
           </View>
