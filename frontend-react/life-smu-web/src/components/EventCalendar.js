@@ -6,13 +6,18 @@ import interactionPlugin from '@fullcalendar/interaction'; // Click & Drag
 import multiMonthPlugin from '@fullcalendar/multimonth'; // Yearly View
 import axios from 'axios';
 
-import { Box, HStack, Text, Dialog, Button, VStack,Portal,Flex,Image } from "@chakra-ui/react";
+import { Box, HStack, Text, Dialog, Button, VStack,Portal,Flex,Image,Card,Checkbox,List,Avatar,Badge } from "@chakra-ui/react";
+
+// Dnd Kit utilities
+import { CSS } from '@dnd-kit/utilities'
+import DraggableUser from './ui/DraggableUser' // Adjust the path
 
 const EventCalendar = () => {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  
+  const [users, setUsers] = useState(null);
+  const [assignedUsers, setAssignedUsers] = useState([]);
   const handleEventDidMount = (info) => {
     if (info.event.extendedProps.status === 'waiting') {
       info.el.style.backgroundColor = 'blue';
@@ -30,6 +35,41 @@ const EventCalendar = () => {
       }
     }
   };
+  
+  
+  
+  
+  
+  useEffect(() => {
+    const fetchexistingUsers = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/api/auth/student-life-dep');
+        const existingUsers = Array.isArray(response.data.users) ? response.data.users : [];
+        console.log(existingUsers)
+        setUsers(existingUsers);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+  
+
+    fetchexistingUsers();
+  }, [isDialogOpen]);
+
+  // Handle the checkbox change
+  const handleCheckboxChange = (userId) => {
+    setAssignedUsers((prevAssignedUsers) => {
+      const updatedAssignedUsers = new Set(prevAssignedUsers);
+      if (updatedAssignedUsers.has(userId)) {
+        updatedAssignedUsers.delete(userId); // Unassign if already assigned
+      } else {
+        updatedAssignedUsers.add(userId); // Assign if not assigned
+      }
+      return updatedAssignedUsers;
+    });
+  };
+  
+
   
   useEffect(() => {
     const fetchEvents = async () => {
@@ -113,7 +153,7 @@ borderColor: event.status?.toLowerCase() === "waiting"
       setIsDialogOpen(false)
     }
   }
-
+  
   return (
     <>
     
@@ -270,8 +310,8 @@ borderColor: event.status?.toLowerCase() === "waiting"
         <Dialog.Backdrop  />
         <Dialog.Positioner >
         <Dialog.Content  >
-          <Dialog.Header   fontWeight="bold" color={"whiteAlpha.950"} bgColor="blackAlpha.900"  fontSize="4xl">{selectedEvent?.title}</Dialog.Header>
-          <Dialog.Body bgColor="blackAlpha.900" >
+          <Dialog.Header   fontWeight="bold" color={"blackAlpha.950"} bgColor="whiteAlpha.900"  fontSize="4xl">{selectedEvent?.title}</Dialog.Header>
+          <Dialog.Body bgColor="whiteAlpha.900" >
   {selectedEvent && (
     <Flex 
       direction="row" 
@@ -296,7 +336,7 @@ borderColor: event.status?.toLowerCase() === "waiting"
           src={selectedEvent.image} 
           alt="Event Image" 
           objectFit="cover" 
-          width="50%" 
+          width="80%" 
           height="100%" 
           maxHeight="500px"
           
@@ -335,12 +375,99 @@ borderColor: event.status?.toLowerCase() === "waiting"
             <Text fontSize="md" color="whiteAlpha.950">{selectedEvent.status}</Text>
           </Box>
         </VStack>
+        {/* Drag & Drop User Assignment */}
+        
       </Box>
+      <Box width="100%" flex={1} maxH="500px" overflowY="auto" p={2}  bg="whiteAlpha.900"
+      sx={{
+        '&::-webkit-scrollbar': {
+          display: 'none', // Hide the scrollbar
+        },
+        '&::-webkit-scrollbar-thumb': {
+          display: 'none', // Hide the thumb too
+        },
+      }}
+      >
+      <VStack spacing={3} align="stretch" >
+        <List.Root
+        >
+          {users.length > 0 ? (
+            users.map((user) => (
+              <List.Item key={user._id}>
+                <Card.Root
+        display="flex"
+        flexDirection="row"
+        alignItems="flex-start"
+        width="100%"
+        bg="blackAlpha.800"
+         mb={4}
+        color="white"
+        variant={"solid"}
+        maxHeight="220px"
+        p={3}
+        boxShadow="md"
+        _hover={{
+          boxShadow: "xl",
+          transform: "scale(1.02)",
+          transition: "0.2s",
+        }}
+      >
+      <Card.Body h="100%" >
+      <HStack align="center" spacing={4} h="100%">
+      {/* Avatar */}
+      <Avatar.Root>
+      <Avatar.Fallback name={user.fullname} />
+      <Avatar.Image src={user.picture} />
+    </Avatar.Root>
+
+      {/* Details + Checkbox */}
+      <VStack align="start" spacing={2} flex="1" justify="center">
+        <Box>
+          <Text fontWeight="bold" fontSize="md" color="whiteAlpha.900">
+            {user.fullname}
+          </Text>
+          <Text fontSize="sm" color="whiteAlpha.900">
+            {user.email}
+          </Text>
+          <Text fontSize="sm" color="whiteAlpha.900">
+            {user.Role}
+          </Text>
+           <HStack mt={2} spacing={2} wrap="wrap">
+                      <Badge variant="solid" fontSize="0.9em" colorPalette={"whiteAlpha.900"}>{user.major}</Badge>
+                      <Badge  variant="solid" fontSize="0.9em" colorPalette={"whiteAlpha.900"}>{user.program}</Badge>
+                    </HStack>
+        </Box>
+
+        {/* Checkbox */}
+        <Checkbox.Root
+        colorPalette={"cyan"}
+        variant={"solid"}
+          
+        >
+          <Checkbox.HiddenInput />
+          <Checkbox.Control>
+            <Checkbox.Indicator />
+          </Checkbox.Control>
+          <Checkbox.Label ml={2}>Assign to Event</Checkbox.Label>
+        </Checkbox.Root>
+      </VStack>
+            </HStack>
+          </Card.Body>
+        </Card.Root>
+
+              </List.Item>
+            ))
+          ) : (
+            <Text>No users available.</Text>
+          )}
+        </List.Root>
+      </VStack>
+    </Box>
     </Flex>
   )}
 </Dialog.Body>
 
-<Dialog.Footer bgColor="blackAlpha.900">
+<Dialog.Footer bgColor="whiteAlpha.900">
   {selectedEvent && (
     <HStack spacing={4}>
       {selectedEvent.status === 'Waiting' ? (
