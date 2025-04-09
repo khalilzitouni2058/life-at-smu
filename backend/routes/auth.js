@@ -350,7 +350,10 @@ router.get("/clubs/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const club = await Club.findById(id).populate("boardMembers"); // Populate events if needed
+    const club = await Club.findById(id).populate(
+      "boardMembers.user",
+      "fullname picture email"
+    );
     if (!club) {
       return res.status(404).json({ message: "Club not found" });
     }
