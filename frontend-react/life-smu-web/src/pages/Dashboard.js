@@ -5,7 +5,11 @@ import ListOfClubs from '../components/ListOfClubs';
 import Sidebar from '../components/Sidebar';
 import ListOfStudentLifeM from '../components/ListOfStudentLifeM';
 import EventCalendar from '../components/EventCalendar';
+
+import { Box } from "@chakra-ui/react"
+
 import Header from '../components/Header';
+
 
 const Dashboard = () => {
   const [activeSection, setActiveSection] = useState("users");
@@ -28,6 +32,8 @@ const Dashboard = () => {
   };
 
   return (
+
+    <>
     
     <div style={{ display: 'flex' }}>
       
@@ -35,7 +41,17 @@ const Dashboard = () => {
       <Sidebar setActiveSection={setActiveSection} activeSection={activeSection} />
 
       {/* Main Content */}
+      
       <div style={{
+
+        marginLeft: '250px',  
+        padding: '20px',
+        width: 'calc(100% - 250px)',
+        
+        
+      }}>
+        {renderContent()}
+
           marginLeft: '250px',
           paddingLeft:'4px',
           paddingRight:'5px',
@@ -52,8 +68,10 @@ const Dashboard = () => {
           
           {renderContent()}
         </div>
+
       </div>
     </div>
+    </>
   );
 };
 

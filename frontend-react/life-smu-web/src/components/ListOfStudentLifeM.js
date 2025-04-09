@@ -107,18 +107,19 @@ const ListOfStudentLifeM = () => {
     }}
     mb={4}
     color="black"
+    w={1080}
     borderRadius="md"
     _placeholder={{ color: "gray.400" }} // Subtle placeholder text
     _focus={{
       borderColor: "teal.400",
       boxShadow: "0 0 0 2px teal.400",
     }}
-    size="lg"
+    
     px={4}
   />
 
       {showList && searchTerm && (
-      <List.Root border="1px solid" borderRadius="md" p={2} maxH="160px" overflowY="auto">
+      <List.Root border="1px solid" borderRadius="md" p={2} maxH="160px"   overflowY="auto" w={1080}>
         {filteredUsers.map((user) => (
           <List.Item
             key={user.email}
@@ -190,50 +191,61 @@ const ListOfStudentLifeM = () => {
       </Drawer.Root>
        )}
        
-    <Flex mt={4} wrap="wrap" gap={6} justify="center" >
-      {existingUsers.map((user) => (
-       <Card.Root key={user.id}
-       display="flex"
-       flexDirection="row"
-       alignItems="center"
-       width="500px"
-       bg="gray.100" 
-       color="black"
-       borderRadius="lg"
-       p={4}
-       boxShadow="md"
-       _hover={{ boxShadow: "xl", transform: "scale(1.02)", transition: "0.2s" }}>
-       <Image
-         objectFit="cover"
-         boxSize="150px"
+       <Flex mt={4} wrap="wrap" gap={4} justify="flex-start">
+  {existingUsers.map((user) => (
+    <Card.Root
+      key={user.id}
+      display="flex"
+      flexDirection="row"
+      alignItems="flex-start"
+      width="350px"
+      bg="gray.100"
+
+      color="black"
+      borderRadius="lg"
+      maxHeight="220px"
+      p={3}
+      boxShadow="md"
+      _hover={{
+        boxShadow: "xl",
+        transform: "scale(1.02)",
+        transition: "0.2s",
+      }}
+    >
+      <Image
+        objectFit="cover"
+        boxSize="80px"
         borderRadius="full"
-        padding={2}
-         src={user.picture || defaultImage}
-         
-       />
-       <Box>
-         <Card.Body>
-           <Card.Title mb="2">{user.fullname}</Card.Title>
-           <Card.Description>
+        
+        ml={2}
+        mt={4}
+        src={user.picture || defaultImage}
+        alt={user.fullname}
+      />
+      <Box flex="1" overflow="hidden">
+        <Card.Body>
+          <Card.Title mb={1} fontSize="md" isTruncated>
+            {user.fullname}
+          </Card.Title>
+          <Card.Description fontSize="sm" isTruncated>
             {user.email}
-            
-           </Card.Description>
-           <Card.Description>
+          </Card.Description>
+          <Card.Description fontSize="sm" isTruncated>
             {user.role}
-            
-           </Card.Description>
-           <HStack mt="4">
-          <Badge variant={"outline"}>{user.major}</Badge>
-          <Badge variant={"outline"}>{user.program}</Badge>
-        </HStack>
-         </Card.Body>
-         <Card.Footer>
-          
-         </Card.Footer>
-       </Box>
-     </Card.Root>
-      ))}
-    </Flex>
+          </Card.Description>
+          <HStack mt={2} spacing={2} wrap="wrap">
+            <Badge variant="outline" fontSize="0.6em">{user.major}</Badge>
+            <Badge variant="outline" fontSize="0.6em">{user.program}</Badge>
+          </HStack>
+        </Card.Body>
+        <Card.Footer mt={2}>
+          {/* Optional actions/buttons */}
+        </Card.Footer>
+      </Box>
+    </Card.Root>
+  ))}
+</Flex>
+
 
        {/** 
       
