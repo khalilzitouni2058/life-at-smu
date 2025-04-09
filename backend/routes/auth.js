@@ -217,6 +217,60 @@ router.put("/users/:id", async (req, res) => {
   }
 });
 
+// Push an event ID to the user's events array
+router.post("/users/:id/events", async (req, res) => {
+  const userId = req.params.id;
+  const { eventId } = req.body;
+
+  if (!eventId) {
+    return res.status(400).json({ message: "eventId is required" });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    const event = await Event.findById(eventId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Avoid duplicates
+    if (user.events.includes(eventId)) {
+      return res.status(400).json({ message: "User already joined this event" });
+    }
+
+    user.events.push(eventId);
+    await user.save();
+
+    res.status(200).json({ message: "Event added to user", user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// This route will fetch all events of a specific user
+router.get("/users/:id/events", async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    // Fetch the user by ID, including their events
+    const user = await User.findById(userId).populate("events");  // Assuming `events` is populated with event details
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Respond with the user's events
+    res.status(200).json({ events: user.events });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
 // Club Signup Route
 router.post("/clubs/signup", async (req, res) => {
   const { email, password, clubName } = req.body;
