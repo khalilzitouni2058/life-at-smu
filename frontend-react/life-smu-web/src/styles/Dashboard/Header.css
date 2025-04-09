@@ -1,0 +1,13 @@
+.custom-header {
+    /* padding: -20px; */
+    height: 72px; 
+    width: 100%;  
+    background-color: #ffffff; 
+    padding-left: 2rem; 
+    padding-right: 2rem; 
+    display: flex;
+    align-items: center;
+    z-index: 1030;
+    border-bottom: 1px solid #dee2e6;
+  }
+  

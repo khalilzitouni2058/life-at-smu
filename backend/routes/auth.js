@@ -37,7 +37,47 @@ router.post("/student-life-dep", async (req, res) => {
     res.status(500).json({ message: "Error adding user", error });
   }
 });
-router.get("/student-life-dep", async (req, res) => {
+
+router.post('/events/approve', async (req, res) => {
+  try {
+    const { eventId } = req.body;
+
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { status: 'Approved' },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    res.status(200).json({ message: 'Event approved', event: updatedEvent });
+  } catch (error) {
+    res.status(500).json({ message: 'Error approving event', error });
+  }
+});
+router.post('/events/decline', async (req, res) => {
+  try {
+    const { eventId } = req.body;
+
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { status: 'Declined' },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    res.status(200).json({ message: 'Event declined', event: updatedEvent });
+  } catch (error) {
+    res.status(500).json({ message: 'Error declining event', error });
+  }
+});
+router.get('/student-life-dep', async (req, res) => {
+
   try {
     const users = await studentLifeDeps.find();
     res.status(200).json({ users });
@@ -174,6 +214,60 @@ router.put("/users/:id", async (req, res) => {
     res.status(200).json({ msg: "update success" });
   } catch (error) {
     res.status(400).json({ msg: "error on updating user" });
+  }
+});
+
+// Push an event ID to the user's events array
+router.post("/users/:id/events", async (req, res) => {
+  const userId = req.params.id;
+  const { eventId } = req.body;
+
+  if (!eventId) {
+    return res.status(400).json({ message: "eventId is required" });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    const event = await Event.findById(eventId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Avoid duplicates
+    if (user.events.includes(eventId)) {
+      return res.status(400).json({ message: "User already joined this event" });
+    }
+
+    user.events.push(eventId);
+    await user.save();
+
+    res.status(200).json({ message: "Event added to user", user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// This route will fetch all events of a specific user
+router.get("/users/:id/events", async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    // Fetch the user by ID, including their events
+    const user = await User.findById(userId).populate("events");  // Assuming `events` is populated with event details
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Respond with the user's events
+    res.status(200).json({ events: user.events });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
@@ -478,6 +572,7 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     room,
     mandatoryParentalAgreement,
     transportationProvided,
+    formLink,
   } = req.body;
 
   try {
@@ -494,6 +589,7 @@ router.post("/clubs/:clubId/events", async (req, res) => {
       eventLocation,
       additionalNotes,
       eventImage,
+      formLink,
       club: clubId,
       room,
       mandatoryParentalAgreement: mandatoryParentalAgreement ?? false,
@@ -538,7 +634,7 @@ router.get("/events/:date", async (req, res) => {
     const events = await Event.find({ eventDate: date })
       .populate("club", "clubName profilePicture") // Populate club with clubName and profilePicture
       .select(
-        "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status"
+        "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status formLink"
       );
 
     if (events.length === 0) {
@@ -556,7 +652,7 @@ router.get("/events/:date", async (req, res) => {
 router.get("/events", async (req, res) => {
   try {
     const events = await Event.find().select(
-      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status"
+      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status formLink"
     );
 
     res.status(200).json(events);

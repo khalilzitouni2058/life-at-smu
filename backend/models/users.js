@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  events: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Event',
+  }],
 });
 
 // Hash the password before saving

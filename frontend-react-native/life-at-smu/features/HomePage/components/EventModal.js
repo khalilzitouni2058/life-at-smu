@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -7,101 +7,179 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   StyleSheet,
+  Linking, // <-- Import Linking
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useUser } from '../../../Context/UserContext';
+import axios from "axios";
+import Constants from "expo-constants";
+import { useNavigation } from "@react-navigation/native"; // <-- Import useNavigation
+import { WebView } from 'react-native-webview';
+import { ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+
+
 
 const EventModal = ({ visible, event, onClose }) => {
   if (!event) return null;
 
+
+
+  const {user , setUser} = useUser();
+  const [formSubmitted, setFormSubmitted] = useState(false); // State to track form submission
+  const [formModalVisible, setFormModalVisible] = useState(false);
+
+  const EVENT_ID = event._id; 
+
+  const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
+
+  useEffect(() => {
+    const checkIfUserJoined = async () => {
+      try {
+        const response = await axios.get(`http://${ipAddress}:8000/api/auth/users/${user.id}/events`);
+        const userEvents = response.data;
+
+        const joinedEvent = userEvents.events.filter((userEvent) => userEvent._id === event._id);
+
+        if (joinedEvent.length > 0) {
+          setFormSubmitted(true); 
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+      checkIfUserJoined(); 
+    
+  },[formModalVisible]);
+
+  
+
+  const handleJoinEvent = () => {
+    setFormModalVisible(true);
+  };
+
+  const handleNavigationStateChange = (navState) => {
+    if (navState.url.includes('formResponse')) {  // Replace 'formResponse' with the actual success URL part
+      AsyncStorage.setItem(`formSubmitted_${EVENT_ID}`, 'true');  // Save submission status in AsyncStorage
+      setFormSubmitted(true);  // Update the form submission state
+      setFormModalVisible(false);  // Close the modal
+      handleCloseForm();
+    }
+  };
+
+const closeform = () =>{
+  setFormModalVisible(false);
+
+}
+
+  const handleCloseForm = async () => {
+    setFormModalVisible(false);
+  
+    try {
+      const response = await axios.post(`http://${ipAddress}:8000/api/auth/users/${user.id}/events`, {
+        eventId: event._id,
+      });
+  
+      setUser((prevUser) => ({
+        ...prevUser,
+        ...response.data, // or response.data.user depending on your response shape
+      }));      setFormSubmitted(true);
+    } catch (error) {
+      console.error("Error joining event:", error);
+    }
+  };
+
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <TouchableWithoutFeedback onPress={onClose}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Image source={event.eventImage} style={styles.modalImage} />
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{event.eventName}</Text>
-              <Text style={styles.modalDescription}>
-                {event.eventDescription}
-              </Text>
-            </View>
+  <TouchableWithoutFeedback onPress={onClose}>
+    <View style={styles.modalOverlay}>
+      <View style={styles.modalContainer}>
+        <Image source={event.eventImage} style={styles.modalImage} />
 
-            <View style={styles.modalDetails}>
-              <View style={styles.detailRow}>
-                <Ionicons
-                  name="calendar-clear-outline"
-                  size={18}
-                  color="#007da5"
-                />
-                <Text style={styles.modalText}>{event.eventDate}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Ionicons name="location-outline" size={18} color="#007da5" />
-                <Text style={styles.modalText}>{event.eventLocation}</Text>
-              </View>
-              <View style={styles.detailRow}>
-                <Ionicons name="time-outline" size={18} color="#007da5" />
-                <Text style={styles.modalText}>{event.eventTime}</Text>
-              </View>
-            </View>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>{event.eventName}</Text>
+          <Text style={styles.modalDescription}>{event.eventDescription}</Text>
+        </View>
 
-            <View
-              style={[
-                styles.statusContainer,
-                event.mandatoryParentalAgreement
-                  ? styles.statusSuccess
-                  : styles.statusError,
-              ]}
-            >
-              <Ionicons
-                name={
-                  event.mandatoryParentalAgreement
-                    ? "checkmark-circle"
-                    : "close-circle"
-                }
-                size={20}
-                color="white"
-                style={styles.statusIcon}
-              />
-              <Text style={styles.statusText}>
-                {event.mandatoryParentalAgreement
-                  ? "Mandatory Parental Agreement"
-                  : "No Parental Agreement Required"}
-              </Text>
-            </View>
-
-            <View
-              style={[
-                styles.statusContainer,
-                event.transportationProvided
-                  ? styles.statusSuccess
-                  : styles.statusError,
-              ]}
-            >
-              <Ionicons
-                name={
-                  event.transportationProvided
-                    ? "checkmark-circle"
-                    : "close-circle"
-                }
-                size={20}
-                color="white"
-                style={styles.statusIcon}
-              />
-              <Text style={styles.statusText}>
-                {event.transportationProvided
-                  ? "Transportation Provided"
-                  : "No Transportation Provided"}
-              </Text>
-            </View>
-
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Join the Event</Text>
-            </TouchableOpacity>
+        <View style={styles.modalDetails}>
+          <View style={styles.detailRow}>
+            <Ionicons name="calendar-clear-outline" size={18} color="#007da5" />
+            <Text style={styles.modalText}>{event.eventDate}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Ionicons name="location-outline" size={18} color="#007da5" />
+            <Text style={styles.modalText}>{event.eventLocation}</Text>
+          </View>
+          <View style={styles.detailRow}>
+            <Ionicons name="time-outline" size={18} color="#007da5" />
+            <Text style={styles.modalText}>{event.eventTime}</Text>
           </View>
         </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+
+        <View style={[styles.statusContainer, event.mandatoryParentalAgreement ? styles.statusSuccess : styles.statusError]}>
+          <Ionicons
+            name={event.mandatoryParentalAgreement ? "checkmark-circle" : "close-circle"}
+            size={20}
+            color="white"
+            style={styles.statusIcon}
+          />
+          <Text style={styles.statusText}>
+            {event.mandatoryParentalAgreement
+              ? "Mandatory Parental Agreement"
+              : "No Parental Agreement Required"}
+          </Text>
+        </View>
+
+        <View style={[styles.statusContainer, event.transportationProvided ? styles.statusSuccess : styles.statusError]}>
+          <Ionicons
+            name={event.transportationProvided ? "checkmark-circle" : "close-circle"}
+            size={20}
+            color="white"
+            style={styles.statusIcon}
+          />
+          <Text style={styles.statusText}>
+            {event.transportationProvided
+              ? "Transportation Provided"
+              : "No Transportation Provided"}
+          </Text>
+        </View>
+
+        <TouchableOpacity
+          style={formSubmitted ? styles.thankYouButton : styles.button}
+          onPress={formSubmitted ? null : handleJoinEvent}
+          activeOpacity={formSubmitted ? 1 : 0.7}
+        >
+          <Text style={formSubmitted ? styles.thankYouButtonText : styles.buttonText}>
+            {formSubmitted ? "✅ Thank You for Submitting" : "Join the Event"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </TouchableWithoutFeedback>
+  <Modal visible={formModalVisible} animationType="slide">
+  <View style={{ flex: 1 }}>
+    <WebView
+      source={{ uri: event.formLink }}
+      onNavigationStateChange={handleNavigationStateChange}
+      startInLoadingState
+      renderLoading={() => (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <ActivityIndicator size="large" />
+        </View>
+      )}
+      style={{ flex: 1 }}
+    />
+    <TouchableOpacity style={styles.closeButton} onPress={closeform}>
+      <Text style={styles.closeButtonText}>Close Form</Text>
+    </TouchableOpacity>
+  </View>
+</Modal>
+</Modal>
+
   );
 };
 
@@ -212,6 +290,57 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  confirmationContainer: {
+    marginTop: 20,
+    alignItems: "center",
+  },
+  confirmationText: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 10,
+  },
+  confirmButton: {
+    backgroundColor: "#28a745",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+  },
+  confirmButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  submissionStatus: {
+    marginTop: 20,
+    fontSize: 16,
+    color: "#007BFF",
+  },
+  thankYouButton: {
+    backgroundColor: "#28a745", // green success
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "90%",
+    marginTop: 10,
+    opacity: 0.9,
+  },
+  
+  thankYouButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  closeButton: {
+    backgroundColor: '#007da5',
+    padding: 12,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 
