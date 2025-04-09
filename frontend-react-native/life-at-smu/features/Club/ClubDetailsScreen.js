@@ -13,15 +13,36 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+import Constants from "expo-constants";
+import { useState } from "react";
 
 const ClubDetailsScreen = ({ route }) => {
-  const { club } = route.params || {};
+  const { club: initialClub } = route.params || {};
+  const [club, setClub] = useState(null);
+
   const navigation = useNavigation();
 
   const fadeIn = useSharedValue(0);
 
   useEffect(() => {
     fadeIn.value = withTiming(1, { duration: 300 });
+
+    const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+    const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "localhost";
+
+    const fetchClubDetails = async () => {
+      try {
+        const res = await axios.get(
+          `http://${ipAddress}:8000/api/auth/clubs/${initialClub._id}`
+        );
+        setClub(res.data.club);
+      } catch (err) {
+        console.error("Failed to fetch club details:", err);
+      }
+    };
+
+    fetchClubDetails();
   }, []);
 
   const fadeStyle = useAnimatedStyle(() => ({
@@ -98,12 +119,14 @@ const ClubDetailsScreen = ({ route }) => {
               <View key={index} style={styles.memberCard}>
                 <Image
                   source={{
-                    uri: member?.profilePicture,
+                    uri: member?.user?.p,
                   }}
                   style={styles.memberImage}
                 />
                 <View style={styles.memberDetails}>
-                  <Text style={styles.memberName}>{member?.name}</Text>
+                  <Text style={styles.memberName}>
+                    {member?.user?.fullname}
+                  </Text>
                   <Text style={styles.memberRole}>{member?.role}</Text>
                 </View>
               </View>
