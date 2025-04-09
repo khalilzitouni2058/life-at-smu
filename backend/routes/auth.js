@@ -26,6 +26,44 @@ router.post('/student-life-dep', async (req, res) => {
     res.status(500).json({ message: 'Error adding user', error });
   }
 });
+router.post('/events/approve', async (req, res) => {
+  try {
+    const { eventId } = req.body;
+
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { status: 'Approved' },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    res.status(200).json({ message: 'Event approved', event: updatedEvent });
+  } catch (error) {
+    res.status(500).json({ message: 'Error approving event', error });
+  }
+});
+router.post('/events/decline', async (req, res) => {
+  try {
+    const { eventId } = req.body;
+
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { status: 'Declined' },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(404).json({ message: 'Event not found' });
+    }
+
+    res.status(200).json({ message: 'Event declined', event: updatedEvent });
+  } catch (error) {
+    res.status(500).json({ message: 'Error declining event', error });
+  }
+});
 router.get('/student-life-dep', async (req, res) => {
   try {
     const users = await studentLifeDeps.find(); 
