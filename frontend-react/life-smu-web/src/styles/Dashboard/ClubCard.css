@@ -1,48 +1,91 @@
 .club-card {
-    width: 250px;
-    height: 350px;
-    border-radius: 15px;
+    width: 100%;
+    border-radius: 16px;
     overflow: hidden;
-    position: relative;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.club-card:hover {
-    transform: scale(1.05);
-}
-
-.club-image {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 15px;
-}
-
-.club-overlay {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 10%;
-    background: linear-gradient(to top, rgba(13, 71, 161, 0.9), rgba(13, 71, 161, 0.3));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content:center; 
     align-items: center;
-    color: white;
-    padding: 10px;
+    height: 100%;
     text-align: center;
-}
-
-.club-name {
+    background-color: #fff;
+  }
+  
+  .club-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .club-card-title {
     font-size: 1.2rem;
     font-weight: bold;
-    margin: 5px 0;
-    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
-}
+    margin-bottom: 0.5rem;
+    margin-top: 10px;
 
-.club-category {
-    font-size: 0.9rem;
-    font-style: italic;
-    opacity: 0.9;
-}
+  }
+  
+  .club-card-description {
+    font-size: 0.95rem;
+    color: #555;
+    margin-bottom: 1rem;
+    max-height: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .club-card-image {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+    object-fit: contain;
+  }
+
+  .card-view-details {
+    background-color: #007da5 !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    align-self: center;
+    margin-top: 10px;
+    box-shadow: none !important;
+    transition: background-color 0.2s ease;
+  }
+  
+  .card-view-details:hover {
+    background-color: #005c7a !important;
+    color: #fff !important;
+    box-shadow: none !important;
+  }
+
+  /* Positioning & styling */
+.delete-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background-color: #dc3545;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .delete-btn:hover {
+    background-color: #c82333;
+    transform: scale(1.05);
+  }
+  
+  .delete-icon-inner {
+    color: white;
+    font-size: 1rem;
+  }
+  
+  
