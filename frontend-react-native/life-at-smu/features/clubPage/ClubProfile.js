@@ -77,7 +77,6 @@ const ClubProfile = ({ navigation }) => {
   return (
     <ScrollView>
       <View style={styles.container}>
-        {/* ✅ Moved logout button to top-left */}
         <TouchableOpacity
           style={{
             position: "absolute",
