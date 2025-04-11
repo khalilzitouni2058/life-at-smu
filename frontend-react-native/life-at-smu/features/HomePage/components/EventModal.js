@@ -7,16 +7,15 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   StyleSheet,
-  Linking, // <-- Import Linking
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useUser } from '../../../Context/UserContext';
 import axios from "axios";
 import Constants from "expo-constants";
-import { useNavigation } from "@react-navigation/native"; // <-- Import useNavigation
 import { WebView } from 'react-native-webview';
 import { ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 
 
@@ -26,8 +25,8 @@ const EventModal = ({ visible, event, onClose }) => {
   if (!event) return null;
 
 
-
   const {user , setUser} = useUser();
+
   const [formSubmitted, setFormSubmitted] = useState(false); // State to track form submission
   const [formModalVisible, setFormModalVisible] = useState(false);
 
@@ -148,15 +147,17 @@ const closeform = () =>{
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={formSubmitted ? styles.thankYouButton : styles.button}
-          onPress={formSubmitted ? null : handleJoinEvent}
-          activeOpacity={formSubmitted ? 1 : 0.7}
-        >
-          <Text style={formSubmitted ? styles.thankYouButtonText : styles.buttonText}>
-            {formSubmitted ? "✅ Thank You for Submitting" : "Join the Event"}
-          </Text>
-        </TouchableOpacity>
+        {user !==null && (
+  <TouchableOpacity
+    style={formSubmitted ? styles.thankYouButton : styles.button}
+    onPress={formSubmitted ? null : handleJoinEvent}
+    activeOpacity={formSubmitted ? 1 : 0.7}
+  >
+    <Text style={formSubmitted ? styles.thankYouButtonText : styles.buttonText}>
+      {formSubmitted ? "✅ Thank You for Submitting" : "Join the Event"}
+    </Text>
+  </TouchableOpacity>
+)}
       </View>
     </View>
   </TouchableWithoutFeedback>
