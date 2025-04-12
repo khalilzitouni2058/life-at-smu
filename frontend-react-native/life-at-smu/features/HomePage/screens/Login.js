@@ -24,7 +24,7 @@ import { CommonActions } from "@react-navigation/native";
 
 const Login = () => {
   const { setUser } = useUser();
-  const { setClubId } = useClub();
+  const { setClubId, setFirstLogin } = useClub();
   const [showText, setShowText] = useState(false);
   const topRightAnim = useRef(new Animated.Value(-500)).current;
   const bottomLeftAnim = useRef(new Animated.Value(-300)).current;
@@ -34,25 +34,45 @@ const Login = () => {
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
     try {
-      const clubResponse = await axios.post(`http://${ipAddress}:8000/api/auth/clubs/login`, {
-        email,
-        password,
-      });
+      const clubResponse = await axios.post(
+        `http://${ipAddress}:8000/api/auth/clubs/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       if (clubResponse.status === 200 && clubResponse.data.club) {
-        console.log("Club login successful:", clubResponse.data.club);
-        setClubId(clubResponse.data.club._id);
+        const club = clubResponse.data.club;
+        console.log("Club login successful:", club);
+        setClubId(club._id);
+        setFirstLogin(club.firstLogin);
+
         setUser(null); // Clear user if logging in as club
-        handlelogin(); 
+
+        if (club.firstLogin === true) {
+          navigation.replace("ClubUpdate");
+        } else {
+          // Regular login → go to home
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: "MainTabs", params: { screen: "HomeMain" } }],
+            })
+          );
+        }
         return;
       }
     } catch (clubError) {
-      console.log("Invalid credentials. Try again");
+      console.error(
+        "Club login failed:",
+        clubError.response?.data || clubError.message
+      );
     }
 
     try {
@@ -69,7 +89,7 @@ const Login = () => {
         console.log("User login successful:", userResponse.data.user);
         setUser(userResponse.data.user);
         setClubId(null); // Clear club if logging in as user
-        handlelogin()
+        handlelogin();
         return;
       }
     } catch (userError) {
@@ -211,7 +231,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     textAlign: "center",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   container: {
     flex: 1,

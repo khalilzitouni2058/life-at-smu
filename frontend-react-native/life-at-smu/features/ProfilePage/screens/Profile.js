@@ -41,28 +41,6 @@ const Profile = ({ navigation, route }) => {
   return (
     <ScrollView>
       <View style={styles.container}>
-        <TouchableOpacity
-          style={{
-            position: "absolute",
-            top: 40,
-            left: 20,
-            backgroundColor: "#FF5A5F",
-            paddingVertical: 6,
-            paddingHorizontal: 14,
-            borderRadius: 15,
-            zIndex: 10,
-            elevation: 10,
-          }}
-          onPress={() => {
-            setUser(null);
-            navigation.replace("Login");
-          }}
-        >
-          <Text style={{ color: "white", fontWeight: "600", fontSize: 14 }}>
-            Logout
-          </Text>
-        </TouchableOpacity>
-
         <Animated.Image
           source={branch4}
           style={[styles.image, styles.topRight, { opacity: branchOpacity }]}
@@ -123,14 +101,15 @@ const Profile = ({ navigation, route }) => {
             <Text style={styles.cardText}>Event History</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard}>
-            <Ionicons name="help-circle-outline" size={30} color="#007DA5" />
-            <Text style={styles.cardText}>FAQ</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionCard}>
-            <Ionicons name="settings-outline" size={30} color="#007DA5" />
-            <Text style={styles.cardText}>Settings</Text>
+          <TouchableOpacity
+            style={[styles.actionCard, { borderColor: "#FF5A5F" }]}
+            onPress={() => {
+              setUser(null); // or setClubId(null) if needed
+              navigation.replace("Login");
+            }}
+          >
+            <Ionicons name="log-out-outline" size={30} color="#FF5A5F" />
+            <Text style={[styles.cardText, { color: "#FF5A5F" }]}>Logout</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>

@@ -356,6 +356,7 @@ router.post("/clubs/signup", async (req, res) => {
       profilePicture:
         "https://cdn-icons-png.flaticon.com/128/16745/16745734.png",
       boardMembers: [],
+      firstLogin: true,
     });
 
     // Save the new club to the database
@@ -429,6 +430,7 @@ router.post("/clubs/login", async (req, res) => {
         contactInfo: club.contactInfo,
         profilePicture: club.profilePicture,
         boardMembers: club.boardMembers,
+        firstLogin: club.firstLogin,
       },
     });
   } catch (err) {
@@ -470,6 +472,7 @@ router.put("/clubs/:id", async (req, res) => {
         contactInfo,
         profilePicture,
         boardMembers,
+        firstLogin: false,
       },
       { new: true, runValidators: true }
     );
