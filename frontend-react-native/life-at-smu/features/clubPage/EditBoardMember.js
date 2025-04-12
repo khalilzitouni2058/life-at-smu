@@ -31,6 +31,10 @@ const EditBoardMember = ({ navigation, route }) => {
     editingMember?.profileImage || ""
   );
   const [invalidEmail, setInvalidEmail] = useState(false);
+  const [existingRoles, setExistingRoles] = useState([]);
+
+  const isValidFacebookLink = (url) =>
+    /^https?:\/\/(www\.)?facebook\.com\/[A-Za-z0-9\/?=._-]+$/.test(url.trim());
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
@@ -70,13 +74,30 @@ const EditBoardMember = ({ navigation, route }) => {
 
     fetchUserByEmail();
   }, [email]);
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await axios.get(
+          `http://${ipAddress}:8000/api/auth/clubs/${clubId}`
+        );
+        const roles = res.data.club.boardMembers
+          .filter((m) => m.user._id !== editingMember.user._id) // skip self
+          .map((m) => m.role.toLowerCase());
+        setExistingRoles(roles);
+      } catch (e) {
+        console.error("Failed to get roles", e);
+      }
+    };
+
+    if (clubId && editingMember?.user?._id) fetchRoles();
+  }, [clubId, editingMember]);
 
   const handleSave = async () => {
     if (!clubId) {
       Alert.alert("Error", "No club ID found.");
       return;
     }
-    
+
     if (!email.trim()) {
       Alert.alert("Error", "Email is required.");
       return;
@@ -96,6 +117,18 @@ const EditBoardMember = ({ navigation, route }) => {
 
     if (!userId) {
       Alert.alert("Error", "User ID not found.");
+      return;
+    }
+    if (facebookLink && !isValidFacebookLink(facebookLink)) {
+      Alert.alert("Invalid Link", "Please enter a valid Facebook link.");
+      return;
+    }
+
+    if (existingRoles.includes(role.trim().toLowerCase())) {
+      Alert.alert(
+        "Role already exists",
+        `The role "${role}" is already taken.`
+      );
       return;
     }
 
@@ -180,6 +213,7 @@ const EditBoardMember = ({ navigation, route }) => {
               placeholder="Enter Facebook Link"
               placeholderTextColor="#888"
               editable={true}
+              required={false}
             />
           </View>
 
@@ -213,7 +247,7 @@ const EditBoardMember = ({ navigation, route }) => {
                 placeholder="Enter Phone Number"
                 placeholderTextColor="#888"
                 keyboardType="phone-pad"
-                editable={false}
+                editable={true}
               />
             </View>
           </View>

@@ -60,6 +60,7 @@ export default function App() {
               component={HomeMain}
               options={{ headerShown: false }}
             />
+
             <Stack.Screen
               name="ClubsScreen"
               component={ClubsScreen}

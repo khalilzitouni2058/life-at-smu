@@ -23,6 +23,10 @@ const AddBoardMember = ({ navigation }) => {
   const [countryCode, setCountryCode] = useState("TN +216");
   const [profilePicture, setProfilePicture] = useState(null);
   const [invalidEmail, setInvalidEmail] = useState(false);
+  const [existingRoles, setExistingRoles] = useState([]);
+
+  const isValidFacebookLink = (url) =>
+    /^https?:\/\/(www\.)?facebook\.com\/[A-Za-z0-9\/?=._-]+$/.test(url.trim());
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
@@ -52,6 +56,25 @@ const AddBoardMember = ({ navigation }) => {
 
     fetchUserInfo();
   }, [email]);
+  useEffect(() => {
+    const fetchBoardRoles = async () => {
+      try {
+        const response = await axios.get(
+          `http://${ipAddress}:8000/api/auth/clubs/${clubId}`
+        );
+        const roles = response.data.club.boardMembers.map((m) =>
+          m.role.toLowerCase()
+        );
+        setExistingRoles(roles);
+      } catch (error) {
+        console.error("Error fetching roles:", error);
+      }
+    };
+
+    if (clubId) {
+      fetchBoardRoles();
+    }
+  }, [clubId]);
 
   const handleSave = async () => {
     if (!clubId) {
@@ -73,6 +96,10 @@ const AddBoardMember = ({ navigation }) => {
       Alert.alert("Error", "Phone number is required.");
       return;
     }
+    if (facebookLink && !isValidFacebookLink(facebookLink)) {
+      Alert.alert("Invalid Link", "Please enter a valid Facebook link.");
+      return;
+    }
 
     try {
       const newMember = {
@@ -81,6 +108,13 @@ const AddBoardMember = ({ navigation }) => {
         phoneNumber: phoneNumber.trim(),
         facebookLink: facebookLink.trim() || "",
       };
+      if (existingRoles.includes(role.trim().toLowerCase())) {
+        Alert.alert(
+          "Role already exists",
+          `The role "${role}" already exists.`
+        );
+        return;
+      }
 
       const response = await axios.put(
         `http://${ipAddress}:8000/api/auth/clubs/${clubId}/add-board-member`,
@@ -157,6 +191,7 @@ const AddBoardMember = ({ navigation }) => {
               onChangeText={setFacebookLink}
               placeholder="Enter Facebook Link"
               placeholderTextColor="#888"
+              required={false}
             />
           </View>
 
@@ -347,7 +382,7 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 13,
     marginTop: 4,
-  },  
+  },
 });
 
 export default AddBoardMember;
