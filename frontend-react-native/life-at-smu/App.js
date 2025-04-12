@@ -18,6 +18,7 @@ import ClubsScreen from "./features/Club/ClubsScreen";
 import ClubDetailsScreen from "./features/Club/ClubDetailsScreen";
 import HomeMain from "./features/HomePage/screens/HomeMain";
 import EventForm from "./features/Club/components/EventForm";
+import MyClubs from "./features/ProfilePage/screens/MyClubs";
 
 const Stack = createNativeStackNavigator();
 
@@ -77,6 +78,11 @@ export default function App() {
             <Stack.Screen
               name="EditProfile"
               component={EditProfile}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="MyClubs"
+              component={MyClubs}
               options={{ headerShown: false }}
             />
             <Stack.Screen
