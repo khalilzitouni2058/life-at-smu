@@ -119,7 +119,7 @@ const ClubDetailsScreen = ({ route }) => {
               <View key={index} style={styles.memberCard}>
                 <Image
                   source={{
-                    uri: member?.user?.p,
+                    uri: member?.user?.picture,
                   }}
                   style={styles.memberImage}
                 />

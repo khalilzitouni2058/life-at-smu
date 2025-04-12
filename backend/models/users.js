@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Event',
   }],
+  clubs: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Club',
+  }],
 });
 
 // Hash the password before saving

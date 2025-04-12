@@ -38,46 +38,45 @@ router.post("/student-life-dep", async (req, res) => {
   }
 });
 
-router.post('/events/approve', async (req, res) => {
+router.post("/events/approve", async (req, res) => {
   try {
     const { eventId } = req.body;
 
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { status: 'Approved' },
+      { status: "Approved" },
       { new: true }
     );
 
     if (!updatedEvent) {
-      return res.status(404).json({ message: 'Event not found' });
+      return res.status(404).json({ message: "Event not found" });
     }
 
-    res.status(200).json({ message: 'Event approved', event: updatedEvent });
+    res.status(200).json({ message: "Event approved", event: updatedEvent });
   } catch (error) {
-    res.status(500).json({ message: 'Error approving event', error });
+    res.status(500).json({ message: "Error approving event", error });
   }
 });
-router.post('/events/decline', async (req, res) => {
+router.post("/events/decline", async (req, res) => {
   try {
     const { eventId } = req.body;
 
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { status: 'Declined' },
+      { status: "Declined" },
       { new: true }
     );
 
     if (!updatedEvent) {
-      return res.status(404).json({ message: 'Event not found' });
+      return res.status(404).json({ message: "Event not found" });
     }
 
-    res.status(200).json({ message: 'Event declined', event: updatedEvent });
+    res.status(200).json({ message: "Event declined", event: updatedEvent });
   } catch (error) {
-    res.status(500).json({ message: 'Error declining event', error });
+    res.status(500).json({ message: "Error declining event", error });
   }
 });
-router.get('/student-life-dep', async (req, res) => {
-
+router.get("/student-life-dep", async (req, res) => {
   try {
     const users = await studentLifeDeps.find();
     res.status(200).json({ users });
@@ -240,7 +239,9 @@ router.post("/users/:id/events", async (req, res) => {
 
     // Avoid duplicates
     if (user.events.includes(eventId)) {
-      return res.status(400).json({ message: "User already joined this event" });
+      return res
+        .status(400)
+        .json({ message: "User already joined this event" });
     }
 
     user.events.push(eventId);
@@ -258,7 +259,7 @@ router.get("/users/:id/events", async (req, res) => {
 
   try {
     // Fetch the user by ID, including their events
-    const user = await User.findById(userId).populate("events");  // Assuming `events` is populated with event details
+    const user = await User.findById(userId).populate("events"); // Assuming `events` is populated with event details
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -270,6 +271,63 @@ router.get("/users/:id/events", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
+
+// Add user to club (Join Club)
+router.post("/users/:userId/join-club", async (req, res) => {
+  const { userId } = req.params;
+  const { clubId } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    const club = await Club.findById(clubId);
+
+    if (!user || !club) {
+      return res.status(404).json({ message: "User or Club not found" });
+    }
+
+    // Avoid duplicates
+    const alreadyJoinedUser = user.clubs.includes(clubId);
+    const alreadyJoinedClub = club.users.includes(userId);
+
+    if (alreadyJoinedUser || alreadyJoinedClub) {
+      return res.status(400).json({ message: "User already joined this club" });
+    }
+
+    user.clubs.push(clubId);
+    club.users.push(userId);
+
+    await user.save();
+    await club.save();
+
+    res.status(200).json({ message: "Club joined successfully", user, club });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Get all clubs the user joined with board info
+router.get("/users/:userId/clubs", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId).populate({
+      path: "clubs",
+      populate: {
+        path: "boardMembers.user",
+        select: "fullname email picture",
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ clubs: user.clubs });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
 
 // Club Signup Route
 router.post("/clubs/signup", async (req, res) => {
@@ -447,7 +505,7 @@ router.get("/clubs/:id", async (req, res) => {
     const club = await Club.findById(id).populate(
       "boardMembers.user",
       "fullname picture email"
-    );
+    ); 
     if (!club) {
       return res.status(404).json({ message: "Club not found" });
     }
