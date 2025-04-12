@@ -115,7 +115,10 @@ const Profile = ({ navigation, route }) => {
             <Text style={styles.cardText}>Offers</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate("EventHistory")}
+          >
             <Ionicons name="megaphone-outline" size={30} color="#007DA5" />
             <Text style={styles.cardText}>Event History</Text>
           </TouchableOpacity>
