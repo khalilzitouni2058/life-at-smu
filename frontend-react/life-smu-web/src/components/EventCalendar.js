@@ -6,11 +6,8 @@ import interactionPlugin from '@fullcalendar/interaction'; // Click & Drag
 import multiMonthPlugin from '@fullcalendar/multimonth'; // Yearly View
 import axios from 'axios';
 
-import { Box, HStack, Text, Dialog, Button, VStack,Portal,Flex,Image,Card,Checkbox,List,Avatar,Badge } from "@chakra-ui/react";
+import { Box, HStack, Text, Dialog, Button, VStack,Portal,Flex,Image,Card,Checkbox,List,Avatar,Badge ,Switch } from "@chakra-ui/react";
 
-// Dnd Kit utilities
-import { CSS } from '@dnd-kit/utilities'
-import DraggableUser from './ui/DraggableUser' // Adjust the path
 
 const EventCalendar = () => {
   const [events, setEvents] = useState([]);
@@ -439,17 +436,18 @@ borderColor: event.status?.toLowerCase() === "waiting"
         </Box>
 
         {/* Checkbox */}
-        <Checkbox.Root
+        <Switch.Root
         colorPalette={"cyan"}
         variant={"solid"}
-          
+        mt={2}
+          display={"flex"}
         >
-          <Checkbox.HiddenInput />
-          <Checkbox.Control>
-            <Checkbox.Indicator />
-          </Checkbox.Control>
-          <Checkbox.Label ml={2}>Assign to Event</Checkbox.Label>
-        </Checkbox.Root>
+          <Switch.HiddenInput />
+          <Switch.Control>
+          
+          </Switch.Control>
+          <Switch.Label >Assign to Event</Switch.Label>
+        </Switch.Root>
       </VStack>
             </HStack>
           </Card.Body>
