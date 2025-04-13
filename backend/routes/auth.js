@@ -38,46 +38,87 @@ router.post("/student-life-dep", async (req, res) => {
   }
 });
 
-router.post('/events/approve', async (req, res) => {
+router.post("/events/approve", async (req, res) => {
   try {
     const { eventId } = req.body;
 
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { status: 'Approved' },
+      { status: "Approved" },
       { new: true }
     );
 
     if (!updatedEvent) {
-      return res.status(404).json({ message: 'Event not found' });
+      return res.status(404).json({ message: "Event not found" });
     }
 
-    res.status(200).json({ message: 'Event approved', event: updatedEvent });
+    res.status(200).json({ message: "Event approved", event: updatedEvent });
   } catch (error) {
-    res.status(500).json({ message: 'Error approving event', error });
+    res.status(500).json({ message: "Error approving event", error });
   }
 });
-router.post('/events/decline', async (req, res) => {
+router.post("/events/decline", async (req, res) => {
   try {
     const { eventId } = req.body;
 
     const updatedEvent = await Event.findByIdAndUpdate(
       eventId,
-      { status: 'Declined' },
+      { status: "Declined" },
       { new: true }
     );
 
     if (!updatedEvent) {
-      return res.status(404).json({ message: 'Event not found' });
+      return res.status(404).json({ message: "Event not found" });
     }
 
-    res.status(200).json({ message: 'Event declined', event: updatedEvent });
+    res.status(200).json({ message: "Event declined", event: updatedEvent });
   } catch (error) {
-    res.status(500).json({ message: 'Error declining event', error });
+    res.status(500).json({ message: "Error declining event", error });
   }
 });
-router.get('/student-life-dep', async (req, res) => {
+router.get("/events/new", async (req, res) => {
+  const { since } = req.query; // e.g. ISO date string
+  try {
+    const newEvents = await Event.find({ createdAt: { $gt: new Date(since) } });
+    res.status(200).json(newEvents);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error fetching new events", error: err.message });
+  }
+});
 
+router.post("/events/:eventId/assign-member", async (req, res) => {
+  const { userId } = req.body;
+  const { eventId } = req.params;
+
+  try {
+    const event = await Event.findById(eventId);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    const index = event.assignedMembers.indexOf(userId);
+
+    if (index === -1) {
+      // ✅ Assign member
+      event.assignedMembers.push(userId);
+      await event.save();
+      return res
+        .status(200)
+        .json({ message: "Member assigned", assigned: true, event });
+    } else {
+      // ❌ Unassign member
+      event.assignedMembers.splice(index, 1);
+      await event.save();
+      return res
+        .status(200)
+        .json({ message: "Member unassigned", assigned: false, event });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+router.get("/student-life-dep", async (req, res) => {
   try {
     const users = await studentLifeDeps.find();
     res.status(200).json({ users });
@@ -240,7 +281,9 @@ router.post("/users/:id/events", async (req, res) => {
 
     // Avoid duplicates
     if (user.events.includes(eventId)) {
-      return res.status(400).json({ message: "User already joined this event" });
+      return res
+        .status(400)
+        .json({ message: "User already joined this event" });
     }
 
     user.events.push(eventId);
@@ -258,7 +301,7 @@ router.get("/users/:id/events", async (req, res) => {
 
   try {
     // Fetch the user by ID, including their events
-    const user = await User.findById(userId).populate("events");  // Assuming `events` is populated with event details
+    const user = await User.findById(userId).populate("events"); // Assuming `events` is populated with event details
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -652,7 +695,7 @@ router.get("/events/:date", async (req, res) => {
 router.get("/events", async (req, res) => {
   try {
     const events = await Event.find().select(
-      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status formLink"
+      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status formLink assignedMembers"
     );
 
     res.status(200).json(events);
