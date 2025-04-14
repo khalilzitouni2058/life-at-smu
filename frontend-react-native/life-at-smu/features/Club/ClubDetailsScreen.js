@@ -16,33 +16,60 @@ import { useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useState } from "react";
+import { useUser } from "../../Context/UserContext";
 
 const ClubDetailsScreen = ({ route }) => {
   const { club: initialClub } = route.params || {};
   const [club, setClub] = useState(null);
-
+  const { user } = useUser();
   const navigation = useNavigation();
-
   const fadeIn = useSharedValue(0);
+  const [hasRequested, setHasRequested] = useState(false);
+  const [isMember, setIsMember] = useState(false);
+  const isUserLoggedIn = user && user.fullname;
+  const isClubLoggedIn = user && !user.fullname; 
+
+
+  const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
+  const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "localhost";
 
   useEffect(() => {
     fadeIn.value = withTiming(1, { duration: 300 });
 
-    const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
-    const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "localhost";
-
     const fetchClubDetails = async () => {
       try {
+        if (!user || isClubLoggedIn) {
         const res = await axios.get(
           `http://${ipAddress}:8000/api/auth/clubs/${initialClub._id}`
         );
         setClub(res.data.club);
+        return;
+      }
+      const res = await axios.get(
+        `http://${ipAddress}:8000/api/auth/clubs/${initialClub._id}`
+      );
+      setClub(res.data.club);
+      
+        const userRes = await axios.get(
+          `http://${ipAddress}:8000/api/auth/users/${user.id}`
+        );
+        const clubRequests = userRes.data.user?.clubRequests || [];
+        const joinedClubs = userRes.data.user?.clubs || [];
+
+        setHasRequested(
+          clubRequests.some(
+            (r) => r.club === initialClub._id && r.status === "Pending"
+          )
+        );
+        setIsMember(joinedClubs.includes(initialClub._id));
       } catch (err) {
         console.error("Failed to fetch club details:", err);
       }
     };
 
-    fetchClubDetails();
+    if (initialClub?._id) {
+      fetchClubDetails();
+    }
   }, []);
 
   const fadeStyle = useAnimatedStyle(() => ({
@@ -110,6 +137,43 @@ const ClubDetailsScreen = ({ route }) => {
           <TouchableOpacity onPress={openEmail}>
             <Text style={styles.contact}>📧 {club.contactInfo}</Text>
           </TouchableOpacity>
+        )}
+
+        {isUserLoggedIn && (
+          <>
+            {!isMember && !hasRequested && (
+              <TouchableOpacity
+                onPress={async () => {
+                  try {
+                    await axios.post(
+                      `http://${ipAddress}:8000/api/auth/users/${user.id}/request-club`,
+                      { clubId: club._id }
+                    );
+                    alert("Join request sent! Awaiting approval.");
+                    setHasRequested(true);
+                  } catch (err) {
+                    alert("You already sent a request or an error occurred.");
+                    console.error(err);
+                  }
+                }}
+                style={styles.joinBtn}
+              >
+                <Text style={styles.joinText}>Request to Join</Text>
+              </TouchableOpacity>
+            )}
+
+            {hasRequested && !isMember && (
+              <View style={[styles.joinBtn, { backgroundColor: "#ccc" }]}>
+                <Text style={styles.joinText}>Awaiting Approval</Text>
+              </View>
+            )}
+
+            {isMember && (
+              <View style={[styles.joinBtn, { backgroundColor: "green" }]}>
+                <Text style={styles.joinText}>Already a Member</Text>
+              </View>
+            )}
+          </>
         )}
 
         {club?.boardMembers?.length > 0 && (
@@ -222,6 +286,19 @@ const styles = StyleSheet.create({
   memberRole: {
     fontSize: 13,
     color: "#555",
+  },
+  joinBtn: {
+    backgroundColor: "#007DA5",
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    alignItems: "center",
+    marginBottom: 30,
+  },
+  joinText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 

@@ -75,14 +75,17 @@ const Profile = ({ navigation, route }) => {
             { transform: [{ translateY: slideAnim }] },
           ]}
         >
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate("ClubRequests")}
+          >
             <Ionicons name="globe-outline" size={30} color="#007DA5" />
-            <Text style={styles.cardText}>Join a Club</Text>
+            <Text style={styles.cardText}>Club Requests</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.actionCard}
-            onPress={() => navigation.navigate("MyClubs")} // ✅ Add this line
+            onPress={() => navigation.navigate("MyClubs")}
           >
             <Ionicons name="heart-outline" size={30} color="#007DA5" />
             <Text style={styles.cardText}>My Clubs</Text>

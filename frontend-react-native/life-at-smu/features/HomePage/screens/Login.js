@@ -38,6 +38,11 @@ const Login = () => {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Please fill in both email and password.");
+      return;
+    }
+
     try {
       const clubResponse = await axios.post(
         `http://${ipAddress}:8000/api/auth/clubs/login`,
@@ -58,7 +63,6 @@ const Login = () => {
         if (club.firstLogin === true) {
           navigation.replace("ClubUpdate");
         } else {
-          // Regular login → go to home
           navigation.dispatch(
             CommonActions.reset({
               index: 0,
@@ -69,10 +73,11 @@ const Login = () => {
         return;
       }
     } catch (clubError) {
-      console.error(
-        "Club login failed:",
-        clubError.response?.data || clubError.message
-      );
+      if (clubError.response?.status === 401) {
+        console.error("Invalid club credentials.");
+      } else {
+        console.error("Club login error:", clubError.message);
+      }
     }
 
     try {
@@ -93,9 +98,13 @@ const Login = () => {
         return;
       }
     } catch (userError) {
-      console.error("Invalid Credentials. Try again");
+      if (userError.response?.status === 401) {
+        console.error("Invalid user credentials.");
+      } else {
+        console.error("User login error:", userError.message);
+      }
     }
-  };
+  }
 
   useEffect(() => {
     Animated.timing(topRightAnim, {
