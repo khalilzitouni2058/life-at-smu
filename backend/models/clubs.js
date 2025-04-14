@@ -39,10 +39,15 @@ const clubSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
-
   boardMembers: [boardMemberSchema],
   events: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }], 
   users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  pendingRequests: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
 // Hash the password before saving

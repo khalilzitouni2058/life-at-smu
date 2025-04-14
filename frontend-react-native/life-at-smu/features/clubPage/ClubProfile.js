@@ -156,7 +156,6 @@ const ClubProfile = ({ navigation }) => {
           </View>
         </View>
 
-        <Text style={[styles.name, { marginTop: 20 }]}>Our Board Members</Text>
         <Animated.View
           style={[
             styles.actionGrid,
@@ -177,6 +176,19 @@ const ClubProfile = ({ navigation }) => {
               style={[styles.cardText, { color: "#007DA5", fontWeight: "600" }]}
             >
               Board Members
+            </Text>
+          </TouchableOpacity>
+          
+          {/* 📬 Review Requests Button */}
+          <TouchableOpacity
+            style={[styles.actionCard, { borderColor: "#007DA5" }]}
+            onPress={() => navigation.navigate("ReviewRequests")}
+          >
+            <Ionicons name="document-text-outline" size={30} color="#007DA5" />
+            <Text
+              style={[styles.cardText, { color: "#007DA5", fontWeight: "600" }]}
+            >
+              Review Requests
             </Text>
           </TouchableOpacity>
 
