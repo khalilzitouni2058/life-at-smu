@@ -13,6 +13,8 @@ import * as ImagePicker from "expo-image-picker";
 import axios from "axios";
 import { useClub } from "../../Context/ClubContext";
 import Constants from "expo-constants";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "react-native-vector-icons";
 
 const ClubUpdate = ({ navigation }) => {
   const { clubId } = useClub();
@@ -127,10 +129,10 @@ const ClubUpdate = ({ navigation }) => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f0f8ff" }}>
+    <SafeAreaView style={styles.safeArea}>
       <ScrollView
-        style={styles.container}
-        contentContainerStyle={styles.contentContainer}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
         {/* Full-Width Header */}
         <View style={styles.header}>
@@ -291,7 +293,7 @@ const ClubUpdate = ({ navigation }) => {
           <Text style={styles.updateButtonText}>Save</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -496,6 +498,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     width: "100%",
   },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#f0f8ff", // matches your theme
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 50,
+    alignItems: "center",
+  },
+
   required: { color: "red", fontSize: 16 },
   deleteButton: {
     backgroundColor: "red",

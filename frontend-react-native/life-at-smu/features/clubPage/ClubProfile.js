@@ -13,6 +13,7 @@ import { Ionicons } from "react-native-vector-icons";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useClub } from "../../Context/ClubContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ClubProfile = ({ navigation }) => {
   const { clubId, setClubId } = useClub();
@@ -77,29 +78,6 @@ const ClubProfile = ({ navigation }) => {
   return (
     <ScrollView>
       <View style={styles.container}>
-        {/* ✅ Moved logout button to top-left */}
-        <TouchableOpacity
-          style={{
-            position: "absolute",
-            top: 40,
-            left: 20,
-            backgroundColor: "#FF5A5F",
-            paddingVertical: 6,
-            paddingHorizontal: 14,
-            borderRadius: 15,
-            zIndex: 10,
-            elevation: 10,
-          }}
-          onPress={() => {
-            setClubId(null);
-            navigation.replace("Login");
-          }}
-        >
-          <Text style={{ color: "white", fontWeight: "600", fontSize: 14 }}>
-            Logout
-          </Text>
-        </TouchableOpacity>
-
         <Animated.Image
           source={branch4}
           style={[styles.image, styles.topRight, { opacity: branchOpacity }]}
@@ -178,52 +156,59 @@ const ClubProfile = ({ navigation }) => {
           </View>
         </View>
 
-        <Text style={[styles.name, { marginTop: 20 }]}>Our Board Members</Text>
-
-        {profile.boardMembers?.length > 0 && (
-          <>
-            <Animated.View
-              style={[
-                styles.actionGrid,
-                { transform: [{ translateY: slideAnim }] },
-              ]}
+        <Animated.View
+          style={[
+            styles.actionGrid,
+            { transform: [{ translateY: slideAnim }] },
+          ]}
+        >
+          {/* 👥 View Board Members Button */}
+          <TouchableOpacity
+            style={[styles.actionCard, { borderColor: "#007DA5" }]}
+            onPress={() =>
+              navigation.navigate("BoardMembersScreen", {
+                boardMembers: profile.boardMembers,
+              })
+            }
+          >
+            <Ionicons name="people-outline" size={30} color="#007DA5" />
+            <Text
+              style={[styles.cardText, { color: "#007DA5", fontWeight: "600" }]}
             >
-              {profile.boardMembers.map((member, index) => (
-                <TouchableOpacity key={index} style={styles.actionCard}>
-                  <Image
-                    source={{ uri: member.user?.picture }}
-                    style={styles.boardMemberImage}
-                  />
-                  <Text style={styles.cardText}>
-                    <Text style={styles.memberinfo}>Name:</Text>
-                    {member.user?.fullname}
-                  </Text>
-                  <Text style={styles.cardText}>
-                    <Text style={styles.memberinfo}>Role:</Text> {member.role}
-                  </Text>
-                  <Text style={styles.cardText}>
-                    <Text style={styles.memberinfo}>Email:</Text>
-                    {member.user?.email}
-                  </Text>
-                  <Text style={styles.cardText}>
-                    <Text style={styles.memberinfo}>Phone:</Text>
-                    {member.phoneNumber}
-                  </Text>
-                  <Text
-                    style={styles.cardTextLink}
-                    onPress={() => {
-                      navigation.navigate("WebView", {
-                        url: member.facebookLink,
-                      });
-                    }}
-                  >
-                    Facebook Profile
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </Animated.View>
-          </>
-        )}
+              Board Members
+            </Text>
+          </TouchableOpacity>
+
+          {/* 📬 Review Requests Button */}
+          <TouchableOpacity
+            style={[styles.actionCard, { borderColor: "#007DA5" }]}
+            onPress={() => navigation.navigate("ReviewRequests")}
+          >
+            <Ionicons name="document-text-outline" size={30} color="#007DA5" />
+            <Text
+              style={[styles.cardText, { color: "#007DA5", fontWeight: "600" }]}
+            >
+              Review Requests
+            </Text>
+          </TouchableOpacity>
+
+          {/* 🚪 Logout Button */}
+          <TouchableOpacity
+            style={[styles.actionCard, { borderColor: "#FF5A5F" }]}
+            onPress={async () => {
+              await AsyncStorage.clear();
+              setClubId(null);
+              navigation.replace("Login");
+            }}
+          >
+            <Ionicons name="log-out-outline" size={30} color="#FF5A5F" />
+            <Text
+              style={[styles.cardText, { color: "#FF5A5F", fontWeight: "600" }]}
+            >
+              Logout
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </ScrollView>
   );

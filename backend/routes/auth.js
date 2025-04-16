@@ -37,6 +37,45 @@ router.post("/student-life-dep", async (req, res) => {
     res.status(500).json({ message: "Error adding user", error });
   }
 });
+
+router.post("/events/approve", async (req, res) => {
+  try {
+    const { eventId } = req.body;
+
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { status: "Approved" },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    res.status(200).json({ message: "Event approved", event: updatedEvent });
+  } catch (error) {
+    res.status(500).json({ message: "Error approving event", error });
+  }
+});
+router.post("/events/decline", async (req, res) => {
+  try {
+    const { eventId } = req.body;
+
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { status: "Declined" },
+      { new: true }
+    );
+
+    if (!updatedEvent) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    res.status(200).json({ message: "Event declined", event: updatedEvent });
+  } catch (error) {
+    res.status(500).json({ message: "Error declining event", error });
+  }
+});
 router.get("/student-life-dep", async (req, res) => {
   try {
     const users = await studentLifeDeps.find();
@@ -177,6 +216,221 @@ router.put("/users/:id", async (req, res) => {
   }
 });
 
+// Push an event ID to the user's events array
+router.post("/users/:id/events", async (req, res) => {
+  const userId = req.params.id;
+  const { eventId } = req.body;
+
+  if (!eventId) {
+    return res.status(400).json({ message: "eventId is required" });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    const event = await Event.findById(eventId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Avoid duplicates
+    if (user.events.includes(eventId)) {
+      return res
+        .status(400)
+        .json({ message: "User already joined this event" });
+    }
+
+    user.events.push(eventId);
+    await user.save();
+
+    res.status(200).json({ message: "Event added to user", user });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// This route will fetch all events of a specific user
+router.get("/users/:id/events", async (req, res) => {
+  const userId = req.params.id;
+
+  try {
+    // Fetch the user by ID, including their events
+    const user = await User.findById(userId).populate("events"); // Assuming `events` is populated with event details
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Respond with the user's events
+    res.status(200).json({ events: user.events });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Add user to club (Join Club)
+router.post("/users/:userId/join-club", async (req, res) => {
+  const { userId } = req.params;
+  const { clubId } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    const club = await Club.findById(clubId);
+
+    if (!user || !club) {
+      return res.status(404).json({ message: "User or Club not found" });
+    }
+
+    // Avoid duplicates
+    const alreadyJoinedUser = user.clubs.includes(clubId);
+    const alreadyJoinedClub = club.users.includes(userId);
+
+    if (alreadyJoinedUser || alreadyJoinedClub) {
+      return res.status(400).json({ message: "User already joined this club" });
+    }
+
+    user.clubs.push(clubId);
+    club.users.push(userId);
+
+    await user.save();
+    await club.save();
+
+    res.status(200).json({ message: "Club joined successfully", user, club });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Get all clubs the user joined with board info
+router.get("/users/:userId/clubs", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId).populate({
+      path: "clubs",
+      populate: {
+        path: "boardMembers.user",
+        select: "fullname email picture",
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({ clubs: user.clubs });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Send a join club request
+router.post("/users/:userId/request-club", async (req, res) => {
+  const { userId } = req.params;
+  const { clubId } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    const club = await Club.findById(clubId);
+
+    if (!user || !club) {
+      return res.status(404).json({ message: "User or Club not found" });
+    }
+
+    const alreadyRequested = user.clubRequests.some(
+      (r) => r.club.toString() === clubId
+    );
+    if (alreadyRequested) {
+      return res.status(400).json({ message: "Request already sent" });
+    }
+
+    user.clubRequests.push({ club: clubId });
+
+    if (!club.pendingRequests) club.pendingRequests = [];
+    const alreadyInQueue = club.pendingRequests.some(
+      (u) => u.toString() === userId
+    );
+    if (!alreadyInQueue) {
+      club.pendingRequests.push(userId);
+    }
+
+    await user.save();
+    await club.save();
+
+    res.status(200).json({ message: "Join request sent", user });
+  } catch (err) {
+    console.error("Error creating club join request:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Get user club requests with club info
+router.get("/users/:userId/club-requests", async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    const user = await User.findById(userId).populate("clubRequests.club", "clubName category profilePicture");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const requests = user.clubRequests.map((req) => ({
+      clubId: req.club?._id,
+      clubName: req.club?.clubName || "Unknown",
+      category: req.club?.category || "Uncategorized",
+      profilePicture: req.club?.profilePicture,
+      status: req.status,
+      program: user.program || "Not specified",
+      major: user.major || "Not specified",
+    }));
+
+    res.status(200).json({ requests });
+  } catch (err) {
+    console.error("Error fetching club requests:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Delete club request
+router.delete("/users/:userId/requests/:clubId", async (req, res) => {
+  const { userId, clubId } = req.params;
+
+  try {
+    const user = await User.findById(userId);
+    const club = await Club.findById(clubId);
+
+    if (!user || !club) {
+      return res.status(404).json({ message: "User or Club not found" });
+    }
+
+    // Remove from user's clubRequests
+    user.clubRequests = user.clubRequests.filter(
+      (r) => r.club.toString() !== clubId
+    );
+
+    // Remove from club's pendingRequests
+    if (club.pendingRequests) {
+      club.pendingRequests = club.pendingRequests.filter(
+        (u) => u.toString() !== userId
+      );
+    }
+
+    await user.save();
+    await club.save();
+
+    res.status(200).json({ message: "Request removed" });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error deleting request", error: err.message });
+  }
+});
+
 // Club Signup Route
 router.post("/clubs/signup", async (req, res) => {
   const { email, password, clubName } = req.body;
@@ -204,6 +458,7 @@ router.post("/clubs/signup", async (req, res) => {
       profilePicture:
         "https://cdn-icons-png.flaticon.com/128/16745/16745734.png",
       boardMembers: [],
+      firstLogin: true,
     });
 
     // Save the new club to the database
@@ -277,6 +532,7 @@ router.post("/clubs/login", async (req, res) => {
         contactInfo: club.contactInfo,
         profilePicture: club.profilePicture,
         boardMembers: club.boardMembers,
+        firstLogin: club.firstLogin,
       },
     });
   } catch (err) {
@@ -318,6 +574,7 @@ router.put("/clubs/:id", async (req, res) => {
         contactInfo,
         profilePicture,
         boardMembers,
+        firstLogin: false,
       },
       { new: true, runValidators: true }
     );
@@ -350,7 +607,10 @@ router.get("/clubs/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const club = await Club.findById(id).populate("boardMembers"); // Populate events if needed
+    const club = await Club.findById(id).populate(
+      "boardMembers.user",
+      "fullname picture email"
+    );
     if (!club) {
       return res.status(404).json({ message: "Club not found" });
     }
@@ -450,6 +710,7 @@ router.put("/clubs/:clubId/update-board-member", async (req, res) => {
   }
 });
 
+// Get user email for club
 router.get("/user-by-email/:email", async (req, res) => {
   const { email } = req.params;
   try {
@@ -458,6 +719,87 @@ router.get("/user-by-email/:email", async (req, res) => {
     res.json({ user });
   } catch (err) {
     res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Club gets user requests to join
+router.get("/clubs/:id/requests", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const users = await User.find({ "clubRequests.club": id })
+      .populate("clubRequests.club", "clubName")
+      .select("fullname email picture clubRequests");
+
+    const filtered = users
+      .map((u) => {
+        const request = u.clubRequests.find((r) => {
+          const clubId = r.club?._id?.toString?.() || r.club?.toString?.();
+          return clubId === id;
+        });
+
+        if (!request) return null;
+
+        return {
+          _id: u._id,
+          fullname: u.fullname,
+          email: u.email,
+          picture: u.picture,
+          request,
+        };
+      })
+      .filter(Boolean);
+
+    res.status(200).json({ requests: filtered });
+  } catch (err) {
+    console.error("Error fetching requests:", err);
+    res
+      .status(500)
+      .json({ message: "Error fetching requests", error: err.message });
+  }
+});
+
+// Club accepts or declines request
+router.post("/clubs/:clubId/respond-request", async (req, res) => {
+  const { clubId } = req.params;
+  const { userId, action } = req.body;
+
+  try {
+    const user = await User.findById(userId);
+    const club = await Club.findById(clubId);
+
+    if (!user || !club) {
+      return res.status(404).json({ message: "User or Club not found" });
+    }
+
+    const request = user.clubRequests.find((r) => r.club.toString() === clubId);
+    if (!request) {
+      return res.status(400).json({ message: "No request found" });
+    }
+
+    request.status = action === "accept" ? "Accepted" : "Declined";
+
+    // Remove user from club's pendingRequests
+    if (club.pendingRequests) {
+      club.pendingRequests = club.pendingRequests.filter(
+        (id) => id.toString() !== userId
+      );
+    }
+
+    // Add user to club.members if accepted
+    if (action === "accept" && !user.clubs.includes(clubId)) {
+      user.clubs.push(clubId);
+      club.users.push(userId);
+    }
+
+    await user.save();
+    await club.save();
+
+    res.status(200).json({ message: `Request ${action}ed` });
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error processing request", error: err.message });
   }
 });
 

@@ -14,7 +14,7 @@ const eventSchema = new mongoose.Schema({
   transportationProvided: { type: Boolean, default: false }, // New Boolean field
   status: {
     type: String,
-    enum: ["Waiting", "Approved", "Refused"], // Only allows these values
+    enum: ["Waiting", "Approved", "Declined"], // Only allows these values
     default: "Waiting", // Default value if none is provided
   },
   formLink: {

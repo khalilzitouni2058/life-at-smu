@@ -1,12 +1,11 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
-import branch4 from "../../../assets/branch4.png"; // Assuming this image is used correctly
+import React, { useEffect, useRef } from "react";
+import branch4 from "../../../assets/branch4.png";
 import { ScrollView } from "react-native";
 import { Ionicons } from "react-native-vector-icons";
 import { Animated } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../../../Context/UserContext";
-import Back from "../../HomePage/components/Back";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Profile = ({ navigation, route }) => {
   const { user, setUser } = useUser();
@@ -43,32 +42,6 @@ const Profile = ({ navigation, route }) => {
   return (
     <ScrollView>
       <View style={styles.container}>
-        <View style={{ position: "relative" }}>
-          {/* ✅ Logout button positioned top-left of blue area */}
-          <TouchableOpacity
-            style={{
-              position: "absolute",
-              top: 100,
-              left: 12,
-              backgroundColor: "#FF5A5F",
-              paddingVertical: 6,
-              paddingHorizontal: 14,
-              borderRadius: 15,
-              zIndex: 10,
-              elevation: 10,
-            }}
-            onPress={() => {
-              setUser(null);
-              navigation.replace("Login");
-            }}
-          >
-            <Text style={{ color: "white", fontWeight: "600", fontSize: 14 }}>
-              Logout
-            </Text>
-          </TouchableOpacity>
-          <Back title={"Home"} />
-        </View>
-
         <Animated.Image
           source={branch4}
           style={[styles.image, styles.topRight, { opacity: branchOpacity }]}
@@ -103,12 +76,18 @@ const Profile = ({ navigation, route }) => {
             { transform: [{ translateY: slideAnim }] },
           ]}
         >
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate("ClubRequests")}
+          >
             <Ionicons name="globe-outline" size={30} color="#007DA5" />
-            <Text style={styles.cardText}>Join a Club</Text>
+            <Text style={styles.cardText}>Club Requests</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate("MyClubs")}
+          >
             <Ionicons name="heart-outline" size={30} color="#007DA5" />
             <Text style={styles.cardText}>My Clubs</Text>
           </TouchableOpacity>
@@ -118,19 +97,24 @@ const Profile = ({ navigation, route }) => {
             <Text style={styles.cardText}>Offers</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity
+            style={styles.actionCard}
+            onPress={() => navigation.navigate("EventHistory")}
+          >
             <Ionicons name="megaphone-outline" size={30} color="#007DA5" />
             <Text style={styles.cardText}>Event History</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard}>
-            <Ionicons name="help-circle-outline" size={30} color="#007DA5" />
-            <Text style={styles.cardText}>FAQ</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionCard}>
-            <Ionicons name="settings-outline" size={30} color="#007DA5" />
-            <Text style={styles.cardText}>Settings</Text>
+          <TouchableOpacity
+            style={[styles.actionCard, { borderColor: "#FF5A5F" }]}
+            onPress={async () => {
+              await AsyncStorage.clear();
+              setUser(null);
+              navigation.replace("Login");
+            }}
+          >
+            <Ionicons name="log-out-outline" size={30} color="#FF5A5F" />
+            <Text style={[styles.cardText, { color: "#FF5A5F" }]}>Logout</Text>
           </TouchableOpacity>
         </Animated.View>
       </View>
@@ -139,14 +123,12 @@ const Profile = ({ navigation, route }) => {
 };
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    paddingBottom: 20, // Adds padding at the bottom of the ScrollView
-  },
   container: {
     flex: 1,
     gap: -200,
     justifyContent: "flex-start",
     backgroundColor: "#007DA5",
+    paddingBottom: 100,
   },
   picture: {
     width: 100,
