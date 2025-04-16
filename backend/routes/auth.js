@@ -120,8 +120,8 @@ router.post("/events/:eventId/assign-member", async (req, res) => {
 });
 
 
-  }
-});
+  
+
 
 router.get("/student-life-dep", async (req, res) => {
   try {
