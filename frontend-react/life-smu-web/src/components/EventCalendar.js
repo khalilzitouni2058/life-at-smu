@@ -1,175 +1,293 @@
-import React, { useState, useEffect } from 'react';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid'; // Month view
-import timeGridPlugin from '@fullcalendar/timegrid'; // Week & Day views
-import interactionPlugin from '@fullcalendar/interaction'; // Click & Drag
-import multiMonthPlugin from '@fullcalendar/multimonth'; // Yearly View
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid"; // Month view
+import timeGridPlugin from "@fullcalendar/timegrid"; // Week & Day views
+import interactionPlugin from "@fullcalendar/interaction"; // Click & Drag
+import multiMonthPlugin from "@fullcalendar/multimonth"; // Yearly View
+import axios from "axios";
+import emailjs from '@emailjs/browser'
 
-import { Box, HStack, Text, Dialog, Button, VStack,Portal,Flex,Image,Card,Checkbox,List,Avatar,Badge ,Switch } from "@chakra-ui/react";
+import { Toaster, toaster } from "../components/ui/toaster";
 
+import {
+  Box,
+  HStack,
+  Text,
+  Dialog,
+  Button,
+  VStack,
+  Portal,
+  Flex,
+  Image,
+  Card,
+  Checkbox,
+  List,
+  Avatar,
+  Badge,
+  Switch,
+} from "@chakra-ui/react";
 
 const EventCalendar = () => {
   const [events, setEvents] = useState([]);
+  const [assignedUserIds, setAssignedUserIds] = useState([]);
+  const [checked, setChecked] = useState(false);
+  const [checkedMap, setCheckedMap] = useState({});
+
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [users, setUsers] = useState(null);
   const [assignedUsers, setAssignedUsers] = useState([]);
   const handleEventDidMount = (info) => {
-    if (info.event.extendedProps.status === 'waiting') {
-      info.el.style.backgroundColor = 'blue';
-    } else if (info.event.extendedProps.status === 'approved') {
-      info.el.style.backgroundColor = 'green';
+    if (info.event.extendedProps.status === "waiting") {
+      info.el.style.backgroundColor = "blue";
+    } else if (info.event.extendedProps.status === "approved") {
+      info.el.style.backgroundColor = "green";
     }
-  
+
     // Change dot color
-    const dotEl = info.el.getElementsByClassName('fc-event-dot')[0];
+    const dotEl = info.el.getElementsByClassName("fc-event-dot")[0];
     if (dotEl) {
-      if (info.event.extendedProps.status === 'Waiting') {
-        dotEl.style.backgroundColor = 'blue';
-      } else if (info.event.extendedProps.status === 'Approved') {
-        dotEl.style.backgroundColor = 'green';
+      if (info.event.extendedProps.status === "Waiting") {
+        dotEl.style.backgroundColor = "blue";
+      } else if (info.event.extendedProps.status === "Approved") {
+        dotEl.style.backgroundColor = "green";
       }
     }
   };
-  
-  
-  
-  
-  
+
+  useEffect(() => {
+    if (users && selectedEvent) {
+      const map = {};
+      console.log(selectedEvent);
+      const assigned = selectedEvent.assignedMembers || [];
+
+      users.forEach((user) => {
+        map[user._id] = assigned.includes(user._id);
+      });
+
+      setCheckedMap(map);
+      
+    }
+  }, [users, selectedEvent,!isDialogOpen]);
+  const handleToggle = async (val, eventId, userId) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:8000/api/auth/events/${eventId}/assign-member`,
+        {
+          userId,
+        }
+      );
+
+      const { assigned } = response.data;
+
+      // Optional: Different message depending on result
+      toaster.create({
+        description: assigned
+          ? "Member assigned successfully"
+          : "Member unassigned successfully",
+        type: "success",
+      });
+
+      // ✅ Update the local checked state based on backend response
+      setCheckedMap((prev) => ({
+        ...prev,
+        [userId]: assigned,
+      }));
+    } catch (err) {
+      console.error("Toggle error:", err);
+      toaster.create({
+        description: "Something went wrong.",
+        type: "error",
+      });
+    }
+  };
+
   useEffect(() => {
     const fetchexistingUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/auth/student-life-dep');
-        const existingUsers = Array.isArray(response.data.users) ? response.data.users : [];
-        console.log(existingUsers)
+        const response = await axios.get(
+          "http://localhost:8000/api/auth/student-life-dep"
+        );
+        const existingUsers = Array.isArray(response.data.users)
+          ? response.data.users
+          : [];
         setUsers(existingUsers);
       } catch (error) {
-        console.error('Error fetching users:', error);
+        console.error("Error fetching users:", error);
       }
     };
-  
 
     fetchexistingUsers();
   }, [isDialogOpen]);
 
   // Handle the checkbox change
-  const handleCheckboxChange = (userId) => {
-    setAssignedUsers((prevAssignedUsers) => {
-      const updatedAssignedUsers = new Set(prevAssignedUsers);
-      if (updatedAssignedUsers.has(userId)) {
-        updatedAssignedUsers.delete(userId); // Unassign if already assigned
-      } else {
-        updatedAssignedUsers.add(userId); // Assign if not assigned
-      }
-      return updatedAssignedUsers;
-    });
-  };
-  
 
-  
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-
-        const response = await axios.get('http://localhost:8000/api/auth/events');
-        console.log(response.data)
-        const formattedEvents = response.data.map(event => ({
-          id:event._id,
+        const response = await axios.get(
+          "http://localhost:8000/api/auth/events"
+        );
+       
+        const formattedEvents = response.data.map((event) => ({
+          id: event._id,
           title: event.eventName,
-          start: event.eventDate + 'T' + event.eventTime.split(' - ')[0],
-          end: event.eventDate + 'T' + event.eventTime.split(' - ')[1],
+          start: event.eventDate + "T" + event.eventTime.split(" - ")[0],
+          end: event.eventDate + "T" + event.eventTime.split(" - ")[1],
           location: event.eventLocation,
-          image:event.eventImage?.uri,
-          backgroundColor: event.status?.toLowerCase() === "waiting"
-  ? "grey"
-  : event.status?.toLowerCase() === "approved"
-  ? "green"
-  : event.status?.toLowerCase() === "declined"
-  ? "red"
-  : "gray", // Default fallback color
+          image: event.eventImage?.uri,
+          assignedMembers: event.assignedMembers,
+          club:event.club,
+          backgroundColor:
+            event.status?.toLowerCase() === "waiting"
+              ? "grey"
+              : event.status?.toLowerCase() === "approved"
+              ? "green"
+              : event.status?.toLowerCase() === "declined"
+              ? "red"
+              : "gray", // Default fallback color
 
-borderColor: event.status?.toLowerCase() === "waiting"
-  ? "grey"
-  : event.status?.toLowerCase() === "approved"
-  ? "green"
-  : event.status?.toLowerCase() === "declined"
-  ? "red"
-  : "gray",
+          borderColor:
+            event.status?.toLowerCase() === "waiting"
+              ? "grey"
+              : event.status?.toLowerCase() === "approved"
+              ? "green"
+              : event.status?.toLowerCase() === "declined"
+              ? "red"
+              : "gray",
           extendedProps: { status: event.status },
         }));
         setEvents(formattedEvents);
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error("Error fetching events:", error);
       }
     };
 
     fetchEvents();
   }, [!isDialogOpen]);
-  
-  
-  
+
   const handleEventClick = (info) => {
     setIsDialogOpen(true);
     const eventDetails = info.event;
     const eventId = info.event._def.publicId;
 
-    console.log(info.event._def.publicId)
+    
     setSelectedEvent({
-      id:eventId,
+      id: eventId,
       title: eventDetails.title,
       start: eventDetails.start,
       end: eventDetails.end,
       location: eventDetails.extendedProps.location,
-      status: eventDetails.extendedProps.status ,
-      image:eventDetails.extendedProps.image
+      status: eventDetails.extendedProps.status,
+      image: eventDetails.extendedProps.image,
+      assignedMembers: eventDetails.extendedProps.assignedMembers,
+      club:eventDetails.extendedProps.club
     });
-    console.log(eventDetails.id)
+  
   };
-
-  const handleApproval = async (eventId) => {
-    console.log(eventId)
+  const fetchClubEmail = async (id) => {
     try {
-      await axios.post('http://localhost:8000/api/auth/events/approve', { eventId })
-      setSelectedEvent(prev => ({ ...prev, status: 'Approved' }))
-    } catch (error) {
-      console.error('Approval failed:', error)
-    } finally {
-      setIsDialogOpen(false)
+      const res = await axios.get(`http://localhost:8000/api/auth/clubs/${id}`);
+      console.log(res.data.club.email)
+      return res.data.club.email;
+    } catch (err) {
+      console.error("Failed to fetch club email", err);
+      return null;
     }
+  };
+  
+  const sendEventStatusEmail = (clubEmail, eventTitle, status) => {
+    const templateParams = {
+      user_email: clubEmail,
+      event_title: eventTitle,
+      status: status, // e.g., "Approved" or "Refused"
+    }
+    console.log("📨 Sending email with params:", templateParams);
+
+    emailjs
+      .send(
+        'service_096kpb3',       // Replace with your EmailJS service ID
+        'template_4ul91xt',      // Replace with your EmailJS template ID
+        templateParams,
+        'VCjuhQHBZ7DEMPEGH'        // Replace with your EmailJS public key
+      )
+      .then((response) => {
+        console.log('✅ Email sent successfully:', response.text)
+      })
+      .catch((err) => {
+        console.error('❌ Failed to send email:', err)
+      })
   }
+  
+  const handleApproval = async (eventId) => {
+    
+    try {
+      await axios.post("http://localhost:8000/api/auth/events/approve", {
+        eventId,
+      });
+      setSelectedEvent((prev) => ({ ...prev, status: "Approved" }));
+      console.log(selectedEvent)
+      const clubEmail = await fetchClubEmail(selectedEvent.club); 
+      console.log(clubEmail)
+      const testEmail = "kzitouni18@gmail.com";
+    const eventTitle = selectedEvent.title;// Replace `clubId` with the actual field
+    if (clubEmail) {
+      sendEventStatusEmail(testEmail, selectedEvent.title, "Approved");
+    }
+    } catch (error) {
+      console.error("Approval failed:", error);
+    } finally {
+      setIsDialogOpen(false);
+    }
+  };
+  const DetailItem = ({ label, value }) => (
+    <Box>
+      <Text fontSize="sm" fontWeight="semibold" color="gray.500">
+        {label}
+      </Text>
+      <Text fontSize="md" color="gray.800">
+        {value}
+      </Text>
+    </Box>
+  );
   
   const handleDecline = async (eventId) => {
-    
     try {
-      await axios.post('http://localhost:8000/api/auth/events/decline', {eventId})
-      setSelectedEvent(prev => ({ ...prev, status: 'Declined' }))
+      await axios.post("http://localhost:8000/api/auth/events/decline", {
+        eventId,
+      });
+      setSelectedEvent((prev) => ({ ...prev, status: "Declined" }));
     } catch (error) {
-      console.error('Decline failed:', error)
+      console.error("Decline failed:", error);
     } finally {
-      setIsDialogOpen(false)
+      setIsDialogOpen(false);
     }
-  }
-  
+  };
+
   return (
     <>
-    
-     <Box  >
-  <HStack spacing={12}  >
-    <HStack spacing={2} align="center">
-      <Box w={3} h={3} bg="gray.500" borderRadius="full" />
-      <Text fontSize="sm" mt={4}>Waiting</Text>
-    </HStack>
-    <HStack spacing={2} align="center">
-      <Box w={3} h={3} bg="green.600" borderRadius="full" />
-      <Text fontSize="sm" mt={4}>Approved</Text>
-    </HStack>
-    <HStack spacing={2} align="center">
-      <Box w={3} h={3} bg="red.600" borderRadius="full" />
-      <Text fontSize="sm" mt={4}>Declined</Text>
-    </HStack>
-  </HStack>
-</Box>
+      <Box>
+        <HStack spacing={12}>
+          <HStack spacing={2} align="center">
+            <Box w={3} h={3} bg="gray.500" borderRadius="full" />
+            <Text fontSize="sm" mt={4}>
+              Waiting
+            </Text>
+          </HStack>
+          <HStack spacing={2} align="center">
+            <Box w={3} h={3} bg="green.600" borderRadius="full" />
+            <Text fontSize="sm" mt={4}>
+              Approved
+            </Text>
+          </HStack>
+          <HStack spacing={2} align="center">
+            <Box w={3} h={3} bg="red.600" borderRadius="full" />
+            <Text fontSize="sm" mt={4}>
+              Declined
+            </Text>
+          </HStack>
+        </HStack>
+      </Box>
       <style>{`
     /* Main calendar styling */
     .fc {
@@ -275,9 +393,13 @@ borderColor: event.status?.toLowerCase() === "waiting"
     }
   `}</style>
 
-
       <FullCalendar
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, multiMonthPlugin]}
+        plugins={[
+          dayGridPlugin,
+          timeGridPlugin,
+          interactionPlugin,
+          multiMonthPlugin,
+        ]}
         initialView="dayGridMonth"
         headerToolbar={{
           left: "prev,next today",
@@ -289,12 +411,12 @@ borderColor: event.status?.toLowerCase() === "waiting"
         }}
         eventDidMount={(info) => {
           const status = info.event.extendedProps.status?.toLowerCase();
-      
-          let borderColor = 'rgb(135, 147, 158)'; // Default gray
-          if (status === 'approved') borderColor = '#38A169';  // green
-          else if (status === 'declined') borderColor = '#E53E3E';  // red
-          else if (status === 'waiting') borderColor = '#A0AEC0';  // light gray
-      
+
+          let borderColor = "rgb(135, 147, 158)"; // Default gray
+          if (status === "approved") borderColor = "#38A169"; // green
+          else if (status === "declined") borderColor = "#E53E3E"; // red
+          else if (status === "waiting") borderColor = "#A0AEC0"; // light gray
+
           info.el.style.borderLeft = `4px solid ${borderColor}`;
         }}
         events={events}
@@ -302,216 +424,220 @@ borderColor: event.status?.toLowerCase() === "waiting"
       />
 
       {/* Dialog for event details */}
-      <Dialog.Root open={isDialogOpen}  motionPreset="slide-in-bottom" size={"cover"}   placement="center" > 
-        <Portal  >
-        <Dialog.Backdrop  />
-        <Dialog.Positioner >
-        <Dialog.Content  >
-          <Dialog.Header   fontWeight="bold" color={"blackAlpha.950"} bgColor="whiteAlpha.900"  fontSize="4xl">{selectedEvent?.title}</Dialog.Header>
-          <Dialog.Body bgColor="whiteAlpha.900" >
+      <Dialog.Root open={isDialogOpen} motionPreset="slide-in-bottom" size="cover" placement="center">
+  <Portal>
+    <Dialog.Backdrop bg="blackAlpha.300" />
+    <Dialog.Positioner>
+      <Dialog.Content bg="white" borderRadius="xl" boxShadow="2xl" p={6}>
+        {/* Header */}
+        <Dialog.Header fontSize="4xl" fontWeight="bold" color="gray.800" mb={4}>
+          {selectedEvent?.title}
+        </Dialog.Header>
+
+        {/* Body */}
+        <Dialog.Body>
   {selectedEvent && (
-    <Flex 
-      direction="row" 
-      align="stretch" 
-      spacing={2} 
+    <Flex
+      p={2}
+      gap={4}
       
-      
+      overflow="hidden"
     >
-      {/* Left side: Image */}
-      <Box 
-        bgColor="blackalpha.900" 
-        flex="1" 
-
-        overflow="hidden"
-        boxShadow="lg"
-        display="flex"
-        alignItems="center"
-        justifyContent="center"
-        
-      >
-        <Image 
-          src={selectedEvent.image} 
-          alt="Event Image" 
-          objectFit="cover" 
-          width="80%" 
-          height="100%" 
-          maxHeight="500px"
+      {/* Left: Event Image with Title */}
+      <Box flex="0.7">
+       
+        <Box
+          borderRadius="xl"
+          overflow="hidden"
+          boxShadow="md"
           
-        />
-      </Box>
-
-      {/* Right side: Event details */}
-      <Box 
-        bgColor="blackAlpha.900" 
-        flex="1" 
-        p={6} 
-        
-        boxShadow="2xl"
-        display="flex" 
-        flexDirection="column" 
-        justifyContent="center"
-      >
-        <VStack spacing={5} color="gray.700">
-          <Box w="100%">
-            <Text fontWeight="bold" fontSize="lg" color="cyan.400">Location:</Text>
-            <Text fontSize="md" color="whiteAlpha.950">{selectedEvent.location}</Text>
-          </Box>
-
-          <Box w="100%">
-            <Text fontWeight="bold" fontSize="lg" color="cyan.400">Start Time:</Text>
-            <Text fontSize="md" color="whiteAlpha.950">{new Date(selectedEvent.start).toLocaleString()}</Text>
-          </Box>
-
-          <Box w="100%">
-            <Text fontWeight="bold" fontSize="lg" color="cyan.400">End Time:</Text>
-            <Text fontSize="md" color="whiteAlpha.950">{new Date(selectedEvent.end).toLocaleString()}</Text>
-          </Box>
-
-          <Box w="100%">
-            <Text fontWeight="bold" fontSize="lg" color="cyan.400">Status:</Text>
-            <Text fontSize="md" color="whiteAlpha.950">{selectedEvent.status}</Text>
-          </Box>
-        </VStack>
-        {/* Drag & Drop User Assignment */}
-        
-      </Box>
-      <Box width="100%" flex={1} maxH="500px" overflowY="auto" p={2}  bg="whiteAlpha.900"
-      sx={{
-        '&::-webkit-scrollbar': {
-          display: 'none', // Hide the scrollbar
-        },
-        '&::-webkit-scrollbar-thumb': {
-          display: 'none', // Hide the thumb too
-        },
-      }}
-      >
-      <VStack spacing={3} align="stretch" >
-        <List.Root
+          
         >
-          {users.length > 0 ? (
-            users.map((user) => (
-              <List.Item key={user._id}>
-                <Card.Root
-        display="flex"
-        flexDirection="row"
-        alignItems="flex-start"
-        width="100%"
-        bg="blackAlpha.800"
-         mb={4}
-        color="white"
-        variant={"solid"}
-        maxHeight="220px"
-        p={3}
-        boxShadow="md"
-        _hover={{
-          boxShadow: "xl",
-          transform: "scale(1.02)",
-          transition: "0.2s",
-        }}
-      >
-      <Card.Body h="100%" >
-      <HStack align="center" spacing={4} h="100%">
-      {/* Avatar */}
-      <Avatar.Root>
-      <Avatar.Fallback name={user.fullname} />
-      <Avatar.Image src={user.picture} />
-    </Avatar.Root>
-
-      {/* Details + Checkbox */}
-      <VStack align="start" spacing={2} flex="1" justify="center">
-        <Box>
-          <Text fontWeight="bold" fontSize="md" color="whiteAlpha.900">
-            {user.fullname}
-          </Text>
-          <Text fontSize="sm" color="whiteAlpha.900">
-            {user.email}
-          </Text>
-          <Text fontSize="sm" color="whiteAlpha.900">
-            {user.Role}
-          </Text>
-           <HStack mt={2} spacing={2} wrap="wrap">
-                      <Badge variant="solid" fontSize="0.9em" colorPalette={"whiteAlpha.900"}>{user.major}</Badge>
-                      <Badge  variant="solid" fontSize="0.9em" colorPalette={"whiteAlpha.900"}>{user.program}</Badge>
-                    </HStack>
+          <Image
+            src={selectedEvent.image}
+            alt="Event"
+            objectFit="cover"
+            w="100%"
+            h="100%"
+            maxH="500px"
+          />
         </Box>
+      </Box>
 
-        {/* Checkbox */}
-        <Switch.Root
-        colorPalette={"cyan"}
-        variant={"solid"}
-        mt={2}
-          display={"flex"}
-        >
-          <Switch.HiddenInput />
-          <Switch.Control>
-          
-          </Switch.Control>
-          <Switch.Label >Assign to Event</Switch.Label>
-        </Switch.Root>
-      </VStack>
-            </HStack>
-          </Card.Body>
-        </Card.Root>
+      {/* Middle: Event Details with Title */}
+      <Box
+        flex="1"
+        bg="gray.50"
+        borderRadius="xl"
+        p={6}
+        boxShadow="md"
+        overflowY="auto"
+      >
+        <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.700">
+          Event Details
+        </Text>
+        <VStack align="start" spacing={4}>
+          <DetailItem label="Location" value={selectedEvent.location} />
+          <DetailItem label="Start Time" value={new Date(selectedEvent.start).toLocaleString()} />
+          <DetailItem label="End Time" value={new Date(selectedEvent.end).toLocaleString()} />
+          <DetailItem label="Status" value={selectedEvent.status} />
+        </VStack>
+      </Box>
 
-              </List.Item>
-            ))
-          ) : (
-            <Text>No users available.</Text>
-          )}
-        </List.Root>
-      </VStack>
-    </Box>
+      {/* Right: Member Assignment */}
+      <Box
+        flex="1"
+        bg="gray.50"
+        borderRadius="xl"
+        p={4}
+        overflowY="auto"
+        boxShadow="md"
+        sx={{ "&::-webkit-scrollbar": { display: "none" } }}
+      >
+        <Text fontSize="lg" fontWeight="semibold" mb={4} color="gray.700">
+          Assign Members
+        </Text>
+
+        <VStack spacing={4} align="stretch">
+          <List.Root>
+            {users.length > 0 ? (
+              users.map((user) => (
+                <List.Item key={user._id} listStyleType={"none"} >
+                  <Card.Root
+                  mt={3}
+                    bg="white"
+                    p={4}
+                    borderRadius="md"
+                    boxShadow="sm"
+                    _hover={{
+                      boxShadow: "md",
+                      transform: "scale(1.01)",
+                      transition: "0.2s",
+                    }}
+                  >
+                    <HStack spacing={4}  align="center">
+                      {/* Avatar */}
+                      <Avatar.Root boxSize={12}>
+                        <Avatar.Fallback name={user.fullname} />
+                        <Avatar.Image src={user.picture} />
+                      </Avatar.Root>
+
+                      {/* Info */}
+                      <Box flex="1" >
+                        <Text fontWeight="bold" fontSize="md" color="gray.800">
+                          {user.fullname}
+                        </Text>
+                        <Text fontSize="sm" color="gray.500">
+                          {user.email}
+                        </Text>
+                        <Text fontSize="sm" color="gray.500">
+                          {user.Role}
+                        </Text>
+                        <HStack mt={2} spacing={2} wrap="wrap">
+                          <Badge colorScheme="blue" fontSize="0.75rem">
+                            {user.major}
+                          </Badge>
+                          <Badge colorScheme="green" fontSize="0.75rem">
+                            {user.program}
+                          </Badge>
+                        </HStack>
+                      </Box>
+
+                      {/* Light-Themed Switch */}
+                      <Switch.Root
+                        variant="solid"
+                        display={"flex"}
+                        colorPalette={"green"}
+                        checked={!!checkedMap[user._id]}
+                        onCheckedChange={(val) =>
+                          handleToggle(val, selectedEvent.id, user._id)
+                        }
+                      >
+                        <Switch.HiddenInput />
+                        <Switch.Control
+                          
+                          
+                         
+                        />
+                        <Switch.Label ml={2} color="gray.700">
+                          Assign
+                        </Switch.Label>
+                      </Switch.Root>
+                    </HStack>
+                  </Card.Root>
+                </List.Item>
+              ))
+            ) : (
+              <Text color="gray.500">No users available.</Text>
+            )}
+          </List.Root>
+        </VStack>
+      </Box>
     </Flex>
   )}
 </Dialog.Body>
 
-<Dialog.Footer bgColor="whiteAlpha.900">
-  {selectedEvent && (
-    <HStack spacing={4}>
-      {selectedEvent.status === 'Waiting' ? (
-  <>
-    <Button color="white" onClick={() => setIsDialogOpen(false)}>
-      Close
-    </Button>
-    <Button colorPalette="red" variant="subtle" onClick={() => handleDecline(selectedEvent.id)}>
-      Decline
-    </Button>
-    <Button colorPalette="green" variant="subtle" onClick={() => handleApproval(selectedEvent.id)}>
-      Approve
-    </Button>
-  </>
-) : selectedEvent.status === 'Approved' ? (
-  <>
-    <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
-      Close
-    </Button>
-    <Button colorPalette="green" variant="solid" disabled>
-      Approved
-    </Button>
-  </>
-) : selectedEvent.status === 'Declined' ? (
-  <>
-    <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
-      Close
-    </Button>
-    <Button colorPalette="red" variant="solid" disabled>
-      Refused
-    </Button>
-  </>
-) : null}
-
-    </HStack>
-  )}
-</Dialog.Footer>
 
 
 
-          
-          </Dialog.Content>
-        </Dialog.Positioner>
+              <Dialog.Footer bgColor="whiteAlpha.900">
+                {selectedEvent && (
+                  <HStack spacing={4}>
+                    {selectedEvent.status === "Waiting" ? (
+                      <>
+                        <Button
+                          color="white"
+                          onClick={() => setIsDialogOpen(false)}
+                        >
+                          Close
+                        </Button>
+                        <Button
+                          colorPalette="red"
+                          variant="subtle"
+                          onClick={() => handleDecline(selectedEvent.id)}
+                        >
+                          Decline
+                        </Button>
+                        <Button
+                          colorPalette="green"
+                          variant="subtle"
+                          onClick={() => handleApproval(selectedEvent.id)}
+                        >
+                          Approve
+                        </Button>
+                      </>
+                    ) : selectedEvent.status === "Approved" ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          onClick={() => setIsDialogOpen(false)}
+                        >
+                          Close
+                        </Button>
+                        <Button colorPalette="green" variant="solid" disabled>
+                          Approved
+                        </Button>
+                      </>
+                    ) : selectedEvent.status === "Declined" ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          onClick={() => setIsDialogOpen(false)}
+                        >
+                          Close
+                        </Button>
+                        <Button colorPalette="red" variant="solid" disabled>
+                          Refused
+                        </Button>
+                      </>
+                    ) : null}
+                  </HStack>
+                )}
+              </Dialog.Footer>
+            </Dialog.Content>
+          </Dialog.Positioner>
         </Portal>
       </Dialog.Root>
-
     </>
   );
 };

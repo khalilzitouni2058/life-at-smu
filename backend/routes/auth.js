@@ -74,8 +74,55 @@ router.post("/events/decline", async (req, res) => {
     res.status(200).json({ message: "Event declined", event: updatedEvent });
   } catch (error) {
     res.status(500).json({ message: "Error declining event", error });
+
   }
 });
+router.get("/events/new", async (req, res) => {
+  const { since } = req.query; // e.g. ISO date string
+  try {
+    const newEvents = await Event.find({ createdAt: { $gt: new Date(since) } });
+    res.status(200).json(newEvents);
+  } catch (err) {
+    res
+      .status(500)
+      .json({ message: "Error fetching new events", error: err.message });
+  }
+});
+
+router.post("/events/:eventId/assign-member", async (req, res) => {
+  const { userId } = req.body;
+  const { eventId } = req.params;
+
+  try {
+    const event = await Event.findById(eventId);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    const index = event.assignedMembers.indexOf(userId);
+
+    if (index === -1) {
+      // ✅ Assign member
+      event.assignedMembers.push(userId);
+      await event.save();
+      return res
+        .status(200)
+        .json({ message: "Member assigned", assigned: true, event });
+    } else {
+      // ❌ Unassign member
+      event.assignedMembers.splice(index, 1);
+      await event.save();
+      return res
+        .status(200)
+        .json({ message: "Member unassigned", assigned: false, event });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+
+  }
+});
+
 router.get("/student-life-dep", async (req, res) => {
   try {
     const users = await studentLifeDeps.find();
@@ -897,7 +944,7 @@ router.get("/events/:date", async (req, res) => {
 router.get("/events", async (req, res) => {
   try {
     const events = await Event.find().select(
-      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status formLink"
+      "eventName eventDescription eventDate eventTime eventLocation additionalNotes eventImage club mandatoryParentalAgreement transportationProvided status formLink assignedMembers"
     );
 
     res.status(200).json(events);

@@ -13,12 +13,9 @@ function ListOfUsers() {
   const SparkLine = () => {
     const chart = useChart({
       data: [
-        { value: 10 },
-        { value: 16 },
-        { value: 19 },
-        { value: 15 },
-        { value: 12 },
-        { value: 15 },
+        { value: 0 },
+        { value: users.length },
+        
       ],
       series: [{ color: "teal.solid" }],
     })
@@ -48,7 +45,7 @@ function ListOfUsers() {
     const chart = useChart({
       data: [
         { value: 1 },
-        { value: 2 },
+        { value: totalUsersWithEvents },
         
       ],
       series: [{ color: "cyan.solid" }],
@@ -102,7 +99,9 @@ function ListOfUsers() {
   size="xl"
   fontWeight="bold"
   mb={6}
-  alignSelf={"center"}
+  
+  display={"flex"}
+  justifyContent={"left"}
   color="blackAlpha.950"
   letterSpacing="wide"
   textTransform="uppercase"
