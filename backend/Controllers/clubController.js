@@ -12,12 +12,12 @@ const getAllClubs = async (req, res) => {
 
 
 const adminCreateClub = async (req, res) => {
-  const { clubName, profilePicture } = req.body;
+  const { email,clubName, profilePicture,password } = req.body;
 
     // Create club
     const newClub = new Club({
       email,
-      password: generatedPassword, 
+      password: 123,
       clubName,
       profilePicture:
         profilePicture ||
