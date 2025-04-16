@@ -7,6 +7,8 @@ import {
   ActivityIndicator,
   TextInput,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import { Card } from "react-native-paper";
 import axios from "axios";
 import Constants from "expo-constants";
@@ -57,58 +59,60 @@ const ClubsScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Student Clubs</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <Text style={styles.heading}>Student Clubs</Text>
 
-      <TextInput
-        placeholder="Search clubs..."
-        placeholderTextColor="#888"
-        value={search}
-        onChangeText={handleSearch}
-        style={styles.search}
-      />
+        <TextInput
+          placeholder="Search clubs..."
+          placeholderTextColor="#888"
+          value={search}
+          onChangeText={handleSearch}
+          style={styles.search}
+        />
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#007DA5" />
-      ) : (
-        <Animated.ScrollView
-          contentContainerStyle={styles.scroll}
-          style={fadeAnim}
-        >
-          {filteredClubs.map((club) => (
-            <View key={club._id}>
-              <Card
-                style={styles.card}
-                onPress={() =>
-                  navigation.navigate("ClubDetailsScreen", { club })
-                }
-              >
-                <Card.Content>
-                  <View style={styles.clubRow}>
-                    <Image
-                      source={{
-                        uri: club?.profilePicture,
-                      }}
-                      style={styles.image}
-                    />
-                    <View style={styles.clubDetails}>
-                      <Text style={styles.clubName}>{club?.clubName}</Text>
-                      <Text
-                        style={styles.description}
-                        numberOfLines={4}
-                        ellipsizeMode="tail"
-                      >
-                        {club?.clubDescription || "No description provided"}
-                      </Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#007DA5" />
+        ) : (
+          <Animated.ScrollView
+            contentContainerStyle={styles.scroll}
+            style={fadeAnim}
+          >
+            {filteredClubs.map((club) => (
+              <View key={club._id}>
+                <Card
+                  style={styles.card}
+                  onPress={() =>
+                    navigation.navigate("ClubDetailsScreen", { club })
+                  }
+                >
+                  <Card.Content>
+                    <View style={styles.clubRow}>
+                      <Image
+                        source={{
+                          uri: club?.profilePicture,
+                        }}
+                        style={styles.image}
+                      />
+                      <View style={styles.clubDetails}>
+                        <Text style={styles.clubName}>{club?.clubName}</Text>
+                        <Text
+                          style={styles.description}
+                          numberOfLines={4}
+                          ellipsizeMode="tail"
+                        >
+                          {club?.clubDescription || "No description provided"}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                </Card.Content>
-              </Card>
-            </View>
-          ))}
-        </Animated.ScrollView>
-      )}
-    </View>
+                  </Card.Content>
+                </Card>
+              </View>
+            ))}
+          </Animated.ScrollView>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
 
@@ -116,7 +120,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    paddingTop: 40,
+    paddingTop: 5,
     paddingBottom: 80,
   },
   heading: {
@@ -171,6 +175,10 @@ const styles = StyleSheet.create({
   description: {
     fontSize: 14,
     color: "#555",
+  },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#FFFFFF",
   },
 });
 

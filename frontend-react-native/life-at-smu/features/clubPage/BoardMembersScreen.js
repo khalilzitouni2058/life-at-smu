@@ -38,34 +38,36 @@ const BoardMembersScreen = ({ route, navigation }) => {
                     source={{ uri: member.user?.picture }}
                     style={styles.image}
                   />
-                  <Text style={styles.text}>
-                    <Text style={styles.label}>Name: </Text>
-                    {member.user?.fullname}
-                  </Text>
-                  <Text style={styles.text}>
-                    <Text style={styles.label}>Role: </Text>
-                    {member.role}
-                  </Text>
-                  <Text style={styles.text}>
-                    <Text style={styles.label}>Email: </Text>
-                    {member.user?.email}
-                  </Text>
-                  <Text style={styles.text}>
-                    <Text style={styles.label}>Phone: </Text>
-                    {member.phoneNumber}
-                  </Text>
-                  {member.facebookLink && (
-                    <Text
-                      style={styles.link}
-                      onPress={() => {
-                        Linking.openURL(member.facebookLink).catch((err) =>
-                          console.error("Failed to open URL:", err)
-                        );
-                      }}
-                    >
-                      Facebook Profile
+                  <View style={{ marginLeft: 10, flex: 1 }}>
+                    <Text style={styles.text}>
+                      <Text style={styles.label}>Name: </Text>
+                      {member.user?.fullname}
                     </Text>
-                  )}
+                    <Text style={styles.text}>
+                      <Text style={styles.label}>Role: </Text>
+                      {member.role}
+                    </Text>
+                    <Text style={styles.text}>
+                      <Text style={styles.label}>Email: </Text>
+                      {member.user?.email}
+                    </Text>
+                    <Text style={styles.text}>
+                      <Text style={styles.label}>Phone: </Text>
+                      {member.phoneNumber}
+                    </Text>
+                    {member.facebookLink && (
+                      <Text
+                        style={styles.link}
+                        onPress={() => {
+                          Linking.openURL(member.facebookLink).catch((err) =>
+                            console.error("Failed to open URL:", err)
+                          );
+                        }}
+                      >
+                        Facebook Profile
+                      </Text>
+                    )}
+                  </View>
                 </TouchableOpacity>
               ))}
             </View>
@@ -131,10 +133,10 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   card: {
-    width: "45%",
+    width: "100%",
+    flexDirection: "row", // ← horizontal layout
     backgroundColor: "#fff",
-    paddingVertical: 20,
-    paddingHorizontal: 10,
+    padding: 10,
     alignItems: "center",
     borderRadius: 10,
     borderColor: "#007DA5",
@@ -146,12 +148,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
+
   image: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginBottom: 10,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
   },
+
   text: {
     fontSize: 14,
     color: "#333",
