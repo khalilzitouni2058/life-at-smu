@@ -39,8 +39,13 @@ const clubSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  isRecruiting: {
+    type: Boolean,
+    default: false,
+  },
+
   boardMembers: [boardMemberSchema],
-  events: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }], 
+  events: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
   users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   pendingRequests: [
     {

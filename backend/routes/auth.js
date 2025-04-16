@@ -74,7 +74,6 @@ router.post("/events/decline", async (req, res) => {
     res.status(200).json({ message: "Event declined", event: updatedEvent });
   } catch (error) {
     res.status(500).json({ message: "Error declining event", error });
-
   }
 });
 router.get("/events/new", async (req, res) => {
@@ -118,10 +117,6 @@ router.post("/events/:eventId/assign-member", async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
-
-
-  
-
 
 router.get("/student-life-dep", async (req, res) => {
   try {
@@ -420,7 +415,10 @@ router.get("/users/:userId/club-requests", async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const user = await User.findById(userId).populate("clubRequests.club", "clubName category profilePicture");
+    const user = await User.findById(userId).populate(
+      "clubRequests.club",
+      "clubName category profilePicture"
+    );
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -506,6 +504,7 @@ router.post("/clubs/signup", async (req, res) => {
         "https://cdn-icons-png.flaticon.com/128/16745/16745734.png",
       boardMembers: [],
       firstLogin: true,
+      isRecruiting,
     });
 
     // Save the new club to the database
@@ -530,6 +529,7 @@ router.post("/clubs/signup", async (req, res) => {
         contactInfo: newClub.contactInfo,
         profilePicture: newClub.profilePicture,
         boardMembers: newClub.boardMembers,
+        isRecruiting: club.isRecruiting,
       },
     });
   } catch (err) {
@@ -580,6 +580,7 @@ router.post("/clubs/login", async (req, res) => {
         profilePicture: club.profilePicture,
         boardMembers: club.boardMembers,
         firstLogin: club.firstLogin,
+        isRecruiting: club.isRecruiting,
       },
     });
   } catch (err) {
@@ -609,6 +610,7 @@ router.put("/clubs/:id", async (req, res) => {
     contactInfo,
     profilePicture,
     boardMembers,
+    isRecruiting,
   } = req.body;
 
   try {
@@ -622,6 +624,7 @@ router.put("/clubs/:id", async (req, res) => {
         profilePicture,
         boardMembers,
         firstLogin: false,
+        isRecruiting,
       },
       { new: true, runValidators: true }
     );
@@ -964,6 +967,22 @@ router.get("/rooms", async (req, res) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: "Error on getting rooms" });
+  }
+});
+router.patch("/clubs/:id/toggle-recruiting", async (req, res) => {
+  try {
+    const club = await Club.findById(req.params.id);
+    if (!club) return res.status(404).json({ message: "Club not found" });
+
+    club.isRecruiting = !club.isRecruiting;
+    await club.save();
+
+    res.status(200).json({
+      message: "Recruiting status toggled",
+      isRecruiting: club.isRecruiting,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 

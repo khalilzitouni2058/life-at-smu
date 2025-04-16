@@ -155,6 +155,40 @@ const ClubProfile = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
+        <TouchableOpacity
+          activeOpacity={0.8}
+          style={[
+            styles.recruitButton,
+            {
+              backgroundColor: profile.isRecruiting ? "#4CAF50" : "#D32F2F",
+            },
+          ]}
+          onPress={async () => {
+            try {
+              const res = await axios.patch(
+                `http://${ipAddress}:8000/api/auth/clubs/${clubId}/toggle-recruiting`
+              );
+              setProfile((prev) => ({
+                ...prev,
+                isRecruiting: res.data.isRecruiting,
+              }));
+            } catch (err) {
+              console.error("Error toggling recruiting status:", err);
+            }
+          }}
+        >
+          <Ionicons
+            name={profile.isRecruiting ? "megaphone" : "megaphone-outline"}
+            size={18}
+            color="white"
+            style={{ marginRight: 8 }}
+          />
+          <Text style={styles.recruitButtonText}>
+            {profile.isRecruiting
+              ? "Recruiting Enabled"
+              : "Recruiting Disabled"}
+          </Text>
+        </TouchableOpacity>
 
         <Animated.View
           style={[
@@ -377,6 +411,27 @@ const styles = StyleSheet.create({
     marginRight: 10,
     paddingBottom: 6,
     color: "#007DA5",
+  },
+  recruitButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginTop: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 25,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+
+  recruitButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 15,
   },
 });
 

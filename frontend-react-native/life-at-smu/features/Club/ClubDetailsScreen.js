@@ -27,8 +27,7 @@ const ClubDetailsScreen = ({ route }) => {
   const [hasRequested, setHasRequested] = useState(false);
   const [isMember, setIsMember] = useState(false);
   const isUserLoggedIn = user && user.fullname;
-  const isClubLoggedIn = user && !user.fullname; 
-
+  const isClubLoggedIn = user && !user.fullname;
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "localhost";
@@ -39,17 +38,17 @@ const ClubDetailsScreen = ({ route }) => {
     const fetchClubDetails = async () => {
       try {
         if (!user || isClubLoggedIn) {
+          const res = await axios.get(
+            `http://${ipAddress}:8000/api/auth/clubs/${initialClub._id}`
+          );
+          setClub(res.data.club);
+          return;
+        }
         const res = await axios.get(
           `http://${ipAddress}:8000/api/auth/clubs/${initialClub._id}`
         );
         setClub(res.data.club);
-        return;
-      }
-      const res = await axios.get(
-        `http://${ipAddress}:8000/api/auth/clubs/${initialClub._id}`
-      );
-      setClub(res.data.club);
-      
+
         const userRes = await axios.get(
           `http://${ipAddress}:8000/api/auth/users/${user.id}`
         );
@@ -144,6 +143,7 @@ const ClubDetailsScreen = ({ route }) => {
             {!isMember && !hasRequested && (
               <TouchableOpacity
                 onPress={async () => {
+                  if (!club.isRecruiting) return;
                   try {
                     await axios.post(
                       `http://${ipAddress}:8000/api/auth/users/${user.id}/request-club`,
@@ -156,22 +156,19 @@ const ClubDetailsScreen = ({ route }) => {
                     console.error(err);
                   }
                 }}
-                style={styles.joinBtn}
+                disabled={!club.isRecruiting}
+                style={[
+                  styles.joinBtn,
+                  {
+                    backgroundColor: club.isRecruiting ? "#007DA5" : "#ccc",
+                    opacity: club.isRecruiting ? 1 : 0.6,
+                  },
+                ]}
               >
-                <Text style={styles.joinText}>Request to Join</Text>
+                <Text style={styles.joinText}>
+                  {club.isRecruiting ? "Request to Join" : "Not Recruiting"}
+                </Text>
               </TouchableOpacity>
-            )}
-
-            {hasRequested && !isMember && (
-              <View style={[styles.joinBtn, { backgroundColor: "#ccc" }]}>
-                <Text style={styles.joinText}>Awaiting Approval</Text>
-              </View>
-            )}
-
-            {isMember && (
-              <View style={[styles.joinBtn, { backgroundColor: "green" }]}>
-                <Text style={styles.joinText}>Already a Member</Text>
-              </View>
             )}
           </>
         )}
