@@ -23,13 +23,7 @@ function ListOfClubs() {
   const [clubName, setClubName] = useState("");
   const [profilePicture, setProfilePicture] = useState("");
   const [email, setEmail] = useState("");
-  const [selectedClub, setSelectedClub] = useState(null);
-  const [editModalVisible, setEditModalVisible] = useState(false);
 
-  const handleEditClick = (club) => {
-    setSelectedClub(club);
-    setEditModalVisible(true);
-  };
   const handleDeleteClub = (clubId) => {
     axios
       .delete(`http://localhost:8000/api/clubs/${clubId}`)
