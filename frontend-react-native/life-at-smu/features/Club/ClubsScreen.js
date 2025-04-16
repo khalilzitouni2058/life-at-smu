@@ -25,6 +25,7 @@ const ClubsScreen = () => {
   const [filteredClubs, setFilteredClubs] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [onlyRecruiting, setOnlyRecruiting] = useState(false);
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "localhost";
@@ -52,16 +53,55 @@ const ClubsScreen = () => {
 
   const handleSearch = (text) => {
     setSearch(text);
-    const filtered = clubs.filter((club) =>
+    let filtered = clubs.filter((club) =>
       club.clubName?.toLowerCase().includes(text.toLowerCase())
     );
-    setFilteredClubs(filtered);
   };
+  useEffect(() => {
+    let filtered = clubs.filter((club) =>
+      club.clubName?.toLowerCase().includes(search.toLowerCase())
+    );
+
+    if (onlyRecruiting) {
+      filtered = filtered.filter((club) => club.isRecruiting);
+    }
+
+    setFilteredClubs(filtered);
+  }, [search, onlyRecruiting, clubs]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.heading}>Student Clubs</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginHorizontal: 16,
+            marginBottom: 10,
+          }}
+        >
+          <Text
+            style={{ color: "#007DA5", fontWeight: "600", marginRight: 10 }}
+          >
+            Show Only Recruiting
+          </Text>
+          <Text
+            style={{
+              paddingHorizontal: 14,
+              paddingVertical: 6,
+              backgroundColor: onlyRecruiting ? "#388E3C" : "#BDBDBD",
+              borderRadius: 20,
+              color: "#fff",
+              fontWeight: "bold",
+              fontSize: 13,
+              overflow: "hidden",
+            }}
+            onPress={() => setOnlyRecruiting((prev) => !prev)}
+          >
+            {onlyRecruiting ? "✓ ON" : "OFF"}
+          </Text>
+        </View>
 
         <TextInput
           placeholder="Search clubs..."
@@ -96,6 +136,24 @@ const ClubsScreen = () => {
                       />
                       <View style={styles.clubDetails}>
                         <Text style={styles.clubName}>{club?.clubName}</Text>
+                        {club.isRecruiting && (
+                          <Text
+                            style={{
+                              backgroundColor: "#FF7043",
+                              color: "white",
+                              paddingHorizontal: 10,
+                              paddingVertical: 4,
+                              borderRadius: 6,
+                              fontSize: 12,
+                              fontWeight: "700",
+                              alignSelf: "flex-start",
+                              marginBottom: 6,
+                            }}
+                          >
+                            Recruiting Now
+                          </Text>
+                        )}
+
                         <Text
                           style={styles.description}
                           numberOfLines={4}
