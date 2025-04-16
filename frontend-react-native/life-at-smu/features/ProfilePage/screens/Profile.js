@@ -1,10 +1,11 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import React, { useEffect, useRef } from "react";
-import branch4 from "../../../assets/branch4.png"; // Assuming this image is used correctly
+import branch4 from "../../../assets/branch4.png";
 import { ScrollView } from "react-native";
 import { Ionicons } from "react-native-vector-icons";
 import { Animated } from "react-native";
 import { useUser } from "../../../Context/UserContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Profile = ({ navigation, route }) => {
   const { user, setUser } = useUser();
@@ -106,8 +107,9 @@ const Profile = ({ navigation, route }) => {
 
           <TouchableOpacity
             style={[styles.actionCard, { borderColor: "#FF5A5F" }]}
-            onPress={() => {
-              setUser(null); // or setClubId(null) if needed
+            onPress={async () => {
+              await AsyncStorage.clear();
+              setUser(null);
               navigation.replace("Login");
             }}
           >

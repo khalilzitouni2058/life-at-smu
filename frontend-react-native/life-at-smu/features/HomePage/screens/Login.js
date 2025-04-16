@@ -21,6 +21,8 @@ import logo from "../../../assets/logo.png";
 import { useUser } from "../../../Context/UserContext";
 import { useClub } from "../../../Context/ClubContext";
 import { CommonActions } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const Login = () => {
   const { setUser } = useUser();
@@ -42,7 +44,6 @@ const Login = () => {
       alert("Please fill in both email and password.");
       return;
     }
-
     try {
       const clubResponse = await axios.post(
         `http://${ipAddress}:8000/api/auth/clubs/login`,
@@ -57,8 +58,10 @@ const Login = () => {
         console.log("Club login successful:", club);
         setClubId(club._id);
         setFirstLogin(club.firstLogin);
+        setUser(null); 
 
-        setUser(null); // Clear user if logging in as club
+        await AsyncStorage.setItem("userType", "club");
+        await AsyncStorage.setItem("club", JSON.stringify(club));
 
         if (club.firstLogin === true) {
           navigation.replace("ClubUpdate");
@@ -91,9 +94,14 @@ const Login = () => {
       );
 
       if (userResponse.status === 200 && userResponse.data.user) {
+        const user = userResponse.data.user; 
         console.log("User login successful:", userResponse.data.user);
-        setUser(userResponse.data.user);
-        setClubId(null); // Clear club if logging in as user
+        setUser(user);
+        setClubId(null);
+
+        await AsyncStorage.setItem("userType", "user");
+        await AsyncStorage.setItem("user", JSON.stringify(user));
+
         handlelogin();
         return;
       }

@@ -13,7 +13,7 @@ import { Ionicons } from "react-native-vector-icons";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useClub } from "../../Context/ClubContext";
-import { Linking } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ClubProfile = ({ navigation }) => {
   const { clubId, setClubId } = useClub();
@@ -178,7 +178,7 @@ const ClubProfile = ({ navigation }) => {
               Board Members
             </Text>
           </TouchableOpacity>
-          
+
           {/* 📬 Review Requests Button */}
           <TouchableOpacity
             style={[styles.actionCard, { borderColor: "#007DA5" }]}
@@ -195,7 +195,8 @@ const ClubProfile = ({ navigation }) => {
           {/* 🚪 Logout Button */}
           <TouchableOpacity
             style={[styles.actionCard, { borderColor: "#FF5A5F" }]}
-            onPress={() => {
+            onPress={async () => {
+              await AsyncStorage.clear();
               setClubId(null);
               navigation.replace("Login");
             }}
