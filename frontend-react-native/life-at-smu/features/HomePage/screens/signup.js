@@ -90,6 +90,10 @@ export default function SignUpPage() {
       );
       if (response.data && response.data.user) {
         setUser(response.data.user);
+
+        await AsyncStorage.setItem("userType", "user");
+        await AsyncStorage.setItem("user", JSON.stringify(response.data.user));
+        
         console.log("User signup successful:", response.data.user);
         handleMain();
       }

@@ -18,6 +18,11 @@ import ClubsScreen from "./features/Club/ClubsScreen";
 import ClubDetailsScreen from "./features/Club/ClubDetailsScreen";
 import HomeMain from "./features/HomePage/screens/HomeMain";
 import EventForm from "./features/Club/components/EventForm";
+import MyClubs from "./features/ProfilePage/screens/MyClubs";
+import ClubRequests from "./features/ProfilePage/screens/ClubRequests";
+import ReviewRequests from "./features/clubPage/ReviewRequests";
+import BoardMembersScreen from "./features/clubPage/BoardMembersScreen";
+import EventHistory from "./features/HomePage/screens/EventHistory";
 
 const Stack = createNativeStackNavigator();
 
@@ -80,6 +85,21 @@ export default function App() {
               options={{ headerShown: false }}
             />
             <Stack.Screen
+              name="MyClubs"
+              component={MyClubs}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ClubRequests"
+              component={ClubRequests}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="EventHistory"
+              component={EventHistory}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
               name="ClubProfile"
               component={ClubProfile}
               options={{ headerShown: false }}
@@ -97,6 +117,16 @@ export default function App() {
             <Stack.Screen
               name="EditBoardMember"
               component={EditBoardMember}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="BoardMembersScreen"
+              component={BoardMembersScreen}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ReviewRequests"
+              component={ReviewRequests}
               options={{ headerShown: false }}
             />
           </Stack.Navigator>

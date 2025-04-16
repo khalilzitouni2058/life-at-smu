@@ -9,7 +9,6 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
 import { useClub } from "../../Context/ClubContext";
 import Constants from "expo-constants";
 import axios from "axios";
@@ -31,26 +30,108 @@ const EditBoardMember = ({ navigation, route }) => {
   const [profileImage, setProfileImage] = useState(
     editingMember?.profileImage || ""
   );
+  const [invalidEmail, setInvalidEmail] = useState(false);
+  const [existingRoles, setExistingRoles] = useState([]);
+
+  const isValidFacebookLink = (url) =>
+    /^https?:\/\/(www\.)?facebook\.com\/[A-Za-z0-9\/?=._-]+$/.test(url.trim());
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
 
   useEffect(() => {
     if (editingMember) {
-      setName(editingMember.user?.fullname || "");
       setEmail(editingMember.user?.email || "");
-      setProfileImage(editingMember.user?.picture || "");
       setFacebookLink(editingMember.facebookLink || "");
       setRole(editingMember.role || "");
       setPhoneNumber(editingMember.phoneNumber || "");
     }
   }, [editingMember]);
 
+  useEffect(() => {
+    const fetchUserByEmail = async () => {
+      if (!email.trim()) {
+        setInvalidEmail(false);
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://${ipAddress}:8000/api/auth/user-by-email/${email
+            .trim()
+            .toLowerCase()}`
+        );
+        const user = response.data.user;
+        setName(user.fullname || "");
+        setProfileImage(user.picture || "");
+        setInvalidEmail(false);
+      } catch (error) {
+        setName("");
+        setProfileImage(null);
+        setInvalidEmail(true);
+      }
+    };
+
+    fetchUserByEmail();
+  }, [email]);
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await axios.get(
+          `http://${ipAddress}:8000/api/auth/clubs/${clubId}`
+        );
+        const roles = res.data.club.boardMembers
+          .filter((m) => m.user._id !== editingMember.user._id) // skip self
+          .map((m) => m.role.toLowerCase());
+        setExistingRoles(roles);
+      } catch (e) {
+        console.error("Failed to get roles", e);
+      }
+    };
+
+    if (clubId && editingMember?.user?._id) fetchRoles();
+  }, [clubId, editingMember]);
+
   const handleSave = async () => {
     if (!clubId) {
       Alert.alert("Error", "No club ID found.");
       return;
     }
+
+    if (!email.trim()) {
+      Alert.alert("Error", "Email is required.");
+      return;
+    }
+
+    if (!role.trim()) {
+      Alert.alert("Error", "Role is required.");
+      return;
+    }
+
+    if (!phoneNumber.trim()) {
+      Alert.alert("Error", "Phone number is required.");
+      return;
+    }
+
+    const userId = editingMember?.user?._id;
+
+    if (!userId) {
+      Alert.alert("Error", "User ID not found.");
+      return;
+    }
+    if (facebookLink && !isValidFacebookLink(facebookLink)) {
+      Alert.alert("Invalid Link", "Please enter a valid Facebook link.");
+      return;
+    }
+
+    if (existingRoles.includes(role.trim().toLowerCase())) {
+      Alert.alert(
+        "Role already exists",
+        `The role "${role}" is already taken.`
+      );
+      return;
+    }
+
     try {
       const response = await axios.put(
         `http://${ipAddress}:8000/api/auth/clubs/${clubId}/update-board-member`,
@@ -103,8 +184,10 @@ const EditBoardMember = ({ navigation, route }) => {
               placeholder="Enter Email"
               placeholderTextColor="#888"
               keyboardType="email-address"
-              editable={false}
             />
+            {invalidEmail && (
+              <Text style={styles.errorText}>This email does not exist.</Text>
+            )}
           </View>
 
           <View style={styles.formGroup}>
@@ -130,6 +213,7 @@ const EditBoardMember = ({ navigation, route }) => {
               placeholder="Enter Facebook Link"
               placeholderTextColor="#888"
               editable={true}
+              required={false}
             />
           </View>
 
@@ -163,7 +247,7 @@ const EditBoardMember = ({ navigation, route }) => {
                 placeholder="Enter Phone Number"
                 placeholderTextColor="#888"
                 keyboardType="phone-pad"
-                editable={false}
+                editable={true}
               />
             </View>
           </View>
@@ -320,6 +404,11 @@ const styles = StyleSheet.create({
     color: "#007DA5",
     fontSize: 14,
     fontWeight: "bold",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 13,
+    marginTop: 4,
   },
 });
 

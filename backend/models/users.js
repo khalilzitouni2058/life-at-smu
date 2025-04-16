@@ -32,6 +32,14 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Event',
   }],
+  clubs: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Club',
+  }],
+  clubRequests: [{
+    club: { type: mongoose.Schema.Types.ObjectId, ref: "Club" },
+    status: { type: String, enum: ["Pending", "Accepted", "Declined"], default: "Pending" }
+  }],
 });
 
 // Hash the password before saving

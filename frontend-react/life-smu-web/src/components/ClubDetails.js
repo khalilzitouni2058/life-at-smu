@@ -1,69 +1,150 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import {
+  CCard,
+  CCardBody,
+  CCardTitle,
+  CCardText,
+  CCardImage,
+  CButton,
+  CCarousel,
+  CCarouselItem,
+  CContainer,
+  CRow,
+  CCol,
+  CCardFooter,
+  CSpinner
+} from "@coreui/react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Box, Image, Text, Heading, VStack, Flex, Button } from "@chakra-ui/react";
+import axios from "axios";
 
 function ClubDetails() {
   const location = useLocation();
   const navigate = useNavigate();
-  const club = location.state?.club;
+  const clubId = location.state?.club;
+  const [club, setClub] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (clubId) {
+      axios
+        .get(`http://localhost:8000/api/clubs/${clubId}`)
+        .then((res) => {
+          setClub(res.data.club);
+        })
+        .catch((err) => {
+          console.error("Error fetching club:", err);
+        });
+      // axios
+      //   .get(`http://localhost:8000/api/events/club/${clubId}`)
+      //   .then((res) => {
+      //     setEvents(res.data.events || []);
+      //   })
+      //   .catch((err) => {
+      //     console.error("Error fetching events:", err);
+      //   })
+      //   .finally(() => setLoading(false));
+    }
+  }, [clubId]);
+
+  if (loading) {
+    return <CSpinner color="primary" />;
+  }
 
   if (!club) {
-    return (
-      <Flex height="100vh" align="center" justify="center">
-        <Text fontSize="xl" color="gray.500">Club details not found.</Text>
-      </Flex>
-    );
+    return <div>Club not found.</div>;
   }
 
   return (
-    <Box height="100vh" width="100vw" bg="gray.50">
-      {/* Navbar */}
-      <Flex bg="white" p={4} boxShadow="md" align="center">
-        <Button colorScheme="blue" onClick={() => navigate(-1)}>Go Back</Button>
-      </Flex>
-      
-      <Flex direction={{ base: "column", md: "row" }} height="calc(100vh - 60px)">
-        {/* Left Section - Club Image with Background */}
-        <Box
-          flex={{ base: "none", md: "1" }}
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          p={6}
-          bg="blue.100"
-        >
-          <Image
-            src={club.profilePicture || "https://via.placeholder.com/400"}
-            alt={club.clubName || "Club"}
-            borderRadius="lg"
-            width={{ base: "50%", md: "150px" }}
-            
+    <CContainer className="py-4">
+      {/* Header */}
+      <CRow className="align-items-center mb-4">
+        <CCol md={4} className="text-center">
+          <CCardImage
+            src={club.profilePicture}
+            alt={club.clubName}
+            style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain" }}
           />
-        </Box>
+        </CCol>
+        <CCol md={8}>
+          <h2 className="text-primary">{club.clubName}</h2>
+          <p><strong>Description:</strong> {club.clubDescription || "No description available."}</p>
+          <p><strong>Email:</strong> {club.email}</p>
+          <p><strong>Category:</strong> {club.category || "Uncategorized"}</p>
+          <CButton color="primary" onClick={() => navigate(-1)}>Back to Clubs</CButton>
+        </CCol>
+      </CRow>
 
-        {/* Right Section - Club Info */}
-        <Box
-          flex="1"
-          bg="white"
-          p={8}
-          borderRadius={{ base: "lg", md: "none" }}
-          boxShadow={{ base: "lg", md: "none" }}
-          maxW={{ base: "100%", md: "500px" }}
-        >
-          <VStack align="start" spacing={4}>
-            <Heading as="h2" size="xl" color="blue.600">
-              {club.clubName}
-            </Heading>
-            <Text fontSize="lg" fontWeight="bold">
-              <strong>Category:</strong> {club.category || "No category"}
-            </Text>
-            <Text fontSize="md" color="gray.700">
-              <strong>Description:</strong> {club.description || "No description available."}
-            </Text>
-          </VStack>
-        </Box>
-      </Flex>
-    </Box>
+      {/* Carousel of Board Members */}
+      {club.boardMembers.length > 0 && (
+        <>
+          <h4 className="mb-3">Board Members</h4>
+          <CCarousel controls indicators dark>
+            {club.boardMembers.map((member, index) => (
+              <CCarouselItem key={index}>
+                <div className="d-flex flex-column align-items-center p-4">
+                  <img
+                    src={member.user.profilePicture || "/images/default-user.jpg"}
+                    alt="Member"
+                    style={{ width: "150px", height: "150px", borderRadius: "50%", objectFit: "cover" }}
+                  />
+                  <h5 className="mt-3">{member.user.username}</h5>
+                  <p className="text-muted">{member.role}</p>
+                  {member.phoneNumber && <p>📞 {member.phoneNumber}</p>}
+                  {member.facebookLink && (
+                    <a href={member.facebookLink} target="_blank" rel="noopener noreferrer">
+                      Facebook Profile
+                    </a>
+                  )}
+                </div>
+              </CCarouselItem>
+            ))}
+          </CCarousel>
+        </>
+      )}
+
+      {/* Events Grid */}
+      <div className="mt-5">
+        <h4 className="mb-3">Past Events</h4>
+        {events.length === 0 ? (
+          <p>No events yet.</p>
+        ) : (
+          <CRow>
+            {events.map((event) => (
+              <CCol key={event._id} sm={12} md={6} lg={4} className="mb-4">
+                <CCard className="h-100 shadow-sm">
+                  {event.eventImage?.uri && (
+                    <CCardImage
+                      src={event.eventImage.uri}
+                      alt={event.eventName}
+                      style={{ height: "200px", objectFit: "cover" }}
+                    />
+                  )}
+                  <CCardBody>
+                    <CCardTitle>{event.eventName}</CCardTitle>
+                    <CCardText>{event.eventDescription?.slice(0, 100) || "No description"}</CCardText>
+                    <CCardText><strong>Date:</strong> {event.eventDate}</CCardText>
+                    <CCardText><strong>Time:</strong> {event.eventTime}</CCardText>
+                    <CCardText><strong>Location:</strong> {event.eventLocation}</CCardText>
+                  </CCardBody>
+                  <CCardFooter>
+                    <CButton
+                      color="secondary"
+                      size="sm"
+                      href={event.formLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View More
+                    </CButton>
+                  </CCardFooter>
+                </CCard>
+              </CCol>
+            ))}
+          </CRow>
+        )}
+      </div>
+    </CContainer>
   );
 }
 

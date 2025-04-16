@@ -21,10 +21,12 @@ import logo from "../../../assets/logo.png";
 import { useUser } from "../../../Context/UserContext";
 import { useClub } from "../../../Context/ClubContext";
 import { CommonActions } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 const Login = () => {
   const { setUser } = useUser();
-  const { setClubId } = useClub();
+  const { setClubId, setFirstLogin } = useClub();
   const [showText, setShowText] = useState(false);
   const topRightAnim = useRef(new Animated.Value(-500)).current;
   const bottomLeftAnim = useRef(new Animated.Value(-300)).current;
@@ -34,25 +36,51 @@ const Login = () => {
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Please fill in both email and password.");
+      return;
+    }
     try {
-      const clubResponse = await axios.post(`http://${ipAddress}:8000/api/auth/clubs/login`, {
-        email,
-        password,
-      });
+      const clubResponse = await axios.post(
+        `http://${ipAddress}:8000/api/auth/clubs/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       if (clubResponse.status === 200 && clubResponse.data.club) {
-        console.log("Club login successful:", clubResponse.data.club);
-        setClubId(clubResponse.data.club._id);
-        setUser(null); // Clear user if logging in as club
-        handlelogin(); 
+        const club = clubResponse.data.club;
+        console.log("Club login successful:", club);
+        setClubId(club._id);
+        setFirstLogin(club.firstLogin);
+        setUser(null); 
+
+        await AsyncStorage.setItem("userType", "club");
+        await AsyncStorage.setItem("club", JSON.stringify(club));
+
+        if (club.firstLogin === true) {
+          navigation.replace("ClubUpdate");
+        } else {
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: "MainTabs", params: { screen: "HomeMain" } }],
+            })
+          );
+        }
         return;
       }
     } catch (clubError) {
-      console.log("Invalid credentials. Try again");
+      if (clubError.response?.status === 401) {
+        console.error("Invalid club credentials.");
+      } else {
+        console.error("Club login error:", clubError.message);
+      }
     }
 
     try {
@@ -66,16 +94,25 @@ const Login = () => {
       );
 
       if (userResponse.status === 200 && userResponse.data.user) {
+        const user = userResponse.data.user; 
         console.log("User login successful:", userResponse.data.user);
-        setUser(userResponse.data.user);
-        setClubId(null); // Clear club if logging in as user
-        handlelogin()
+        setUser(user);
+        setClubId(null);
+
+        await AsyncStorage.setItem("userType", "user");
+        await AsyncStorage.setItem("user", JSON.stringify(user));
+
+        handlelogin();
         return;
       }
     } catch (userError) {
-      console.error("Invalid Credentials. Try again");
+      if (userError.response?.status === 401) {
+        console.error("Invalid user credentials.");
+      } else {
+        console.error("User login error:", userError.message);
+      }
     }
-  };
+  }
 
   useEffect(() => {
     Animated.timing(topRightAnim, {
@@ -211,7 +248,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     textAlign: "center",
-    fontWeight: "bold"
+    fontWeight: "bold",
   },
   container: {
     flex: 1,
