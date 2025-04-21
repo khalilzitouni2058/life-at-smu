@@ -4,19 +4,28 @@ const eventSchema = new mongoose.Schema(
   {
     eventName: { type: String, required: true },
     eventDescription: { type: String },
-    eventDate: { type: String, required: true }, // Store as a string (ISO format) or Date
-    eventTime: { type: String, required: true }, // Store as string (e.g., "14:00" or "2:00 PM")
+    eventDate: { type: String, required: true },
+    eventTime: { type: String, required: true },
     eventLocation: { type: String, required: true },
     additionalNotes: { type: String },
-    eventImage: { uri: String }, // Store image URL or file path
-    room: { type: mongoose.Schema.Types.ObjectId, ref: "Room", required: true },
-    club: { type: mongoose.Schema.Types.ObjectId, ref: "Club", required: true }, // Reference to Club
-    mandatoryParentalAgreement: { type: Boolean, default: false }, // New Boolean field
-    transportationProvided: { type: Boolean, default: false }, // New Boolean field
+    eventImage: { uri: String },
+    
+    // ✅ Change from single room to array of rooms
+    rooms: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Room",
+        required: true,
+      },
+    ],
+    
+    club: { type: mongoose.Schema.Types.ObjectId, ref: "Club", required: true },
+    mandatoryParentalAgreement: { type: Boolean, default: false },
+    transportationProvided: { type: Boolean, default: false },
     status: {
       type: String,
-      enum: ["Waiting", "Approved", "Declined"], // Only allows these values
-      default: "Waiting", // Default value if none is provided
+      enum: ["Waiting", "Approved", "Declined"],
+      default: "Waiting",
     },
     formLink: {
       type: String,

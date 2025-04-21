@@ -864,7 +864,7 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     eventLocation,
     additionalNotes,
     eventImage,
-    room,
+    rooms,
     mandatoryParentalAgreement,
     transportationProvided,
     formLink,
@@ -886,7 +886,7 @@ router.post("/clubs/:clubId/events", async (req, res) => {
       eventImage,
       formLink,
       club: clubId,
-      room,
+      rooms,
       mandatoryParentalAgreement: mandatoryParentalAgreement ?? false,
       transportationProvided: transportationProvided ?? false,
       status: "Waiting", // ✅ Default status is "Waiting"
@@ -959,16 +959,17 @@ router.get("/events", async (req, res) => {
 router.get("/rooms", async (req, res) => {
   try {
     const rooms = await Room.find();
-    if (!Room.available) {
-      return res.status(200).json({ rooms: rooms });
-    } else {
+    if (rooms.length === 0) {
       return res.status(404).json({ msg: "No available rooms found" });
     }
+
+    return res.status(200).json({ rooms });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: "Error on getting rooms" });
   }
 });
+
 router.patch("/clubs/:id/toggle-recruiting", async (req, res) => {
   try {
     const club = await Club.findById(req.params.id);
