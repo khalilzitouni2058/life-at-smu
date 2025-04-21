@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Image,
+  Modal,
+  Button,
   ScrollView,
   Platform,
 } from "react-native";
@@ -18,7 +20,6 @@ import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons, FontAwesome, Entypo } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useClub } from "../../../Context/ClubContext"; // Import useClub hook
-import DropDownPicker from "react-native-dropdown-picker";
 
 const schema = yup.object().shape({
   eventName: yup
@@ -71,7 +72,16 @@ const EventForm = () => {
   const [transportationProvided, setTransportationProvided] = useState(false); // ✅ New State
   const [formLink, setformLink] = useState(false); // ✅ New State
 
-  const [open, setOpen] = useState(false);
+
+    const [roomOverlayVisible, setRoomOverlayVisible] = useState(false);
+  
+    const toggleRoomSelection = (roomId) => {
+      if (selectedRooms?.includes(roomId)) {
+        setSelectedRooms(selectedRooms.filter((id) => id !== roomId));
+      } else {
+        setSelectedRooms([...selectedRooms, roomId]);
+      }
+    };
 
   const {
     control,
@@ -81,7 +91,7 @@ const EventForm = () => {
     resolver: yupResolver(schema),
   });
 
-  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [selectedRooms, setSelectedRooms] = useState("");
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
@@ -107,7 +117,7 @@ const EventForm = () => {
         .getMinutes()
         .toString()
         .padStart(2, "0")}`,
-      room: selectedRoom,
+      rooms: selectedRooms,
       mandatoryParentalAgreement,
       transportationProvided,
       formLink, // Add the formLink data here
@@ -293,7 +303,7 @@ const EventForm = () => {
                     ":" +
                     time.getMinutes().toString().padStart(2, "0");
 
-                  setValue("time", formattedTime); // ✅ Store time
+                  setValue("time", formattedTime); 
                 }
               }}
             />
@@ -374,42 +384,69 @@ const EventForm = () => {
             <Text style={styles.errorText}>{errors.place.message}</Text>
           )}
           {/*Rooms*/}
-          <View style={styles.inputWrapper}>
-            <MaterialIcons
-              name="meeting-room"
-              size={24}
-              color="#007da5"
-              style={styles.icon}
-            />
+          <View>
+      {/* Room selection button */}
+      <TouchableOpacity
+        onPress={() => setRoomOverlayVisible(true)}
+        style={styles.inputWrapper}
+      >
+        <MaterialIcons
+          name="meeting-room"
+          size={24}
+          color="#007da5"
+          style={styles.icon}
+        />
+        <Text style={styles.selectText}>
+          {selectedRooms?.length > 0
+            ? `${selectedRooms?.length} room(s) selected`
+            : "Select rooms"}
+        </Text>
+      </TouchableOpacity>
 
-            <Controller
-              control={control}
-              name="room"
-              render={({ field: { onChange, value } }) => (
-                <DropDownPicker
-                  open={open}
-                  setOpen={setOpen}
-                  items={roomsList}
-                  value={value || selectedRoom} // Show selected room in dropdown
-                  setValue={(callback) => {
-                    const newValue = callback(selectedRoom);
-                    setSelectedRoom(newValue);
-                    console.log(selectedRoom);
-                    onChange(newValue); // Update form field
-                  }}
-                  placeholder="Select a room"
-                  containerStyle={styles.dropdown}
-                  listMode="MODAL" // Prevents VirtualizedList nesting error
-                  dropDownDirection="BOTTOM"
-                  style={styles.dropdownInput}
-                />
-              )}
+      {/* Room selection overlay modal */}
+      <Modal
+        visible={roomOverlayVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setRoomOverlayVisible(false)}
+      >
+        <View style={styles.overlayBackground}>
+          <View style={styles.overlayContainer}>
+            <Text style={styles.overlayTitle}>Select Rooms</Text>
+            <ScrollView contentContainerStyle={styles.roomCardContainer}>
+              {roomsList.map((room) => {
+                const isSelected = selectedRooms.includes(room.value);
+                return (
+                  <TouchableOpacity
+                    key={room.value}
+                    style={[
+                      styles.roomCard,
+                      isSelected && styles.roomCardSelected,
+                    ]}
+                    onPress={() => toggleRoomSelection(room.value)}
+                  >
+                    <Text
+                      style={[
+                        styles.roomCardText,
+                        isSelected && styles.roomCardTextSelected,
+                      ]}
+                    >
+                      {room.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <Button
+              title="Confirm Selection"
+              onPress={() => setRoomOverlayVisible(false)}
+              color="#007da5"
             />
           </View>
-
-          {errors.room && (
-            <Text style={styles.errorText}>{errors.room.message}</Text>
-          )}
+        </View>
+      </Modal>
+    </View>
           {/* Participants */}
           <View style={styles.inputWrapper}>
             <FontAwesome
@@ -681,29 +718,56 @@ const styles = {
     marginTop: 4,
     fontSize: 12,
   },
-  dropdown: {
-    width: "100%", // Ensures it matches the width of the parent container
-    marginBottom: 10, // Optional margin to separate the input from other components
+  selectText: {
+    fontSize: 16,
+    color: "#333",
   },
-  dropdownInput: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 8,
+  overlayBackground: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  overlayContainer: {
+    backgroundColor: "#fff",
+    padding: 20,
+    paddingTop: 60,
+    justifyContent: "flex-start",
+    width: "80%",
+    borderRadius: 10,
+  },
+  overlayTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  roomCardContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+  roomCard: {
+    backgroundColor: "#e0e0e0",
+    padding: 15,
+    margin: 10,
+    borderRadius: 10,
+    width: 100,
+    alignItems: "center",
+    borderColor: "#ccc",
     borderWidth: 1,
-    width: 250,
-    borderColor: "#ccc", // Adjust this for border color
-    backgroundColor: "white",
   },
-  dropdownContainer: {
-    marginTop: 10,
-    zIndex: 99, // Ensure the dropdown is above other elements
-    backgroundColor: "white", // Make sure it has a white background for visibility
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5, // Adds elevation for Android (shadow effect)
+  roomCardSelected: {
+    backgroundColor: "#007da5",
+    borderColor: "#005f7f",
+  },
+  roomCardText: {
+    color: "#333",
+    fontSize: 14,
+  },
+  roomCardTextSelected: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 };
 
