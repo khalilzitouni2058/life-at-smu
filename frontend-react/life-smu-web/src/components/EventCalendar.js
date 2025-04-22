@@ -136,7 +136,9 @@ const EventCalendar = () => {
           end: event.eventDate + "T" + event.eventTime.split(" - ")[1],
           location: event.eventLocation,
           image: event.eventImage?.uri,
+          eventName : event.eventName,
           assignedMembers: event.assignedMembers,
+          eventDate : event.eventDate,
           club:event.club,
           backgroundColor:
             event.status?.toLowerCase() === "waiting"
@@ -181,8 +183,11 @@ const EventCalendar = () => {
       status: eventDetails.extendedProps.status,
       image: eventDetails.extendedProps.image,
       assignedMembers: eventDetails.extendedProps.assignedMembers,
-      club:eventDetails.extendedProps.club
+      club:eventDetails.extendedProps.club,
+      eventName:eventDetails.extendedProps.eventName,
+      eventDate:eventDetails.extendedProps.eventDate
     });
+    
   
   };
   const fetchClubEmail = async (id) => {
@@ -196,17 +201,23 @@ const EventCalendar = () => {
     }
   };
   
-  const sendEventStatusEmail = (clubEmail, eventTitle, status) => {
+  const sendEventStatusEmail = (clubEmail, eventTitle,eventDate,eventLocation ,status) => {
     const templateParams = {
       user_email: clubEmail,
+      
       event_title: eventTitle,
-      status: status, // e.g., "Approved" or "Refused"
-    }
+      event_date: eventDate,
+      event_location: eventLocation,
+      
+      status: status,
+      
+      
+    };
     console.log("📨 Sending email with params:", templateParams);
 
     emailjs
       .send(
-        'service_096kpb3',       // Replace with your EmailJS service ID
+        'service_1ml3ls9',       // Replace with your EmailJS service ID
         'template_4ul91xt',      // Replace with your EmailJS template ID
         templateParams,
         'VCjuhQHBZ7DEMPEGH'        // Replace with your EmailJS public key
@@ -230,9 +241,11 @@ const EventCalendar = () => {
       const clubEmail = await fetchClubEmail(selectedEvent.club); 
       console.log(clubEmail)
       const testEmail = "kzitouni18@gmail.com";
-    const eventTitle = selectedEvent.title;// Replace `clubId` with the actual field
+      
+    const eventTitle = selectedEvent.eventName;
+    console.log(selectedEvent)// Replace `clubId` with the actual field
     if (clubEmail) {
-      sendEventStatusEmail(testEmail, selectedEvent.title, "Approved");
+      sendEventStatusEmail(testEmail, eventTitle,selectedEvent.eventDate,selectedEvent.location,"Approved");
     }
     } catch (error) {
       console.error("Approval failed:", error);
@@ -257,6 +270,15 @@ const EventCalendar = () => {
         eventId,
       });
       setSelectedEvent((prev) => ({ ...prev, status: "Declined" }));
+      const clubEmail = await fetchClubEmail(selectedEvent.club);
+      const testEmail = "kzitouni18@gmail.com";
+      const eventTitle = selectedEvent.eventName;
+      if (clubEmail) {
+        sendEventStatusEmail(testEmail, eventTitle,selectedEvent.eventDate,selectedEvent.location,"Refused");
+      }
+      
+      
+
     } catch (error) {
       console.error("Decline failed:", error);
     } finally {
