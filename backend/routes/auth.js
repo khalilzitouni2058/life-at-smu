@@ -7,8 +7,62 @@ const Club = require("../models/clubs");
 const Event = require("../models/events");
 const Room = require("../models/rooms");
 
+const axios = require('axios');
+
 const studentLifeDeps = require("../models/studentLifeDeps");
 
+router.post('/ask', async (req, res) => {
+  const { question } = req.body;
+  
+  try {
+    // 1. Try to find the matching event
+    const events = await Event.find({});
+
+    const matchedEvent = events.find(e =>
+      question.toLowerCase().includes(e.eventName.toLowerCase())
+    );
+
+    if (!matchedEvent) {
+      return res.status(404).json({ answer: "Sorry, I couldn't find that event." });
+    }
+
+    // 2. Format event context
+    const eventContext = `
+    You are a helpful assistant for an event app. Use only the following event data to answer the question.
+    
+    Event Title: ${matchedEvent.eventName}
+    Date: ${matchedEvent.eventDate || "Not provided"}
+    Time: ${matchedEvent.eventTime || "Not provided"}
+    Location: ${matchedEvent.eventLocation || "Not provided"}
+    Description: ${matchedEvent.eventDescription || "No description available"}
+    Speakers: ${(matchedEvent.speakers || []).join(', ')}
+    
+    FAQs:
+    ${(matchedEvent.faq || []).map(f => `Q: ${f.question}\nA: ${f.answer}`).join('\n')}
+    `;
+
+    // 3. Call OpenRouter
+    const aiResponse = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
+      model: "meta-llama/llama-3-8b-instruct",
+      messages: [
+        { role: "system", content: eventContext },
+        { role: "user", content: question }
+      ]
+    }, {
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    const answer = aiResponse.data.choices[0].message.content;
+    res.json({ answer });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Something went wrong." });
+  }
+});
 router.post("/student-life-dep", async (req, res) => {
   try {
     const { email, fullname, role, picture, program, major } = req.body;
