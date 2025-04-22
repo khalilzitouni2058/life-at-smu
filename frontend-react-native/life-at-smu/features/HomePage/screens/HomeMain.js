@@ -6,6 +6,7 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
+  Image
 } from "react-native";
 import { useClub } from "../../../Context/ClubContext";
 import CalendarView from "../components/CalendarView";
@@ -14,6 +15,8 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import axios from "axios";
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons' // or use FontAwesome, Ionicons, etc.
+
 
 const Addproposal = () => {
   const navigation = useNavigation(); // Get navigation from context
@@ -39,7 +42,7 @@ const HomeMain = () => {
     new Date().toISOString().split("T")[0]
   );
   const [eventsByDate, setEventsByDate] = useState({});
-  
+  const navigation = useNavigation(); 
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
@@ -119,8 +122,14 @@ const HomeMain = () => {
         eventsByDate={eventsByDate}
       />
 
-      <Text style={styles.text}>Upcoming Events</Text>
+      
+<View style={styles.headerContainer}>
+      <Text style={styles.title}> Upcoming Events</Text>
 
+      <TouchableOpacity style={styles.buttonAi} onPress={() => navigation.navigate('AskAiButton')}>
+        <Icon name="robot-outline" size={28} color="#fff" />
+      </TouchableOpacity>
+    </View>
       {clubId && <Addproposal />}
 
       <EventDisplay selectedDate={selectedDate} se  archQuery={searchQuery} />
@@ -129,6 +138,36 @@ const HomeMain = () => {
 };
 
 const styles = StyleSheet.create({
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginHorizontal: 16,
+    marginBottom: 12,
+    marginTop: 10,
+    backgroundColor: "#F4F6FA",
+    padding:8,
+    borderRadius:10
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1e1e1e',
+  },
+  buttonAi: {
+    backgroundColor: '#4a90e2',
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 4,
+    marginLeft:60
+  },
   button: {
     backgroundColor: "#E9F8FC",
     paddingVertical: 5,
@@ -197,7 +236,8 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#F4F6FA",
+
     alignItems: "center",
   },
 });

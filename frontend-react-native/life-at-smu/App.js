@@ -27,6 +27,7 @@ import EventHistory from "./features/HomePage/screens/EventHistory";
 const Stack = createNativeStackNavigator();
 
 import TabNavigator from "./navigation/TabNavigator"; // <-- Create this file
+import AskAiButton from "./features/HomePage/screens/AskAiButton";
 
 export default function App() {
   return (
@@ -127,6 +128,11 @@ export default function App() {
             <Stack.Screen
               name="ReviewRequests"
               component={ReviewRequests}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="AskAiButton"
+              component={AskAiButton}
               options={{ headerShown: false }}
             />
           </Stack.Navigator>
