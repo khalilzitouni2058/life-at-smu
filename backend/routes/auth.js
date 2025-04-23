@@ -951,6 +951,25 @@ router.post("/clubs/:clubId/events", async (req, res) => {
     club.events.push(newEvent._id);
     await club.save();
 
+    // Prepare reservation
+    const [start, end] = eventTime.split(" - ");
+    const reservation = {
+      DayOfReservation: new Date(eventDate),
+      TimeInterval: {
+        start,
+        end,
+      },
+    };
+
+    // Save reservation in each selected room
+    for (const roomId of rooms) {
+      const room = await Room.findById(roomId);
+      if (room) {
+        room.reservations.push(reservation);
+        await room.save();
+      }
+    }
+
     res
       .status(201)
       .json({ message: "Event created successfully", event: newEvent });
