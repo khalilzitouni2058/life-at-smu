@@ -74,7 +74,81 @@ const EventForm = () => {
 
 
     const [roomOverlayVisible, setRoomOverlayVisible] = useState(false);
-  
+
+    function getRoomAvailabilityStatus(roomsList, selectedDate, selectedStartTime, selectedEndTime ) {
+      const selectedDateStr = new Date(selectedDate).toISOString().substring(0, 10);
+    
+      const getHourMinute = (value) => {
+        if (value instanceof Date) {
+          // Extract hours and minutes from the Date object
+          const hours = String(value.getHours()).padStart(2, '0');
+          const minutes = String(value.getMinutes()).padStart(2, '0');
+          return `${hours}:${minutes}`;
+        }
+      
+        if (typeof value === 'string') {
+          // If value is a string in "HH:mm" format, return as is
+          return value;
+        }
+      
+        // Return a default time if value is neither a Date nor a string
+        console.log("Invalid time value:", value);
+        return "00:00";
+      };
+    
+      const eventStart = getHourMinute(selectedStartTime);
+  const eventEnd = getHourMinute(selectedEndTime);
+    
+      console.log(`📅 Selected Event Time: ${eventStart} - ${eventEnd}`);
+    
+      const availabilityMap = {};
+    
+      roomsList.forEach((room) => {
+        let hasConflict = false;
+        console.log(`\nChecking availability for room: ${room.label}`);
+    
+        room.reservations.forEach((res) => {
+          const resDate = new Date(res.DayOfReservation);
+          if (isNaN(resDate.getTime())) {
+            console.log("Invalid Reservation Date:", res.DayOfReservation);
+            return; // Skip this reservation if it's invalid
+          }
+          const resDateStr = resDate.toISOString().substring(0, 10);
+          if (resDateStr !== selectedDateStr) return;
+    
+          if (!res.TimeInterval.start || !res.TimeInterval.end) {
+            console.log("Missing Time Interval:", res);
+            return; // Skip this reservation if time interval is missing
+          }
+    
+          const resStart = res.TimeInterval.start;
+          const resEnd = res.TimeInterval.end;
+    
+          console.log(`  🛑 Reservation: ${resStart} - ${resEnd}`);
+    
+          const conflict = eventStart < resEnd && eventEnd > resStart;
+    
+          if (conflict) {
+            hasConflict = true;
+            console.log(`    ❌ Conflict for room "${room.label}" ➤ Event: ${eventStart}-${eventEnd} vs Res: ${resStart}-${resEnd}`);
+          } else {
+            console.log(`    ✅ No conflict for room "${room.label}" ➤ Event: ${eventStart}-${eventEnd} vs Res: ${resStart}-${resEnd}`);
+          }
+        });
+    
+        availabilityMap[room.value] = !hasConflict;
+    
+        if (hasConflict) {
+          console.log(`    ❌ Room "${room.label}" is unavailable.`);
+        } else {
+          console.log(`    ✅ Room "${room.label}" is available.`);
+        }
+      });
+    
+      return availabilityMap;
+    }
+    
+    
     const toggleRoomSelection = (roomId) => {
       if (selectedRooms?.includes(roomId)) {
         setSelectedRooms(selectedRooms.filter((id) => id !== roomId));
@@ -91,7 +165,7 @@ const EventForm = () => {
     resolver: yupResolver(schema),
   });
 
-  const [selectedRooms, setSelectedRooms] = useState("");
+  const [selectedRooms, setSelectedRooms] = useState([]);
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
@@ -157,6 +231,7 @@ const EventForm = () => {
           const formattedRooms = response.data.rooms.map((room) => ({
             label: room.number,
             value: room._id,
+            reservations : room.reservations
           }));
           setRoomsList(formattedRooms);
           console.log("This is the second log", roomsList);
@@ -405,47 +480,77 @@ const EventForm = () => {
 
       {/* Room selection overlay modal */}
       <Modal
-        visible={roomOverlayVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setRoomOverlayVisible(false)}
-      >
-        <View style={styles.overlayBackground}>
-          <View style={styles.overlayContainer}>
-            <Text style={styles.overlayTitle}>Select Rooms</Text>
-            <ScrollView contentContainerStyle={styles.roomCardContainer}>
-              {roomsList.map((room) => {
-                const isSelected = selectedRooms.includes(room.value);
-                return (
-                  <TouchableOpacity
-                    key={room.value}
-                    style={[
-                      styles.roomCard,
-                      isSelected && styles.roomCardSelected,
-                    ]}
-                    onPress={() => toggleRoomSelection(room.value)}
-                  >
-                    <Text
-                      style={[
-                        styles.roomCardText,
-                        isSelected && styles.roomCardTextSelected,
-                      ]}
-                    >
-                      {room.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>
+  visible={roomOverlayVisible}
+  animationType="slide"
+  transparent={true}
+  onRequestClose={() => setRoomOverlayVisible(false)}
+>
+  <View style={styles.overlayBackground}>
+    <View style={styles.overlayContainer}>
+      <Text style={styles.overlayTitle}>Select Rooms</Text>
 
-            <Button
-              title="Confirm Selection"
-              onPress={() => setRoomOverlayVisible(false)}
-              color="#007da5"
-            />
-          </View>
-        </View>
-      </Modal>
+      
+      {(() => {
+        const roomAvailability = getRoomAvailabilityStatus(
+          roomsList,
+          selectedDate,
+          selectedTime,
+          eventEndTime
+        );
+
+        console.log(roomAvailability)
+        console.log(selectedDate)
+        console.log(selectedTime)
+        console.log(eventEndTime)
+
+
+        return (
+          <ScrollView contentContainerStyle={styles.roomCardContainer}>
+            {roomsList.map((room) => {
+              const isSelected = selectedRooms.includes(room.value);
+              const isAvailable = roomAvailability[room.value];
+
+              return (
+                <TouchableOpacity
+                  key={room.value}
+                  style={[
+                    styles.roomCard,
+                    isSelected && styles.roomCardSelected,
+                    !isAvailable && styles.roomCardDisabled,
+                  ]}
+                  onPress={() => {
+                    if (isAvailable) {
+                      toggleRoomSelection(room.value);
+                    }
+                  }}
+                  disabled={!isAvailable}
+                  activeOpacity={isAvailable ? 0.7 : 1}
+                >
+                  <Text
+                    style={[
+                      styles.roomCardText,
+                      isSelected && styles.roomCardTextSelected,
+                      !isAvailable && styles.roomCardTextDisabled,
+                    ]}
+                  >
+                    {room.label} {!isAvailable ? '🔴' : '🟢'}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        );
+      })()}
+
+      <Button
+        title="Confirm Selection"
+        onPress={() => setRoomOverlayVisible(false)}
+        color="#007da5"
+      />
+    </View>
+  </View>
+</Modal>
+
     </View>
           {/* Participants */}
           <View style={styles.inputWrapper}>
@@ -768,6 +873,18 @@ const styles = {
   roomCardTextSelected: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  roomCardDisabled: {
+    backgroundColor: "#ffe5e5", // soft red tone
+    border: "1px solid #ff4d4f", // subtle red border
+    opacity: 1, // keep it clear
+    boxShadow: "0 2px 6px rgba(255, 0, 0, 0.15)", // soft red shadow
+    transition: "all 0.3s ease-in-out",
+  },
+  
+  roomCardTextDisabled: {
+    color: "#cc0000", // rich red text
+    fontWeight: "600", // emphasize
   },
 };
 
