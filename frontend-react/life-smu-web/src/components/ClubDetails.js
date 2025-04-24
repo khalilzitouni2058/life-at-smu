@@ -1,150 +1,92 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
-  CCard,
-  CCardBody,
-  CCardTitle,
-  CCardText,
-  CCardImage,
+  CModal,
+  CModalHeader,
+  CModalTitle,
+  CModalBody,
+  CModalFooter,
   CButton,
-  CCarousel,
-  CCarouselItem,
-  CContainer,
   CRow,
   CCol,
-  CCardFooter,
-  CSpinner
+  CCard,
+  CCardBody,
+  CCardImage,
+  CCardText,
+  CListGroup,
+  CListGroupItem
 } from "@coreui/react";
-import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 
-function ClubDetails() {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const clubId = location.state?.club;
-  const [club, setClub] = useState(null);
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (clubId) {
-      axios
-        .get(`http://localhost:8000/api/clubs/${clubId}`)
-        .then((res) => {
-          setClub(res.data.club);
-        })
-        .catch((err) => {
-          console.error("Error fetching club:", err);
-        });
-      // axios
-      //   .get(`http://localhost:8000/api/events/club/${clubId}`)
-      //   .then((res) => {
-      //     setEvents(res.data.events || []);
-      //   })
-      //   .catch((err) => {
-      //     console.error("Error fetching events:", err);
-      //   })
-      //   .finally(() => setLoading(false));
-    }
-  }, [clubId]);
-
-  if (loading) {
-    return <CSpinner color="primary" />;
-  }
-
-  if (!club) {
-    return <div>Club not found.</div>;
-  }
+function ClubDetails({ visible, onClose, club }) {
+  if (!club) return null;
 
   return (
-    <CContainer className="py-4">
-      {/* Header */}
-      <CRow className="align-items-center mb-4">
-        <CCol md={4} className="text-center">
-          <CCardImage
-            src={club.profilePicture}
-            alt={club.clubName}
-            style={{ maxWidth: "100%", maxHeight: "300px", objectFit: "contain" }}
-          />
-        </CCol>
-        <CCol md={8}>
-          <h2 className="text-primary">{club.clubName}</h2>
-          <p><strong>Description:</strong> {club.clubDescription || "No description available."}</p>
-          <p><strong>Email:</strong> {club.email}</p>
-          <p><strong>Category:</strong> {club.category || "Uncategorized"}</p>
-          <CButton color="primary" onClick={() => navigate(-1)}>Back to Clubs</CButton>
-        </CCol>
-      </CRow>
+    <CModal visible={visible} onClose={onClose} size="lg" scrollable>
+      <CModalHeader>
+        <CModalTitle>{club.clubName}</CModalTitle>
+      </CModalHeader>
 
-      {/* Carousel of Board Members */}
-      {club.boardMembers.length > 0 && (
-        <>
-          <h4 className="mb-3">Board Members</h4>
-          <CCarousel controls indicators dark>
+      <CModalBody>
+        <CCard className="border-0 shadow-sm p-3" style={{ background: "#f9f9f9", borderRadius: "1rem" }}>
+          <CRow className="align-items-center">
+            {/* Club Image */}
+            <CCol md={4} className="text-center">
+              <CCardImage
+                src={club.profilePicture || "/images/default.jpg"}
+                alt={club.clubName}
+                style={{ width: "100%", borderRadius: "1rem", objectFit: "cover", maxHeight: "250px" }}
+              />
+            </CCol>
+
+            {/* Club Info */}
+            <CCol md={8}>
+              <h5 className="text-primary fw-bold">About the Club</h5>
+              <p className="text-muted" style={{ fontStyle: "italic" }}>
+                {club.clubDescription || "This club has not provided a description yet, but it's part of something exciting."}
+              </p>
+              <ul className="list-unstyled mb-0">
+                <li><strong>Email:</strong> <span className="text-muted">{club.email}</span></li>
+                <li><strong>Category:</strong> <span className="text-muted">{club.category || "Uncategorized"}</span></li>
+              </ul>
+            </CCol>
+          </CRow>
+        </CCard>
+
+        {/* Divider */}
+        <hr className="my-4" />
+
+        {/* Board Members Section */}
+        <h5 className="text-primary mb-3 fw-bold">🎓 Meet the Board</h5>
+        {club.boardMembers && club.boardMembers.length > 0 ? (
+          <CListGroup flush>
             {club.boardMembers.map((member, index) => (
-              <CCarouselItem key={index}>
-                <div className="d-flex flex-column align-items-center p-4">
-                  <img
-                    src={member.user.profilePicture || "/images/default-user.jpg"}
-                    alt="Member"
-                    style={{ width: "150px", height: "150px", borderRadius: "50%", objectFit: "cover" }}
-                  />
-                  <h5 className="mt-3">{member.user.username}</h5>
-                  <p className="text-muted">{member.role}</p>
-                  {member.phoneNumber && <p>📞 {member.phoneNumber}</p>}
+              <CListGroupItem key={index} className="py-3 px-4 bg-white mb-2 rounded shadow-sm d-flex align-items-start gap-3">
+                <img
+                  src={member.user.picture || "/images/default-user.jpg"}
+                  alt=""
+                  style={{ width: "60px", height: "60px", borderRadius: "50%", objectFit: "cover" }}
+                />
+                <div>
+                  <h6 className="mb-0 fw-semibold">{member.user.username}</h6>
+                  <p className="mb-1 text-muted small">{member.role}</p>
+                  {member.phoneNumber && <p className="mb-1 text-muted small">📞 {member.phoneNumber}</p>}
                   {member.facebookLink && (
-                    <a href={member.facebookLink} target="_blank" rel="noopener noreferrer">
-                      Facebook Profile
+                    <a href={member.facebookLink} target="_blank" rel="noopener noreferrer" className="text-info small">
+                      🔗 Connect on Facebook
                     </a>
                   )}
                 </div>
-              </CCarouselItem>
+              </CListGroupItem>
             ))}
-          </CCarousel>
-        </>
-      )}
-
-      {/* Events Grid */}
-      <div className="mt-5">
-        <h4 className="mb-3">Past Events</h4>
-        {events.length === 0 ? (
-          <p>No events yet.</p>
+          </CListGroup>
         ) : (
-          <CRow>
-            {events.map((event) => (
-              <CCol key={event._id} sm={12} md={6} lg={4} className="mb-4">
-                <CCard className="h-100 shadow-sm">
-                  {event.eventImage?.uri && (
-                    <CCardImage
-                      src={event.eventImage.uri}
-                      alt={event.eventName}
-                      style={{ height: "200px", objectFit: "cover" }}
-                    />
-                  )}
-                  <CCardBody>
-                    <CCardTitle>{event.eventName}</CCardTitle>
-                    <CCardText>{event.eventDescription?.slice(0, 100) || "No description"}</CCardText>
-                    <CCardText><strong>Date:</strong> {event.eventDate}</CCardText>
-                    <CCardText><strong>Time:</strong> {event.eventTime}</CCardText>
-                    <CCardText><strong>Location:</strong> {event.eventLocation}</CCardText>
-                  </CCardBody>
-                  <CCardFooter>
-                    <CButton
-                      color="secondary"
-                      size="sm"
-                      href={event.formLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View More
-                    </CButton>
-                  </CCardFooter>
-                </CCard>
-              </CCol>
-            ))}
-          </CRow>
+          <p className="text-muted">No board members listed for this club.</p>
         )}
-      </div>
-    </CContainer>
+      </CModalBody>
+
+      <CModalFooter>
+        <CButton color="dark" variant="outline" onClick={onClose}>Close</CButton>
+      </CModalFooter>
+    </CModal>
   );
 }
 

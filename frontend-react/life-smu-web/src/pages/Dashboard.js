@@ -5,8 +5,8 @@ import ListOfClubs from '../components/ListOfClubs';
 import Sidebar from '../components/Sidebar';
 import ListOfStudentLifeM from '../components/ListOfStudentLifeM';
 import EventCalendar from '../components/EventCalendar';
-import DashboarUI from "../components/DashboardUI"
 import { Toaster, toaster } from "../components/ui/toaster"
+import Statistics from "../components/Statistics";
 
 
 import Header from '../components/Header';
@@ -28,8 +28,8 @@ const Dashboard = () => {
         return <ListOfStudentLifeM />;
       case "Events":
         return <EventCalendar />;
-        case "Dashboard":
-        return <DashboarUI />;
+      case "Dashboard":
+        return <Statistics />;
       default:
         return <div>Welcome to the Dashboard!</div>;
     }

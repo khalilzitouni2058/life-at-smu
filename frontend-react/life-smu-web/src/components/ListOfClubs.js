@@ -26,7 +26,7 @@ function ListOfClubs() {
 
   const handleDeleteClub = (clubId) => {
     axios
-      .delete(`http://localhost:8000/api/clubs/${clubId}`)
+      .delete(`http://localhost:8000/api/delete-club/${clubId}`)
       .then(() => fetchClubs())
       .catch((err) => console.error("Error deleting club:", err));
   };
@@ -154,7 +154,7 @@ function ListOfClubs() {
         <div className="clubs-grid">
           {clubs.length > 0 ? (
             clubs.map((club) => (
-              <div key={club.id} className="club-grid-item">
+              <div key={club._id} className="club-grid-item">
                 <ClubCard
                   club={club}
                   editMode={editMode}
