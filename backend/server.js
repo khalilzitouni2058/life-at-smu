@@ -25,7 +25,10 @@ const authRoutes = require('./routes/auth');
 app.use('/api/auth', authRoutes);
 
 const clubRoutes = require("./routes/clubRoutes");
-app.use("/api", clubRoutes); 
+app.use("/api", clubRoutes);
+
+const statsRoutes = require("./routes/statsRoutes");
+app.use("/api/stats", statsRoutes);
 
 
 app.listen(PORT, () => {
