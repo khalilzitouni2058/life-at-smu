@@ -15,7 +15,7 @@ router.post('/ask', async (req, res) => {
   const { question } = req.body;
   
   try {
-    // 1. Try to find the matching event
+    // Try to find the matching event
     const events = await Event.find({});
 
     const matchedEvent = events.find(e =>
@@ -26,7 +26,7 @@ router.post('/ask', async (req, res) => {
       return res.status(404).json({ answer: "Sorry, I couldn't find that event." });
     }
 
-    // 2. Format event context
+    // Format event context
     const eventContext = `
     You are a helpful assistant for an event app. Use only the following event data to answer the question.
     
@@ -41,7 +41,7 @@ router.post('/ask', async (req, res) => {
     ${(matchedEvent.faq || []).map(f => `Q: ${f.question}\nA: ${f.answer}`).join('\n')}
     `;
 
-    // 3. Call OpenRouter
+    // Call OpenRouter
     const aiResponse = await axios.post('https://openrouter.ai/api/v1/chat/completions', {
       model: "meta-llama/llama-3-8b-instruct",
       messages: [
@@ -63,6 +63,8 @@ router.post('/ask', async (req, res) => {
     res.status(500).json({ error: "Something went wrong." });
   }
 });
+
+
 router.post("/student-life-dep", async (req, res) => {
   try {
     const { email, fullname, role, picture, program, major } = req.body;

@@ -53,6 +53,8 @@ const styles = StyleSheet.create({
   container: {
     marginTop: 20,
     height: 100,
+    padding:5,
+  
   },
   dayContainer: {
     width: 72,
