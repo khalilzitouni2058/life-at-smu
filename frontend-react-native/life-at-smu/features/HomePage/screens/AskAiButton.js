@@ -38,7 +38,6 @@ const AskAiButton = () => {
     } catch (err) {
       
   
-      // If the status code is 404 and you still want the answer message
       if (err.response && err.response.status === 404 && err.response.data.answer) {
         setMessages([...newMessages, { type: 'bot', text: err.response.data.answer }]);
       } else {
@@ -71,13 +70,13 @@ const AskAiButton = () => {
   
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
+     
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Icon name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Ask the Assistant</Text>
-        <View style={{ width: 24 }} /> {/* Spacer for alignment */}
+        <View style={{ width: 24 }} /> 
       </View>
 
       {/* Messages */}
