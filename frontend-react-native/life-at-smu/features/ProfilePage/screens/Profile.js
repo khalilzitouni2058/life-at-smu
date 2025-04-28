@@ -40,7 +40,7 @@ const Profile = ({ navigation, route }) => {
   }, [slideAnim, branchOpacity]);
 
   return (
-    <ScrollView>
+    <ScrollView >
       <View style={styles.container}>
         <Animated.Image
           source={branch4}
@@ -53,7 +53,7 @@ const Profile = ({ navigation, route }) => {
         <View style={[styles.profileHeader]}>
           <View style={styles.profilePictureContainer}>
             <Image
-              source={{ uri: user.picture }}
+              source={{ uri: user?.picture }}
               style={styles.profilePicture}
             />
           </View>
@@ -109,7 +109,6 @@ const Profile = ({ navigation, route }) => {
             style={[styles.actionCard, { borderColor: "#FF5A5F" }]}
             onPress={async () => {
               await AsyncStorage.clear();
-              setUser(null);
               navigation.replace("Login");
             }}
           >
@@ -275,14 +274,14 @@ const styles = StyleSheet.create({
   },
 
   actionCard: {
-    width: "45%", // Adjust grid item width
+    width: "40%", // Adjust grid item width
     backgroundColor: "#fff",
-    paddingVertical: 20,
+    paddingVertical: 10,
     alignItems: "center",
     borderRadius: 10,
     borderColor: "#007DA5",
     borderWidth: 1,
-    marginBottom: 15,
+    marginBottom: 5,
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 4,

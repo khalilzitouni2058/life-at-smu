@@ -22,7 +22,6 @@ import usericon from "../../../assets/usericon.png";
 import majoricon from "../../../assets/majoricon.png";
 import mailicon from "../../../assets/mailicon.png";
 import programicon from "../../../assets/programicon.png";
-import change from "../../../assets/change.png";
 import { Animated } from "react-native";
 import branch from "../../../assets/branch.png";
 
@@ -45,33 +44,111 @@ const EditProfile = ({ navigation, route }) => {
     route.params?.user.picture ||
       "https://plus.unsplash.com/premium_photo-1689977968861-9c91dbb16049?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8cHJvZmlsZSUyMHBpY3R1cmV8ZW58MHx8MHx8fDA%3D"
   );
+    const [urlphoto, setUrlphoto] = useState("");
+  
 
   const [programMenuVisible, setProgramMenuVisible] = useState(false);
   const [majorMenuVisible, setMajorMenuVisible] = useState(false);
 
   const programs = ["MSB", "Medtech"];
-  const majors = [
+  const medtechmajors = [
     "Pre-engineering",
     "Software Engineering",
     "Renewable Energy",
     "Computer Engineering",
   ];
 
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
+  const msbMajors = [
+    "Marketing",
+    "Finance",
+    "Business Analytics",
+    "Management",
+  ];
 
-    if (!result.canceled) {
-      setPicture(result.assets[0].uri);
-    }
+  
+
+
+  const userData = {
+    email: email,
+    fullname: fullname,
+    picture: picture ,
+    program: program,
+    major: major,
   };
 
+
+  const handleUploadPhoto = async () => {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    
+      if (status !== "granted") {
+        Alert.alert("Permission denied", "We need access to your gallery.");
+        return;
+      }
+    
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+    
+      if (result.canceled) {
+        return;
+      }
+    
+      const uri = result.assets[0].uri;
+      
+  
+      if (result.canceled) {
+        return;
+      }
+  
+      
+  
+      const uploadedImageUrl = await uploadImage(uri);
+      if (uploadedImageUrl) {
+        console.log("Uploaded Image URL:", uploadedImageUrl);
+        // Use uploadedImageUrl instead of result.uri
+      }
+
+      setPicture(uploadedImageUrl);
+
+    };
+  
+    const uploadImage = async (uri) => {
+      const formData = new FormData();
+      formData.append("source", {
+        uri,
+        name: "photo.jpg", // Required for FormData
+        type: "image/jpeg",
+      });
+  
+      try {
+        const response = await fetch("https://postimage.me/api/1/upload", {
+          method: "POST",
+          body: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+            "X-API-Key":
+              "chv_ZtFY_1d68e60bdc2a3a9f47650fa766b07390e1b69aac2a4ee7d94a3d52e0b853cd8783e54a37fef88448278f2c92526b7f87b9da5acdc486f91f784f0891e651454a",
+          },
+        });
+  
+        const data = await response.json();
+  
+        if (data) {
+          setUrlphoto(data.image.url);
+          return data.image.url;
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        return null;
+      }
+    };
+
+  
+
   const validateEmail = (email) => {
-    return email.endsWith("@medtech.tn");
+    return email.endsWith("@medtech.tn") || email.endsWith("@msb.tn");
   };
 
   const slideAnim = useRef(new Animated.Value(300)).current;
@@ -95,6 +172,8 @@ const EditProfile = ({ navigation, route }) => {
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
 
+  
+
   const handleSave = async () => {
     if (!validateEmail(email)) {
       alert("Please enter a valid email address.");
@@ -112,13 +191,7 @@ const EditProfile = ({ navigation, route }) => {
     try {
       const response = await axios.put(
         `http://${ipAddress}:8000/api/auth/users/${route.params.user.id}`,
-        {
-          fullname,
-          email,
-          major,
-          program,
-          picture,
-        }
+        userData
       );
 
       if (response.status === 200) {
@@ -151,10 +224,7 @@ const EditProfile = ({ navigation, route }) => {
                 ]}
               />
 
-              <Image
-                source={require("../../../assets/bluecurves.jpg")}
-                style={styles.backgroundImage}
-              />
+              
 
               <View style={styles.profilePictureContainer}>
                 <Image
@@ -162,7 +232,7 @@ const EditProfile = ({ navigation, route }) => {
                   style={styles.profilePicture}
                 />
                 <TouchableOpacity
-                  onPress={pickImage}
+                  onPress={handleUploadPhoto}
                   style={styles.changePictureButton}
                 >
                   <Image
@@ -180,10 +250,8 @@ const EditProfile = ({ navigation, route }) => {
                       display: "flex",
                       width: "90%",
                       marginLeft: 10,
-                      marginTop: 5,
                     }}
                   >
-                    <Text style={{ color: "gray" }}>Username</Text>
                     <TextInput
                       style={styles.inputField}
                       placeholder="Username"
@@ -200,10 +268,8 @@ const EditProfile = ({ navigation, route }) => {
                       display: "flex",
                       width: "90%",
                       marginLeft: 10,
-                      marginTop: 5,
                     }}
                   >
-                    <Text style={{ color: "gray" }}>Email</Text>
                     <View style={{ display: "flex", flexDirection: "row" }}>
                       <TextInput
                         style={styles.inputField}
@@ -213,7 +279,7 @@ const EditProfile = ({ navigation, route }) => {
                       />
                       <MaterialIcons
                         name={validateEmail(email) ? "check-circle" : "cancel"}
-                        size={24}
+                        size={25}
                         color={validateEmail(email) ? "green" : "red"}
                         style={styles.icon}
                       />
@@ -265,7 +331,7 @@ const EditProfile = ({ navigation, route }) => {
                       </TouchableOpacity>
                     }
                   >
-                    {majors.map((item, index) => (
+                    {(program === "MSB" ? msbMajors : medtechmajors).map((item, index) => (
                       <Menu.Item
                         key={index}
                         onPress={() => {
@@ -305,23 +371,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    position: "relative",
-    width: 400,
+    width: "100%",
     height: "100%",
   },
 
   Inputicon: {
-    height: 35,
-    width: 35,
+    height: 30,
+    width: 30,
   },
 
-  backgroundImage: {
-    position: "absolute",
-    height: 800,
-    width: "100%",
-    resizeMode: "cover",
-    zIndex: 3,
-  },
   profilePictureContainer: {
     alignItems: "center",
     position: "relative",
@@ -353,6 +411,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     display: "flex",
     flexDirection: "column",
+
     marginBottom: 20,
     gap: 10,
     paddingHorizontal: 30,
@@ -365,7 +424,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     paddingHorizontal: 20,
     paddingVertical: 5,
-    borderRadius: 30,
+    borderRadius: 20,
     marginBottom: 15,
     zIndex: 1,
     borderWidth: 2,
@@ -374,13 +433,14 @@ const styles = StyleSheet.create({
   inputField: {
     flex: 1,
     padding: 8,
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 400,
     color: "#333",
     zIndex: 2,
   },
   icon: {
     marginLeft: 10,
+    top:7,
   },
   saveButton: {
     backgroundColor: "#007DA5",
@@ -430,21 +490,22 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   cancelButton: {
-    backgroundColor: "#FF4D4D",
+    backgroundColor: "#ff5b51",
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
-    width: "60%",
+    width: "50%",
   },
-  cancelButtonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  cancelButtonText: { color: "#fff", fontSize: 20, fontWeight: "bold" },
+  
   saveButton: {
     backgroundColor: "#007DA5",
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
-    width: "70%",
+    width: "50%",
   },
-  saveButtonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  saveButtonText: { color: "#fff", fontSize: 20, fontWeight: "bold" },
 });
 
 export default EditProfile;

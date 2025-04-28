@@ -20,6 +20,8 @@ import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons, FontAwesome, Entypo } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useClub } from "../../../Context/ClubContext"; // Import useClub hook
+import { useNavigation } from '@react-navigation/native';
+
 
 const schema = yup.object().shape({
   eventName: yup
@@ -55,7 +57,7 @@ const EventForm = () => {
   const [image, setImage] = useState(null);
   const [roomsList, setRoomsList] = useState([]);
   const [showDatePicker, setShowDatePicker] = useState(false);
-
+  const [urlphoto, setUrlphoto] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date()); // ✅ Stores selected date
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showTimePicker2, setShowTimePicker2] = useState(false);
@@ -71,6 +73,8 @@ const EventForm = () => {
     useState(false); // ✅ New State
   const [transportationProvided, setTransportationProvided] = useState(false); // ✅ New State
   const [formLink, setformLink] = useState(false); // ✅ New State
+
+  const navigation = useNavigation();
 
 
     const [roomOverlayVisible, setRoomOverlayVisible] = useState(false);
@@ -99,56 +103,113 @@ const EventForm = () => {
       const eventStart = getHourMinute(selectedStartTime);
   const eventEnd = getHourMinute(selectedEndTime);
     
-      console.log(`📅 Selected Event Time: ${eventStart} - ${eventEnd}`);
     
       const availabilityMap = {};
     
       roomsList.forEach((room) => {
         let hasConflict = false;
-        console.log(`\nChecking availability for room: ${room.label}`);
     
         room.reservations.forEach((res) => {
           const resDate = new Date(res.DayOfReservation);
           if (isNaN(resDate.getTime())) {
-            console.log("Invalid Reservation Date:", res.DayOfReservation);
             return; // Skip this reservation if it's invalid
           }
           const resDateStr = resDate.toISOString().substring(0, 10);
           if (resDateStr !== selectedDateStr) return;
     
           if (!res.TimeInterval.start || !res.TimeInterval.end) {
-            console.log("Missing Time Interval:", res);
             return; // Skip this reservation if time interval is missing
           }
     
           const resStart = res.TimeInterval.start;
           const resEnd = res.TimeInterval.end;
     
-          console.log(`  🛑 Reservation: ${resStart} - ${resEnd}`);
     
           const conflict = eventStart < resEnd && eventEnd > resStart;
     
           if (conflict) {
             hasConflict = true;
-            console.log(`    ❌ Conflict for room "${room.label}" ➤ Event: ${eventStart}-${eventEnd} vs Res: ${resStart}-${resEnd}`);
-          } else {
-            console.log(`    ✅ No conflict for room "${room.label}" ➤ Event: ${eventStart}-${eventEnd} vs Res: ${resStart}-${resEnd}`);
-          }
+          } 
         });
     
         availabilityMap[room.value] = !hasConflict;
     
-        if (hasConflict) {
-          console.log(`    ❌ Room "${room.label}" is unavailable.`);
-        } else {
-          console.log(`    ✅ Room "${room.label}" is available.`);
-        }
+        
       });
     
       return availabilityMap;
     }
     
     
+    const handleUploadPhoto = async () => {
+          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        
+          if (status !== "granted") {
+            Alert.alert("Permission denied", "We need access to your gallery.");
+            return;
+          }
+        
+          const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            quality: 1,
+          });
+        
+          if (result.canceled) {
+            return;
+          }
+        
+          const uri = result.assets[0].uri;
+          
+      
+          if (result.canceled) {
+            return;
+          }
+      
+          
+      
+          const uploadedImageUrl = await uploadImage(uri);
+          if (uploadedImageUrl) {
+            console.log("Uploaded Image URL:", uploadedImageUrl);
+            // Use uploadedImageUrl instead of result.uri
+          }
+    
+          setImage(uploadedImageUrl);
+    
+        };
+      
+        const uploadImage = async (uri) => {
+          const formData = new FormData();
+          formData.append("source", {
+            uri,
+            name: "photo.jpg", // Required for FormData
+            type: "image/jpeg",
+          });
+      
+          try {
+            const response = await fetch("https://postimage.me/api/1/upload", {
+              method: "POST",
+              body: formData,
+              headers: {
+                "Content-Type": "multipart/form-data",
+                "X-API-Key":
+                  "chv_ZtFY_1d68e60bdc2a3a9f47650fa766b07390e1b69aac2a4ee7d94a3d52e0b853cd8783e54a37fef88448278f2c92526b7f87b9da5acdc486f91f784f0891e651454a",
+              },
+            });
+      
+            const data = await response.json();
+      
+            if (data) {
+              setUrlphoto(data.image.url);
+              return data.image.url;
+            }
+          } catch (error) {
+            console.error("Error uploading image:", error);
+            return null;
+          }
+        };
+
+
     const toggleRoomSelection = (roomId) => {
       if (selectedRooms?.includes(roomId)) {
         setSelectedRooms(selectedRooms.filter((id) => id !== roomId));
@@ -219,6 +280,8 @@ const EventForm = () => {
           console.error("Error:", error.message);
         }
       });
+
+      navigation.navigate("HomeMain");
   };
 
   useEffect(() => {
@@ -244,19 +307,7 @@ const EventForm = () => {
     fetchRooms();
   }, []);
 
-  // Handle Image Picker
-  const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [16, 9],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
-  };
+  
 
   return (
     <View style={styles.container}>
@@ -266,7 +317,7 @@ const EventForm = () => {
         </View>
 
         {/* Event Image */}
-        <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+        <TouchableOpacity onPress={handleUploadPhoto} style={styles.imageContainer}>
           {image ? (
             <Image source={{ uri: image }} style={styles.image} />
           ) : (

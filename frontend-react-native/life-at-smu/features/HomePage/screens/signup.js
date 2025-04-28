@@ -19,6 +19,8 @@ import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import { CommonActions } from "@react-navigation/native";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 export default function SignUpPage() {
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
@@ -69,7 +71,7 @@ export default function SignUpPage() {
     fullname: fullname,
     password: password,
 
-    picture: photo || defaultPhotoUrl,
+    picture: urlphoto || defaultPhotoUrl,
     program: value,
     major: major,
   };
