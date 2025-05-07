@@ -6,8 +6,8 @@ import {
   StyleSheet,
   ActivityIndicator,
   TextInput,
+  SafeAreaView,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import { Card } from "react-native-paper";
 import axios from "axios";
@@ -53,9 +53,6 @@ const ClubsScreen = () => {
 
   const handleSearch = (text) => {
     setSearch(text);
-    let filtered = clubs.filter((club) =>
-      club.clubName?.toLowerCase().includes(text.toLowerCase())
-    );
   };
   useEffect(() => {
     let filtered = clubs.filter((club) =>

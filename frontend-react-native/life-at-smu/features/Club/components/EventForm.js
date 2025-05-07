@@ -21,6 +21,7 @@ import { MaterialIcons, FontAwesome, Entypo } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useClub } from "../../../Context/ClubContext"; // Import useClub hook
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from "react-native-safe-area-context";
 
 
 const schema = yup.object().shape({
@@ -281,7 +282,7 @@ const EventForm = () => {
         }
       });
 
-      navigation.navigate("HomeMain");
+      navigation.navigate('HomeMain',{screen:'HomeMain'});
   };
 
   useEffect(() => {
@@ -310,6 +311,7 @@ const EventForm = () => {
   
 
   return (
+    <SafeAreaView style={{ flex: 1 }}>
     <View style={styles.container}>
       <ScrollView keyboardShouldPersistTaps="handled">
         <View style={styles.titleContainer}>
@@ -766,6 +768,7 @@ const EventForm = () => {
         </View>
       </ScrollView>
     </View>
+    </SafeAreaView>
   );
 };
 
@@ -777,7 +780,7 @@ const styles = {
     backgroundColor: "#f7fcff",
   },
   titleContainer: {
-    backgroundColor: "#007da5", // Matching color to the rest of the design
+    backgroundColor: "#007da5", 
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
@@ -791,12 +794,12 @@ const styles = {
 
   title: {
     fontSize: 28,
-    fontWeight: "700", // Bold font style for prominence
+    fontWeight: "700", 
     color: "#fff",
     textAlign: "center",
   },
   imageContainer: {
-    width: "90%", // Leaves space on each side
+    width: "90%", 
     height: 200,
     borderWidth: 2,
     borderColor: "#007da5",
@@ -880,7 +883,7 @@ const styles = {
   },
   overlayBackground: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    backgroundColor: "rgba(0, 0, 0, 0.5)", 
     justifyContent: "center",
     alignItems: "center",
   },
@@ -934,8 +937,8 @@ const styles = {
   },
   
   roomCardTextDisabled: {
-    color: "#cc0000", // rich red text
-    fontWeight: "600", // emphasize
+    color: "#cc0000", 
+    fontWeight: "600", 
   },
 };
 

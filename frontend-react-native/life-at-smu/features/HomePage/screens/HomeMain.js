@@ -6,7 +6,6 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
-  Image
 } from "react-native";
 import { useClub } from "../../../Context/ClubContext";
 import CalendarView from "../components/CalendarView";
@@ -132,7 +131,7 @@ const HomeMain = () => {
     </View>
       {clubId && <Addproposal />}
 
-      <EventDisplay selectedDate={selectedDate} se  archQuery={searchQuery} />
+      <EventDisplay selectedDate={selectedDate} searchQuery={searchQuery} />
     </View>
   );
 };
@@ -237,7 +236,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F4F6FA",
-
     alignItems: "center",
   },
 });
