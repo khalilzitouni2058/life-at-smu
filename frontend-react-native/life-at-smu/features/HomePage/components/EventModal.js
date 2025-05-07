@@ -60,8 +60,7 @@ const EventModal = ({ visible, event, onClose }) => {
 
   const handleNavigationStateChange = (navState) => {
     if (navState.url.includes("formResponse")) {
-      // Replace 'formResponse' with the actual success URL part
-      AsyncStorage.setItem(`formSubmitted_${EVENT_ID}`, "true"); // Save submission status in AsyncStorage
+      AsyncStorage.setItem(`formSubmitted_${EVENT_ID}`, "true"); 
       setFormSubmitted(true); // Update the form submission state
       setFormModalVisible(false); // Close the modal
       handleCloseForm();
@@ -85,7 +84,7 @@ const EventModal = ({ visible, event, onClose }) => {
 
       setUser((prevUser) => ({
         ...prevUser,
-        ...response.data, // or response.data.user depending on your response shape
+        ...response.data, 
       }));
       setFormSubmitted(true);
     } catch (error) {
@@ -94,6 +93,7 @@ const EventModal = ({ visible, event, onClose }) => {
   };
 
   return (
+    
     <Modal visible={visible} transparent animationType="slide">
       <TouchableWithoutFeedback onPress={onClose}>
         <View style={styles.modalOverlay}>
