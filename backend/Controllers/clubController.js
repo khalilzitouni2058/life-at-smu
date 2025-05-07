@@ -15,7 +15,7 @@ const adminCreateClub = async (req, res) => {
   // Create club
   const newClub = new Club({
     email,
-    password: 123,
+    password: 123456,
     clubName,
     profilePicture:
       profilePicture ||

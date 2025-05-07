@@ -40,7 +40,7 @@ const Header = ({ setActiveSection, activeSection }) => {
   return (
     <Flex
       as="header"
-      align="center"
+    
       justify="space-between"
       paddingX={4}
       paddingY={3}
