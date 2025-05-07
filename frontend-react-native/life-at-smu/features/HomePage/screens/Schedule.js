@@ -30,6 +30,24 @@ const Schedule = () => {
     setModalVisible(false);
     setSelectedEvent(null);
   };
+  const renderCustomHeader = (date) => {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      year: "numeric",
+    });
+    return (
+      <Text
+        style={{
+          fontSize: 18,
+          fontWeight: "bold",
+          color: "black",
+          marginBottom: 10,
+        }}
+      >
+        {formatter.format(new Date(date))}
+      </Text>
+    );
+  };
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "localhost";
@@ -118,6 +136,7 @@ const Schedule = () => {
           dayTextColor: "#333",
           textDisabledColor: "#ccc",
         }}
+        renderHeader={(date) => renderCustomHeader(date)}
       />
 
       <Text style={styles.header}>Schedule for {selectedDate}</Text>
