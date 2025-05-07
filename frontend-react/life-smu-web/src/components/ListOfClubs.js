@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import emailjs from '@emailjs/browser'
+
 import {
   CButton,
   CModal,
@@ -51,7 +53,30 @@ function ListOfClubs() {
         setLoading(false);
       });
   };
+  const sendclubEmail = (clubEmail,clubname,clubpassword) => {
+    const templateParams = {
+      email: clubEmail,
+      club_email:email,
+      club_name:clubname,
+      club_password:clubpassword
+      
+    };
+    console.log("📨 Sending email with params:", templateParams);
 
+    emailjs
+      .send(
+        'service_1ml3ls9',       // Replace with your EmailJS service ID
+        'template_dw6yddu',      // Replace with your EmailJS template ID
+        templateParams,
+        'VCjuhQHBZ7DEMPEGH'        // Replace with your EmailJS public key
+      )
+      .then((response) => {
+        console.log('✅ Email sent successfully:', response.text)
+      })
+      .catch((err) => {
+        console.error('❌ Failed to send email:', err)
+      })
+  }
   const handleAddClub = () => {
     const newClub = {
       clubName,
@@ -71,6 +96,7 @@ function ListOfClubs() {
       .catch((error) => {
         console.error("Error adding club:", error);
       });
+      sendclubEmail("kzitouni18@gmail.com",newClub.clubName,"welcomeTosmu123")
   };
 
   return (

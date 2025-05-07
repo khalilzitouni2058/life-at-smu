@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Box, Input, List, ListItem, Card, CardBody, Text,Button,Select,Portal,createListCollection, Drawer,CloseButton,HStack, Image, Flex,Badge } from '@chakra-ui/react';
+import { Box, Input, List, ListItem, Card, CardBody, Text,Button,Select,Portal,createListCollection, Drawer,CloseButton,HStack, Image, Flex,Badge ,VStack} from '@chakra-ui/react';
 import defaultImage from "../assets/defaultImage.png"
 const ListOfStudentLifeM = () => {
   const [users, setUsers] = useState([]);
@@ -94,54 +94,121 @@ const ListOfStudentLifeM = () => {
   
 
   return (
-    <Box p={4}>
-  <Text fontSize="xl" fontWeight="bold" mb={2} color="black">
-    Add a Student Life Member
-  </Text>
-  <Input
-    placeholder="Search by email"
-    value={searchTerm}
-    onChange={(e) => {
-      setSearchTerm(e.target.value);
-      setShowList(true);
-    }}
-    mb={4}
-    color="black"
-    w={1080}
-    borderRadius="md"
-    _placeholder={{ color: "gray.400" }} // Subtle placeholder text
-    _focus={{
-      borderColor: "teal.400",
-      boxShadow: "0 0 0 2px teal.400",
-    }}
-    
-    px={4}
-  />
-
-      {showList && searchTerm && (
-      <List.Root border="1px solid" borderRadius="md" p={2} maxH="160px"   overflowY="auto" w={1080}>
-        {filteredUsers.map((user) => (
-          <List.Item
-            key={user.email}
-            p={2}
-            cursor="pointer"
-            _hover={{ bg: "gray.100" }}
-            onClick={() => handleSelectUser(user)}
-            display="flex"
+    <Box minH="100vh" bg="gray.50">
+      
+      {/* Hero Section */}
+      <Box
+        position="relative"
+        w="100%"
+        minH="300px"
+        bgImage="url('https://www.leconomistemaghrebin.com/wp-content/uploads/2025/05/SMU-etudiants-1-860x573.jpg')"
+        bgSize="cover"
+        bgPosition="center"
+        bgRepeat="no-repeat"
+        display="flex"
+        flexDirection="column"
         alignItems="center"
-          >
-            <Image
-          src={user.picture || defaultImage}
-          boxSize="40px"
-          borderRadius="full"
-          mr={3}
-          objectFit="cover"
+        justifyContent="center"
+        textAlign="center"
+        px={4}
+        mb={12}
+      >
+        {/* Dark overlay */}
+        <Box
+          position="absolute"
+          top="0"
+          left="0"
+          right="0"
+          bottom="0"
+          bg="blackAlpha.600"
         />
-        <Text color="black" fontWeight="bold">{user.email}</Text>
-          </List.Item>
-        ))}
-      </List.Root>
-      )}
+
+        {/* Title and Search */}
+        <Box position="relative" zIndex="1" w="full" maxW="600px">
+          <Text fontSize="4xl" fontWeight="bold" color="white" mb={2}>
+            Add a New Student
+          </Text>
+          <Text fontSize="lg" color="gray.200" mb={6}>
+            Find and add a student to your student life program easily.
+          </Text>
+
+          {/* Search input wrapper */}
+          <Box position="relative">
+            <Input
+              placeholder="Search by email..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setShowList(true);
+              }}
+              size="lg"
+              borderRadius="full"
+              bg="white"
+              color="gray.800"
+              boxShadow="lg"
+              _placeholder={{ color: "gray.400" }}
+              _focus={{
+                borderColor: "teal.400",
+                boxShadow: "0 0 0 3px teal.300",
+                bg: "white",
+              }}
+              px={6}
+            />
+
+            {/* Dropdown list */}
+            {showList && searchTerm && (
+              <VStack
+                position="absolute"
+                top="100%" // Right under input
+                left="0"
+                right="0"
+                mt={2}
+                
+                spacing={0}
+                border="1px solid"
+                borderColor="gray.200"
+                borderRadius="md"
+                bg="white"
+                boxShadow="xl"
+                maxH="300px"
+                overflowY="auto"
+                zIndex="10"
+              >
+                {filteredUsers.length > 0 ? (
+                  filteredUsers.map((user) => (
+                    <Flex
+                      key={user.email}
+                      p={3}
+                      w="100%"
+                      align="center"
+                      borderBottom="1px solid"
+                      borderColor="gray.100"
+                      cursor="pointer"
+                      _hover={{ bg: "teal.50" }}
+                      onClick={() => handleSelectUser(user)}
+                    >
+                      <Image
+                        src={user.picture || defaultImage}
+                        boxSize="40px"
+                        borderRadius="full"
+                        mr={3}
+                        objectFit="cover"
+                      />
+                      <Text fontWeight="medium" color="gray.700">
+                        {user.email}
+                      </Text>
+                    </Flex>
+                  ))
+                ) : (
+                  <Box p={4} color="gray.500">
+                    No students found
+                  </Box>
+                )}
+              </VStack>
+            )}
+          </Box>
+          </Box>
+          </Box>
       {selectedUser && (
         <Drawer.Root open={isDrawerOpen}    placement={"top"}>
         <Portal>
@@ -191,7 +258,7 @@ const ListOfStudentLifeM = () => {
       </Drawer.Root>
        )}
        
-       <Flex mt={4} wrap="wrap" gap={4} justify="flex-start">
+       <Flex mt={2} wrap="wrap" gap={4} justify="center">
   {existingUsers.map((user) => (
     <Card.Root
       key={user.id}

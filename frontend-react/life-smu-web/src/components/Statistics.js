@@ -70,7 +70,7 @@ function Statistics() {
   }
 
   return (
-    <CContainer fluid className="py-4">
+    <CContainer fluid className="py-4" backgroundColor="#f7f9fc">
       <h2 className="mb-4 fw-bold text-dark">📊 Dashboard Overview</h2>
 
       <CRow className="mb-4 g-4">
