@@ -30,8 +30,17 @@ const Sidebar = ({ setActiveSection, activeSection }) => {
       width: '254px',
     }}>
       {/* Sidebar Header */}
-      <CSidebarHeader>
-        <CSidebarBrand style={{marginBottom: '20px'}}>Dashboard</CSidebarBrand>
+      <CSidebarHeader style={{ padding: 1, marginBottom: '20px' }}>
+        <img 
+          src="https://www.smu.tn/storage/app/media/logos/LOGO_SMU_2023_FINAL.png"
+          alt="Sidebar Logo"
+          style={{
+            width: '100%',
+            height: 'auto',
+            objectFit: 'cover',
+          }}
+        />
+
       </CSidebarHeader>
 
       <CSidebarNav>

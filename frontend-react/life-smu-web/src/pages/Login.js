@@ -22,8 +22,8 @@ const Login = ({ setIsAuthenticated }) => {
   const navigate = useNavigate();
 
   const validUser = {
-    username: "a",
-    password: "a",
+    username: "admin",
+    password: "admin",
   };
 
   const handleLogin = (e) => {
