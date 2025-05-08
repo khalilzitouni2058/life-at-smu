@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   CSidebar,
@@ -30,7 +31,7 @@ const Sidebar = ({ setActiveSection, activeSection }) => {
       width: '254px',
     }}>
       {/* Sidebar Header */}
-      <CSidebarHeader >
+      <CSidebarHeader>
         <CSidebarBrand style={{marginBottom: '20px'}}>Dashboard</CSidebarBrand>
       </CSidebarHeader>
 
@@ -39,34 +40,18 @@ const Sidebar = ({ setActiveSection, activeSection }) => {
 
         {/* Users */}
         <CButton
-          active={activeSection === 'users'}
+          className={`sidebar-button ${activeSection === 'users' ? 'active' : ''}`}
           onClick={() => handleNavigation('users')}
-          style={{
-            padding: '8px 12px',
-            width: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '10px'
-          }}
-         
         >
           <CIcon icon={cilUser} className="me-2" /> Users
         </CButton>
 
         {/* Clubs */}
         <CButton
-
-          active={activeSection === 'clubs'}
+          className={`sidebar-button ${activeSection === 'clubs' ? 'active' : ''}`}
           onClick={() => handleNavigation('clubs')}
-          style={{
-            padding: '8px 12px',
-            width: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '10px'
-          }}
         >
-          <CIcon icon={cilGroup} className="me-2" /> Clubs{' '}
+          <CIcon icon={cilGroup} className="me-2" /> Clubs
         </CButton>
 
         {/* Student Life Members */}
@@ -79,30 +64,14 @@ const Sidebar = ({ setActiveSection, activeSection }) => {
           }
         >
           <CButton
-            component="button"
-            active={activeSection === 'Student Life Members'}
+            className={`sidebar-button ${activeSection === 'Student Life Members' ? 'active' : ''}`}
             onClick={() => handleNavigation('Student Life Members')}
-            style={{
-              padding: '8px 12px',
-              width: 'auto',
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '10px'
-            }}
           >
             Members
           </CButton>
           <CButton
-            component="button"
-            active={activeSection === 'Student Life Members'}
+            className={`sidebar-button ${activeSection === 'Student Life Members' ? 'active' : ''}`}
             onClick={() => handleNavigation('Student Life Members')}
-            style={{
-              padding: '8px 12px',
-              width: 'auto',
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: '10px'
-            }}
           >
             Officers
           </CButton>
@@ -110,17 +79,8 @@ const Sidebar = ({ setActiveSection, activeSection }) => {
 
         {/* Events */}
         <CButton
-          component="button"
-          active={activeSection === 'Events'}
+          className={`sidebar-button ${activeSection === 'Events' ? 'active' : ''}`}
           onClick={() => handleNavigation('Events')}
-          style={{
-            padding: '8px 12px',
-            width: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            marginBottom: '10px',
-            
-          }}
         >
           <CIcon icon={cilCalendar} className="me-2" /> Events
         </CButton>
