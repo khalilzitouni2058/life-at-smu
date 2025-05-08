@@ -1,6 +1,5 @@
 
 import React from 'react';
-import "../styles/Dashboard/Sidebar.css"
 import {
   CSidebar,
   CSidebarBrand,
@@ -14,6 +13,7 @@ import {
 import CIcon from '@coreui/icons-react';
 import { cilUser, cilGroup, cilCalendar } from '@coreui/icons';
 import '@coreui/coreui/dist/css/coreui.min.css';
+import "../styles/Dashboard/Sidebar.css"
 
 const Sidebar = ({ setActiveSection, activeSection }) => {
 
