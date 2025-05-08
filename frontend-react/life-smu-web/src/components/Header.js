@@ -11,6 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { IoIosNotifications, IoIosLogOut  } from "react-icons/io";
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const Header = ({ setActiveSection, activeSection,setIsAuthenticated }) => {
@@ -18,6 +19,9 @@ const Header = ({ setActiveSection, activeSection,setIsAuthenticated }) => {
   const [lastChecked, setLastChecked] = useState(
     localStorage.getItem("lastCheckedEvents") || new Date(0).toISOString()
   );
+
+  const navigate = useNavigate();
+
   const handleNavigation = (section) => {
     console.log(`Navigating to ${section}`);
     setActiveSection(section);
@@ -38,11 +42,11 @@ const Header = ({ setActiveSection, activeSection,setIsAuthenticated }) => {
   }, [lastChecked]);
 
   const handleLogout = () => {
-    // Clear authentication state
-    //localStorage.removeItem("authToken"); // Example if you're storing authToken in localStorage
-    setIsAuthenticated(false);  // Reset authentication state
-    window.location.href = "/"; // Redirect to the login page after logging out
+    localStorage.removeItem("isAuthenticated");
+    setIsAuthenticated(false);
+    navigate("/login");
   };
+  
 
 
   return (
