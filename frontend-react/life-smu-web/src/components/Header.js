@@ -2,7 +2,6 @@ import {
   Flex,
   Box,
   IconButton,
-  Avatar,
   Badge,
   HStack,
   Button,
@@ -10,11 +9,11 @@ import {
   VStack,
   Text,
 } from "@chakra-ui/react";
-import { IoIosNotifications } from "react-icons/io";
+import { IoIosNotifications, IoIosLogOut  } from "react-icons/io";
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-const Header = ({ setActiveSection, activeSection }) => {
+const Header = ({ setActiveSection, activeSection,setIsAuthenticated }) => {
   const [newEvents, setNewEvents] = useState([]);
   const [lastChecked, setLastChecked] = useState(
     localStorage.getItem("lastCheckedEvents") || new Date(0).toISOString()
@@ -37,6 +36,15 @@ const Header = ({ setActiveSection, activeSection }) => {
 
     return () => clearInterval(interval);
   }, [lastChecked]);
+
+  const handleLogout = () => {
+    // Clear authentication state
+    //localStorage.removeItem("authToken"); // Example if you're storing authToken in localStorage
+    setIsAuthenticated(false);  // Reset authentication state
+    window.location.href = "/"; // Redirect to the login page after logging out
+  };
+
+
   return (
     <Flex
       as="header"
@@ -65,9 +73,6 @@ const Header = ({ setActiveSection, activeSection }) => {
           onClick={() => handleNavigation("users")}
         >
           Users
-        </Button>
-        <Button size="xs" variant="plain">
-          Settings
         </Button>
       </HStack>
       <Box position="relative" marginRight={4}>
@@ -189,10 +194,18 @@ const Header = ({ setActiveSection, activeSection }) => {
           </Popover.Positioner>
         </Popover.Root>
 
-        <Avatar.Root size={"sm"}>
-          <Avatar.Fallback name="Segun Adebayo" />
-          <Avatar.Image src="https://bit.ly/sage-adebayo" />
-        </Avatar.Root>
+        <IconButton
+          size="sm"
+          variant="outline"
+          colorScheme="red"
+          aria-label="Logout"
+          onClick={handleLogout}
+          
+          _hover={{ bg: "red.500", color: "white" }}
+        >
+          <IoIosLogOut /> {/* Logout Icon */}
+        </IconButton>
+
       </Box>
     </Flex>
   );

@@ -86,10 +86,7 @@ const Sidebar = ({ setActiveSection, activeSection }) => {
         </CButton>
       </CSidebarNav>
 
-      {/* Sidebar Footer */}
-      <CSidebarHeader className="border-top">
-        <CSidebarToggler />
-      </CSidebarHeader>
+
     </CSidebar>
   );
 };
