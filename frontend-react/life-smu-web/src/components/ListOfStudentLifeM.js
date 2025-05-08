@@ -1,38 +1,69 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Box, Input, List, ListItem, Card, CardBody, Text,Button,Select,Portal,createListCollection, Drawer,CloseButton,HStack, Image, Flex,Badge ,VStack} from '@chakra-ui/react';
-import defaultImage from "../assets/defaultImage.png"
+import React, { useState, useEffect } from "react";
+import "../styles/Dashboard/delete-btn.css";
+import axios from "axios";
+import {
+  Box,
+  Input,
+  List,
+  ListItem,
+  Card,
+  CardBody,
+  Text,
+  Button,
+  Select,
+  Portal,
+  createListCollection,
+  Drawer,
+  CloseButton,
+  HStack,
+  Image,
+  Flex,
+  Badge,
+  VStack,
+} from "@chakra-ui/react";
+import defaultImage from "../assets/defaultImage.png";
 const ListOfStudentLifeM = () => {
   const [users, setUsers] = useState([]);
   const [existingUsers, setexistingUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [pickedRole, setpickedRole] = useState("");
-  const [showList, setShowList] = useState(false); 
+  const [showList, setShowList] = useState(false);
   const frameworks = createListCollection({
     items: [
       { label: "Student Life Member", value: "Student Life Member" },
       { label: "Officer", value: "Officer" },
-      
     ],
-  })
+  });
   const handleDrawerClose = () => {
     setIsDrawerOpen(false);
-    setShowList(false); 
-    
-    
-    
+    setShowList(false);
   };
 
   const fetchexistingUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/auth/student-life-dep');
-      const existingUsers = Array.isArray(response.data.users) ? response.data.users : [];
+      const response = await axios.get(
+        "http://localhost:8000/api/auth/student-life-dep"
+      );
+      const existingUsers = Array.isArray(response.data.users)
+        ? response.data.users
+        : [];
       setexistingUsers(existingUsers);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      await axios.delete(`http://localhost:8000/api/delete-user/${userId}`);
+      setexistingUsers((prevUsers) =>
+        prevUsers.filter((user) => user.id !== userId)
+      );
+    } catch (error) {
+      console.error("Error deleting user:", error);
     }
   };
 
@@ -41,11 +72,13 @@ const ListOfStudentLifeM = () => {
   }, [isDrawerOpen]);
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/auth/users');
-      const fetchedUsers = Array.isArray(response.data.users) ? response.data.users : [];
+      const response = await axios.get("http://localhost:8000/api/auth/users");
+      const fetchedUsers = Array.isArray(response.data.users)
+        ? response.data.users
+        : [];
       setUsers(fetchedUsers);
     } catch (error) {
-      console.error('Error fetching users:', error);
+      console.error("Error fetching users:", error);
     }
   };
 
@@ -68,34 +101,31 @@ const ListOfStudentLifeM = () => {
         u.email === user.email ? { ...u, role: newRole } : u
       )
     );
-    
-  
-    console.log(user.email)
-    console.log(user.picture)
-    console.log(newRole)
+
+    console.log(user.email);
+    console.log(user.picture);
+    console.log(newRole);
     try {
-      await axios.post('http://localhost:8000/api/auth/student-life-dep', {
+      await axios.post("http://localhost:8000/api/auth/student-life-dep", {
         email: user.email,
         fullname: user.fullname,
         role: newRole,
         picture: user.picture,
-        program:user.program,
-        major:user.major
+        program: user.program,
+        major: user.major,
       });
-      console.log('User successfully added to Student Life Department');
+      console.log("User successfully added to Student Life Department");
       setIsDrawerOpen(false);
     } catch (error) {
-      console.error('Error pushing user to new collection:', error);
+      console.error("Error pushing user to new collection:", error);
     }
   };
   const filteredUsers = users.filter((user) =>
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
 
   return (
     <Box minH="100vh" bg="gray.50">
-      
       {/* Hero Section */}
       <Box
         position="relative"
@@ -163,7 +193,6 @@ const ListOfStudentLifeM = () => {
                 left="0"
                 right="0"
                 mt={2}
-                
                 spacing={0}
                 border="1px solid"
                 borderColor="gray.200"
@@ -207,114 +236,165 @@ const ListOfStudentLifeM = () => {
               </VStack>
             )}
           </Box>
-          </Box>
-          </Box>
-      {selectedUser && (
-        <Drawer.Root open={isDrawerOpen}    placement={"top"}>
-        <Portal>
-          <Drawer.Backdrop />
-          <Drawer.Positioner>
-            <Drawer.Content overflowY="auto">  
-              <Drawer.Header>
-                <Drawer.Title>Student Details</Drawer.Title>
-              </Drawer.Header>
-              <Drawer.Body>
-                <Text fontWeight="bold" textStyle="3xl">Email: {selectedUser.email}</Text>
-                <Text textStyle="2xl">Name: {selectedUser.fullname}</Text>
-                <Select.Root mt={4} collection={frameworks} onChange={(e) => setpickedRole(e.target.value)}>
-                  <Select.HiddenSelect />
-                  <Select.Control>
-                    <Select.Trigger>
-                      <Select.ValueText placeholder="Select Role" color={'blackAlpha.900'} />
-                    </Select.Trigger>
-                    <Select.IndicatorGroup>
-                      <Select.Indicator />
-                    </Select.IndicatorGroup>
-                  </Select.Control>
-                  <Portal>
-                    <Select.Positioner>
-                      <Select.Content style={{ zIndex: 9999 }}>
-                        {frameworks.items.map((framework) => (
-                          <Select.Item item={framework} key={framework.value}>
-                            {framework.label}
-                            <Select.ItemIndicator />
-                          </Select.Item>
-                        ))}
-                      </Select.Content>
-                    </Select.Positioner>
-                  </Portal>
-                </Select.Root>
-              </Drawer.Body>
-              <Drawer.Footer>
-                <Button variant="outline" onClick={handleDrawerClose}>Cancel</Button>
-                <Button onClick={()=>handleRoleChange(selectedUser,pickedRole)}>Save</Button> {/* Ensure the Save button works */}
-              </Drawer.Footer>
-              <Drawer.CloseTrigger asChild>
-                <CloseButton size="sm" onClick={handleDrawerClose} />
-              </Drawer.CloseTrigger>
-            </Drawer.Content>
-          </Drawer.Positioner>
-        </Portal>
-      </Drawer.Root>
-       )}
-       
-       <Flex mt={2} wrap="wrap" gap={4} justify="center">
-  {existingUsers.map((user) => (
-    <Card.Root
-      key={user.id}
-      display="flex"
-      flexDirection="row"
-      alignItems="flex-start"
-      width="350px"
-      bg="gray.100"
-
-      color="black"
-      borderRadius="lg"
-      maxHeight="220px"
-      p={3}
-      boxShadow="md"
-      _hover={{
-        boxShadow: "xl",
-        transform: "scale(1.02)",
-        transition: "0.2s",
-      }}
-    >
-      <Image
-        objectFit="cover"
-        boxSize="80px"
-        borderRadius="full"
-        
-        ml={2}
-        mt={4}
-        src={user.picture || defaultImage}
-        alt={user.fullname}
-      />
-      <Box flex="1" overflow="hidden">
-        <Card.Body>
-          <Card.Title mb={1} fontSize="md" isTruncated>
-            {user.fullname}
-          </Card.Title>
-          <Card.Description fontSize="sm" isTruncated>
-            {user.email}
-          </Card.Description>
-          <Card.Description fontSize="sm" isTruncated>
-            {user.role}
-          </Card.Description>
-          <HStack mt={2} spacing={2} wrap="wrap">
-            <Badge variant="outline" fontSize="0.6em">{user.major}</Badge>
-            <Badge variant="outline" fontSize="0.6em">{user.program}</Badge>
-          </HStack>
-        </Card.Body>
-        <Card.Footer mt={2}>
-          {/* Optional actions/buttons */}
-        </Card.Footer>
+        </Box>
       </Box>
-    </Card.Root>
-  ))}
-</Flex>
+      {selectedUser && (
+        <Drawer.Root open={isDrawerOpen} placement={"top"}>
+          <Portal>
+            <Drawer.Backdrop />
+            <Drawer.Positioner>
+              <Drawer.Content overflowY="auto">
+                <Drawer.Header>
+                  <Drawer.Title>Student Details</Drawer.Title>
+                </Drawer.Header>
+                <Drawer.Body>
+                  <Text fontWeight="bold" textStyle="3xl">
+                    Email: {selectedUser.email}
+                  </Text>
+                  <Text textStyle="2xl">Name: {selectedUser.fullname}</Text>
+                  <Select.Root
+                    mt={4}
+                    collection={frameworks}
+                    onChange={(e) => setpickedRole(e.target.value)}
+                  >
+                    <Select.HiddenSelect />
+                    <Select.Control>
+                      <Select.Trigger>
+                        <Select.ValueText
+                          placeholder="Select Role"
+                          color={"blackAlpha.900"}
+                        />
+                      </Select.Trigger>
+                      <Select.IndicatorGroup>
+                        <Select.Indicator />
+                      </Select.IndicatorGroup>
+                    </Select.Control>
+                    <Portal>
+                      <Select.Positioner>
+                        <Select.Content style={{ zIndex: 9999 }}>
+                          {frameworks.items.map((framework) => (
+                            <Select.Item item={framework} key={framework.value}>
+                              {framework.label}
+                              <Select.ItemIndicator />
+                            </Select.Item>
+                          ))}
+                        </Select.Content>
+                      </Select.Positioner>
+                    </Portal>
+                  </Select.Root>
+                </Drawer.Body>
+                <Drawer.Footer>
+                  <Button variant="outline" onClick={handleDrawerClose}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => handleRoleChange(selectedUser, pickedRole)}
+                  >
+                    Save
+                  </Button>{" "}
+                  {/* Ensure the Save button works */}
+                </Drawer.Footer>
+                <Drawer.CloseTrigger asChild>
+                  <CloseButton size="sm" onClick={handleDrawerClose} />
+                </Drawer.CloseTrigger>
+              </Drawer.Content>
+            </Drawer.Positioner>
+          </Portal>
+        </Drawer.Root>
+      )}
 
+      <Flex mt={2} wrap="wrap" gap={4} justify="center">
+        {existingUsers.map((user) => (
+          <Card.Root
+            key={user.id}
+            display="flex"
+            flexDirection="row"
+            alignItems="flex-start"
+            width="350px"
+            bg="gray.100"
+            color="black"
+            borderRadius="lg"
+            maxHeight="220px"
+            p={3}
+            boxShadow="md"
+            _hover={{
+              boxShadow: "xl",
+              transform: "scale(1.02)",
+              transition: "0.2s",
+            }}
+          >
+            {/* Delete Button */}
+            <Button
+              position="absolute"
+              top="8px"
+              right="8px"
+              size="sm"
+              onClick={() => handleDeleteUser(user.id)}
+              sx={{
+                backgroundColor: "#e74c3c", // Red background
+                color: "white",
+                borderRadius: "50%", // Circular button
+                width: "36px", // Button size
+                height: "36px", // Button size
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                cursor: "pointer",
+                transition: "background-color 0.3s ease, transform 0.2s ease",
+                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                zIndex: 10,
+              }}
+              _hover={{
+                backgroundColor: "#c0392b", // Darker red when hovered
+                transform: "scale(1.1)", // Slightly enlarge the button when hovered
+              }}
+              _active={{
+                backgroundColor: "#e74c3c", // Keep red color when clicked
+                transform: "scale(1.05)", // Slightly shrink the button on press
+              }}
+            >
+              <CloseButton size="sm" />
+            </Button>
 
-       {/** 
+            {/* User Image */}
+            <Image
+              objectFit="cover"
+              boxSize="80px"
+              borderRadius="full"
+              ml={2}
+              mt={4}
+              src={user.picture || defaultImage}
+              alt={user.fullname}
+            />
+
+            {/* User Information */}
+            <Box flex="1" overflow="hidden">
+              <Card.Body>
+                <Card.Title mb={1} fontSize="md" isTruncated>
+                  {user.fullname}
+                </Card.Title>
+                <Card.Description fontSize="sm" isTruncated>
+                  {user.email}
+                </Card.Description>
+                <Card.Description fontSize="sm" isTruncated>
+                  {user.role}
+                </Card.Description>
+                <HStack mt={2} spacing={2} wrap="wrap">
+                  <Badge variant="outline" fontSize="0.6em">
+                    {user.major}
+                  </Badge>
+                  <Badge variant="outline" fontSize="0.6em">
+                    {user.program}
+                  </Badge>
+                </HStack>
+              </Card.Body>
+              <Card.Footer mt={2}>{/* Optional actions/buttons */}</Card.Footer>
+            </Box>
+          </Card.Root>
+        ))}
+      </Flex>
+
+      {/** 
       
       <Box mt={4}>
         {selectedUsers.map((user) => (
@@ -352,9 +432,7 @@ const ListOfStudentLifeM = () => {
       </Box>
       */}
     </Box>
-
   );
-  
 };
 
 export default ListOfStudentLifeM;

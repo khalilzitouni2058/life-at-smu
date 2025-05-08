@@ -30,22 +30,20 @@ const adminCreateClub = async (req, res) => {
 };
 
 const deleteClubById = async (req, res) => {
-  const { id } = req.params._id;
-  
+  const { id } = req.params;
 
   try {
     const deletedClub = await Club.findByIdAndDelete(id);
 
     if (!deletedClub) {
-      return res.status(404).json({ message: id });
+      return res.status(404).json({ message: `Club with id ${id} not found` });
     }
 
     return res.status(200).json({ message: "Club deleted successfully" });
   } catch (error) {
+    
     console.error("Error deleting club:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error", error: error.message });
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 

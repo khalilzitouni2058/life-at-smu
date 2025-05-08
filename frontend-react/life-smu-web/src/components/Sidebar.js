@@ -1,16 +1,15 @@
 
 import React from 'react';
+import "../styles/Dashboard/Sidebar.css"
 import {
   CSidebar,
   CSidebarBrand,
   CSidebarHeader,
   CSidebarNav,
-  CSidebarToggler,
   CNavGroup,
   CNavTitle,
   CButton,
 } from '@coreui/react';
-import "../styles/Dashboard/Sidebar.css"
 
 import CIcon from '@coreui/icons-react';
 import { cilUser, cilGroup, cilCalendar } from '@coreui/icons';
@@ -55,27 +54,12 @@ const Sidebar = ({ setActiveSection, activeSection }) => {
         </CButton>
 
         {/* Student Life Members */}
-        <CNavGroup
-          toggler={
-            <span className="d-flex align-items-center">
-              <CIcon icon={cilGroup} className="me-2" />
-              Student Life Members
-            </span>
-          }
+        <CButton
+          className={`sidebar-button ${activeSection === 'Student Life Members' ? 'active' : ''}`}
+          onClick={() => handleNavigation('Student Life Members')}
         >
-          <CButton
-            className={`sidebar-button ${activeSection === 'Student Life Members' ? 'active' : ''}`}
-            onClick={() => handleNavigation('Student Life Members')}
-          >
-            Members
-          </CButton>
-          <CButton
-            className={`sidebar-button ${activeSection === 'Student Life Members' ? 'active' : ''}`}
-            onClick={() => handleNavigation('Student Life Members')}
-          >
-            Officers
-          </CButton>
-        </CNavGroup>
+          <CIcon icon={cilGroup} className="me-2" /> Student Life Members
+        </CButton>
 
         {/* Events */}
         <CButton
