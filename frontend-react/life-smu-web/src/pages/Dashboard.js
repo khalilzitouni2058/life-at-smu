@@ -9,7 +9,7 @@ import { Toaster, toaster } from "../components/ui/toaster";
 import Statistics from "../components/Statistics";
 import Header from '../components/Header';
 
-const Dashboard = () => {
+const Dashboard = ({setIsAuthenticated}) => {
   const [activeSection, setActiveSection] = useState("users");
 
   useEffect(() => {
@@ -54,7 +54,7 @@ const Dashboard = () => {
             overflowY: 'auto',
           }}
         >
-          <Header setActiveSection={setActiveSection} activeSection={activeSection} />
+          <Header setActiveSection={setActiveSection} activeSection={activeSection} setIsAuthenticated={setIsAuthenticated} />
           
           <div style={{ marginTop: '20px' }}>
             {renderContent()}
