@@ -7,12 +7,14 @@ import {
   TouchableOpacity,
   Image,
   Animated,
+  ScrollView,
 } from "react-native";
 import { useUser } from "../../../Context/UserContext";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ClubRequests = () => {
   const navigation = useNavigation();
@@ -58,93 +60,135 @@ const ClubRequests = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backBtn}
-      >
-        <Text style={styles.backText}>Back to Profile</Text>
-      </TouchableOpacity>
-      <Text style={styles.title}>My Club Requests</Text>
-      {requests.length === 0 ? (
-        <Text style={styles.emptyText}>No club requests yet.</Text>
-      ) : (
-        <FlatList
-          data={requests}
-          keyExtractor={(item) => item.clubId}
-          renderItem={({ item }) => (
-            <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
-              <View style={styles.cardHeader}>
-                {item.profilePicture && (
-                  <Image
-                    source={{ uri: item.profilePicture }}
-                    style={styles.clubImage}
-                  />
+    <SafeAreaView style={styles.safeArea}>
+      {/* 🔙 Back Tab */}
+      <View style={styles.backTab}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back-outline" size={22} color="#fff" />
+          <Text style={styles.backText}>Club Profile</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView>
+        <View style={styles.container}>
+          <View style={styles.contentBox}>
+            <Text style={styles.title}>My Club Requests</Text>
+            {requests.length === 0 ? (
+              <Text style={styles.emptyText}>No club requests yet.</Text>
+            ) : (
+              <FlatList
+                data={requests}
+                keyExtractor={(item) => item.clubId}
+                scrollEnabled={false}
+                renderItem={({ item }) => (
+                  <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
+                    <View style={styles.cardHeader}>
+                      {item.profilePicture && (
+                        <Image
+                          source={{ uri: item.profilePicture }}
+                          style={styles.clubImage}
+                        />
+                      )}
+                      <View>
+                        <Text style={styles.name}>{item.clubName}</Text>
+                        <View style={styles.detailRow}>
+                          <Ionicons
+                            name="albums-outline"
+                            size={14}
+                            color="#666"
+                            style={styles.iconLeft}
+                          />
+                          <Text style={styles.category}>{item.category}</Text>
+                        </View>
+                      </View>
+                    </View>
+                    <View style={styles.statusWrapper}>
+                      {getStatusIcon(item.status)}
+                      <Text style={styles.statusText}>{item.status}</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => deleteRequest(item.clubId)}
+                      style={styles.btnDelete}
+                    >
+                      <Ionicons name="trash-outline" size={18} color="white" />
+                      <Text style={styles.btnText}> Delete</Text>
+                    </TouchableOpacity>
+                  </Animated.View>
                 )}
-                <View>
-                  <Text style={styles.name}>{item.clubName}</Text>
-                  <View style={styles.detailRow}>
-                    <Ionicons
-                      name="albums-outline"
-                      size={14}
-                      color="#666"
-                      style={styles.iconLeft}
-                    />
-                    <Text style={styles.category}>{item.category}</Text>
-                  </View>
-                </View>
-              </View>
-              <View style={styles.statusWrapper}>
-                {getStatusIcon(item.status)}
-                <Text style={styles.statusText}>{item.status}</Text>
-              </View>
-              <TouchableOpacity
-                onPress={() => deleteRequest(item.clubId)}
-                style={styles.btnDelete}
-              >
-                <Ionicons name="trash-outline" size={18} color="white" />
-                <Text style={styles.btnText}> Delete</Text>
-              </TouchableOpacity>
-            </Animated.View>
-          )}
-        />
-      )}
-    </View>
+              />
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#F4F6FA",
+  },
+  backTab: {
+    paddingHorizontal: 15,
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#007DA5",
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 4,
+  },
   container: {
     flex: 1,
-    backgroundColor: "#E0F4FF",
-    padding: 20,
-    paddingTop: 40,
+    backgroundColor: "#F4F6FA",
+    paddingBottom: 30,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#007DA5",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  backBtn: {
-    backgroundColor: "#007DA5",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignSelf: "flex-start",
-    marginBottom: 10,
-  },
-  backText: { color: "#fff", fontWeight: "bold" },
-  card: {
+  contentBox: {
     backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 10,
+    borderRadius: 20,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 40,
     shadowColor: "#000",
     shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
     shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#007DA5",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  card: {
+    width: "100%",
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 10,
+    alignItems: "center",
+    borderRadius: 10,
+    borderColor: "#007DA5",
+    borderWidth: 1,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
   cardHeader: {

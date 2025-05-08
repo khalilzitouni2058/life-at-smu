@@ -81,7 +81,7 @@ const BoardMembersScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#007DA5",
+    backgroundColor: "#F4F6FA",
   },
   backTab: {
     paddingHorizontal: 15,
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: "#007DA5",
+    backgroundColor: "#F4F6FA",
     paddingBottom: 30,
   },
   contentBox: {

@@ -6,7 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
-  Image
+  Image,
+  FlatList,
 } from "react-native";
 import { useClub } from "../../../Context/ClubContext";
 import CalendarView from "../components/CalendarView";
@@ -15,23 +16,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import axios from "axios";
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons' // or use FontAwesome, Ionicons, etc.
-
-
-const Addproposal = () => {
-  const navigation = useNavigation(); // Get navigation from context
-
-  return (
-    <View style={{ display: "flex", flexDirection: "row" }}>
-      <Pressable
-        style={styles.button}
-        onPress={() => navigation.navigate("eventForm")}
-      >
-        <Text style={styles.text2}>Create an event proposal</Text>
-      </Pressable>
-    </View>
-  );
-};
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const HomeMain = () => {
   const { clubId } = useClub() || {};
@@ -42,7 +27,7 @@ const HomeMain = () => {
     new Date().toISOString().split("T")[0]
   );
   const [eventsByDate, setEventsByDate] = useState({});
-  const navigation = useNavigation(); 
+  const navigation = useNavigation();
 
   const expoUrl = Constants.manifest2?.extra?.expoGo?.debuggerHost;
   const ipAddress = expoUrl?.match(/^([\d.]+)/)?.[0] || "Not Available";
@@ -65,10 +50,9 @@ const HomeMain = () => {
     fetchEvents();
   }, []);
 
-  // Get 14 days from start of current week
   const today = new Date();
   const startOfWeek = new Date(today);
-  startOfWeek.setDate(today.getDate() - today.getDay()); // Sunday
+  startOfWeek.setDate(today.getDate() - today.getDay());
   const twoWeeks = Array.from({ length: 14 }, (_, i) => {
     const date = new Date(startOfWeek);
     date.setDate(date.getDate() + i);
@@ -84,16 +68,27 @@ const HomeMain = () => {
     setSelectedDate(todayISO);
   }, []);
 
+  const eventsToday = eventsByDate[selectedDate] || [];
+
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search events..."
-          placeholderTextColor="#aaa"
-          value={searchQuery}
-          onChangeText={(text) => setSearchQuery(text)}
-        />
+        <View style={styles.searchBarWrapper}>
+          <Ionicons
+            name="search"
+            size={20}
+            color="#888"
+            style={styles.searchIcon}
+          />
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search events..."
+            placeholderTextColor="#aaa"
+            value={searchQuery}
+            onChangeText={(text) => setSearchQuery(text)}
+          />
+        </View>
+
         <TouchableOpacity onPress={() => setDrawerVisible(!drawerVisible)}>
           <Ionicons
             name="notifications-outline"
@@ -103,15 +98,13 @@ const HomeMain = () => {
           />
         </TouchableOpacity>
       </View>
+
       {drawerVisible && (
-        <View
-          entering={SlideInRight.duration(300)}
-          exiting={SlideOutRight.duration(300)}
-          style={styles.drawer}
-        >
+        <View style={styles.drawer}>
           <Text style={styles.drawerText}>hello</Text>
         </View>
       )}
+
       <CalendarView
         days={twoWeeks}
         selectedIndex={selectedIndex}
@@ -122,76 +115,83 @@ const HomeMain = () => {
         eventsByDate={eventsByDate}
       />
 
-      
-<View style={styles.headerContainer}>
-      <Text style={styles.title}> Upcoming Events</Text>
+      <View style={styles.headerContainer}>
+        {eventsToday.length > 0 ? (
+          <Text style={styles.title}>Upcoming Events</Text>
+        ) : (
+          <View style={{ width: 160 }} /> // ← reserve space when title is hidden
+        )}
+        <TouchableOpacity
+          style={styles.buttonAi}
+          onPress={() => navigation.navigate("AskAiButton")}
+        >
+          <Icon name="robot-outline" size={28} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity style={styles.buttonAi} onPress={() => navigation.navigate('AskAiButton')}>
-        <Icon name="robot-outline" size={28} color="#fff" />
-      </TouchableOpacity>
-    </View>
-      {clubId && <Addproposal />}
-
-      <EventDisplay selectedDate={selectedDate} se  archQuery={searchQuery} />
+      {eventsToday.length === 0 ? (
+        <View style={styles.emptyStateContainer}>
+          <Ionicons
+            name="calendar-outline"
+            size={100}
+            color="#ccc"
+            style={{ marginBottom: 20 }}
+          />
+          <Text style={styles.emptyText}>
+            Looks like you have no events today. Stay tuned!
+          </Text>
+          {clubId && (
+            <TouchableOpacity
+              style={styles.secondaryBtn}
+              onPress={() => navigation.navigate("eventForm")}
+            >
+              <Text style={styles.secondaryBtnText}>Plan your event</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      ) : (
+        <EventDisplay selectedDate={selectedDate} searchQuery={searchQuery} />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   headerContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginHorizontal: 16,
     marginBottom: 12,
     marginTop: 10,
     backgroundColor: "#F4F6FA",
-    padding:8,
-    borderRadius:10
+    padding: 8,
+    borderRadius: 10,
   },
   title: {
     fontSize: 26,
-    fontWeight: '700',
-    color: '#1e1e1e',
+    fontWeight: "700",
+    color: "#1e1e1e",
   },
   buttonAi: {
-    backgroundColor: '#4a90e2',
+    backgroundColor: "#4a90e2",
     width: 48,
     height: 48,
     borderRadius: 24,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 4,
     elevation: 4,
-    marginLeft:60
-  },
-  button: {
-    backgroundColor: "#E9F8FC",
-    paddingVertical: 5,
-    paddingHorizontal: 25,
-    borderRadius: 0,
-    alignItems: "center",
-  },
-  text2: {
-    color: "black",
-    fontSize: 16,
-    fontWeight: "bold",
-    alignSelf: "right",
-    padding: 10,
-  },
-  text: {
-    color: "black",
-    fontSize: 2,
-    fontWeight: "bold",
+    marginLeft: 60,
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 0,
     marginTop: 40,
+    paddingHorizontal: 8,
   },
   searchBar: {
     flex: 1,
@@ -201,7 +201,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 12,
     marginRight: 8,
-    marginLeft: 8,
     backgroundColor: "#fff",
   },
   drawer: {
@@ -220,25 +219,54 @@ const styles = StyleSheet.create({
   drawerText: {
     fontSize: 16,
   },
-
-  placeholder: {
-    height: 200,
-    backgroundColor: "#ddd",
-  },
-  text: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#007DA5",
-    marginRight: "auto",
-    marginLeft: "20",
-    marginTop: 10,
-    marginBottom: 10,
-  },
   container: {
     flex: 1,
     backgroundColor: "#F4F6FA",
-
+    paddingHorizontal: 12,
+    paddingBottom: 60,
+  },
+  emptyStateContainer: {
     alignItems: "center",
+    justifyContent: "center",
+    marginTop: 40,
+  },
+  emptyText: {
+    textAlign: "center",
+    color: "#555",
+    fontSize: 16,
+    marginVertical: 16,
+  },
+  secondaryBtn: {
+    backgroundColor: "#E9F8FC",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+  },
+  secondaryBtnText: {
+    color: "#007DA5",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  searchBarWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginHorizontal: 8,
+    marginBottom: 12,
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchBar: {
+    flex: 1,
+    height: 40,
+    fontSize: 16,
+    color: "#333",
   },
 });
 

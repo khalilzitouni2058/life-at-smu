@@ -11,6 +11,8 @@ import axios from "axios";
 import { useUser } from "../../../Context/UserContext";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "react-native-vector-icons";
 
 const MyClubs = () => {
   const { user } = useUser();
@@ -43,82 +45,116 @@ const MyClubs = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backButton}
-      >
-        <Text style={styles.backText}>Back to Profile</Text>
-      </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.backTab}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back-outline" size={22} color="#fff" />
+          <Text style={styles.backText}>Profile</Text>
+        </TouchableOpacity>
+      </View>
 
-      <Text style={styles.header}>My Clubs</Text>
+      <ScrollView>
+        <View style={styles.container}>
+          <View style={styles.contentBox}>
+            <Text style={styles.header}>My Clubs</Text>
 
-      {clubs.length === 0 ? (
-        <Text style={styles.emptyText}>You haven't joined any clubs yet.</Text>
-      ) : (
-        clubs.map((club) => {
-          const role = getBoardRole(club);
-          return (
-            <TouchableOpacity
-              key={club._id}
-              style={styles.card}
-              activeOpacity={0.9}
-              onPress={() => navigation.navigate("ClubDetailsScreen", { club })}
-            >
-              <Image
-                source={{ uri: club.profilePicture }}
-                style={styles.image}
-              />
-              <View style={styles.info}>
-                <Text style={styles.name}>{club.clubName}</Text>
-                <View style={styles.categoryWrapper}>
-                  <Text style={styles.categoryChip}>
-                    {club?.category || "Uncategorized"}
-                  </Text>
-                </View>
-                {role ? (
-                  <Text style={styles.role}>
-                    🎓 Board member –{" "}
-                    <Text style={{ fontWeight: "bold" }}>{role}</Text>
-                  </Text>
-                ) : (
-                  <Text style={styles.member}>✅ Member</Text>
-                )}
-              </View>
-            </TouchableOpacity>
-          );
-        })
-      )}
-    </ScrollView>
+            {clubs.length === 0 ? (
+              <Text style={styles.emptyText}>
+                You haven't joined any clubs yet.
+              </Text>
+            ) : (
+              clubs.map((club) => {
+                const role = getBoardRole(club);
+                return (
+                  <TouchableOpacity
+                    key={club._id}
+                    style={styles.card}
+                    activeOpacity={0.9}
+                    onPress={() =>
+                      navigation.navigate("ClubDetailsScreen", { club })
+                    }
+                  >
+                    <Image
+                      source={{ uri: club.profilePicture }}
+                      style={styles.image}
+                    />
+                    <View style={styles.info}>
+                      <Text style={styles.name}>{club.clubName}</Text>
+                      <View style={styles.categoryWrapper}>
+                        <Text style={styles.categoryChip}>
+                          {club?.category || "Uncategorized"}
+                        </Text>
+                      </View>
+                      {role ? (
+                        <Text style={styles.role}>
+                          🎓 Board member –{" "}
+                          <Text style={{ fontWeight: "bold" }}>{role}</Text>
+                        </Text>
+                      ) : (
+                        <Text style={styles.member}>✅ Member</Text>
+                      )}
+                    </View>
+                  </TouchableOpacity>
+                );
+              })
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#F4F6FA",
+  },
+  backTab: {
+    paddingHorizontal: 15,
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#007DA5",
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 4,
+  },
   container: {
-    backgroundColor: "#F6FBFF",
-    padding: 24,
-    paddingTop: 40,
+    flex: 1,
+    backgroundColor: "#F4F6FA",
+    paddingBottom: 30,
+  },
+  contentBox: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 40,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
   },
   header: {
     fontSize: 26,
     fontWeight: "bold",
     color: "#007DA5",
-    marginBottom: 20,
+    marginBottom: 30,
     alignSelf: "center",
-  },
-  backButton: {
-    marginLeft: 16,
-    marginBottom: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    backgroundColor: "#007DA5",
-    borderRadius: 10,
-    alignSelf: "flex-start",
-  },
-  backText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 14,
   },
   emptyText: {
     fontSize: 16,
