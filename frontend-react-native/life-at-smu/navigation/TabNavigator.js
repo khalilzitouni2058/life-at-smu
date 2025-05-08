@@ -6,6 +6,7 @@ import ProfileStack from "./ProfileStack";
 import Schedule from "../features/HomePage/screens/Schedule";
 import ClubsScreen from "../features/Club/ClubsScreen";
 
+
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
@@ -21,18 +22,16 @@ const TabNavigator = () => {
         tabBarActiveTintColor: "#007DA5",
         tabBarInactiveTintColor: "#999",
         tabBarStyle: {
-          position: "absolute",
           left: 10,
           right: 10,
+          bottom:3,
           elevation: 10,
           backgroundColor: "#ffffff",
-          borderTopLeftRadius: 25,
-          borderTopRightRadius: 25,
-          height: 70,
+          height: 100,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: -3 },
           shadowOpacity: 0.1,
-          shadowRadius: 6,
+          shadowRadius: 4,
         },
         tabBarItemStyle: {
           marginTop: 8,
@@ -58,7 +57,6 @@ const TabNavigator = () => {
       <Tab.Screen
         name="HomeMain"
         component={HomeMain}
-        options={{ title: "Home" }}
       />
       <Tab.Screen name="Clubs" component={ClubsScreen} />
       <Tab.Screen name="Schedule" component={Schedule} />

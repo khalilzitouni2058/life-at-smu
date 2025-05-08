@@ -6,8 +6,10 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
+
   Image,
   FlatList,
+
 } from "react-native";
 import { useClub } from "../../../Context/ClubContext";
 import CalendarView from "../components/CalendarView";
@@ -129,6 +131,7 @@ const HomeMain = () => {
         </TouchableOpacity>
       </View>
 
+
       {eventsToday.length === 0 ? (
         <View style={styles.emptyStateContainer}>
           <Ionicons
@@ -152,6 +155,7 @@ const HomeMain = () => {
       ) : (
         <EventDisplay selectedDate={selectedDate} searchQuery={searchQuery} />
       )}
+
     </View>
   );
 };
@@ -222,10 +226,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F4F6FA",
+
     paddingHorizontal: 12,
     paddingBottom: 60,
   },
   emptyStateContainer: {
+
     alignItems: "center",
     justifyContent: "center",
     marginTop: 40,

@@ -69,7 +69,59 @@ const EventCalendar = () => {
       
     }
   }, [users, selectedEvent,!isDialogOpen]);
-  const handleToggle = async (val, eventId, userId) => {
+  const sendassignEmail = (email,eventName,eventDate,support_email,eventlocation,student_fullname) => {
+      const templateParams = {
+        email: email,
+        eventLocation:eventlocation,
+        eventName:eventName,
+        eventDate:eventDate,
+        support_email:support_email,
+        student_fullname:student_fullname
+        
+      };
+      console.log("📨 Sending email with params:", templateParams);
+  
+      emailjs
+        .send(
+          'service_c3y8o5g',       // Replace with your EmailJS service ID
+          'template_qzlsfwq',      // Replace with your EmailJS template ID
+          templateParams,
+          'TnwC11NR8IXLU9kFt'        // Replace with your EmailJS public key
+        )
+        .then((response) => {
+          console.log('✅ Email sent successfully:', response.text)
+        })
+        .catch((err) => {
+          console.error('❌ Failed to send email:', err)
+        })
+    }
+    const sendunassignEmail = (email,eventName,eventDate,support_email,eventlocation,student_fullname) => {
+      const templateParams = {
+        email: email,
+        eventLocation:eventlocation,
+        eventName:eventName,
+        eventDate:eventDate,
+        support_email:support_email,
+        student_fullname:student_fullname
+        
+      };
+      console.log("📨 Sending email with params:", templateParams);
+  
+      emailjs
+        .send(
+          'service_c3y8o5g',       // Replace with your EmailJS service ID
+          'template_4bloyi2',      // Replace with your EmailJS template ID
+          templateParams,
+          'TnwC11NR8IXLU9kFt'        // Replace with your EmailJS public key
+        )
+        .then((response) => {
+          console.log('✅ Email sent successfully:', response.text)
+        })
+        .catch((err) => {
+          console.error('❌ Failed to send email:', err)
+        })
+    }
+  const handleToggle = async (val, eventId, userId,useremail,userfullname) => {
     try {
       const response = await axios.post(
         `http://localhost:8000/api/auth/events/${eventId}/assign-member`,
@@ -87,7 +139,12 @@ const EventCalendar = () => {
           : "Member unassigned successfully",
         type: "success",
       });
-
+      if(assigned){
+      sendassignEmail("kzitouni18@gmail.com",selectedEvent.eventName,selectedEvent.eventDate,"lifeatatsmu@gmail.com",selectedEvent.location,userfullname)
+      }
+      else{
+        sendunassignEmail("kzitouni18@gmail.com",selectedEvent.eventName,selectedEvent.eventDate,"lifeatatsmu@gmail.com",selectedEvent.location,userfullname)
+      }
       // ✅ Update the local checked state based on backend response
       setCheckedMap((prev) => ({
         ...prev,
@@ -513,6 +570,7 @@ const EventCalendar = () => {
         borderRadius="xl"
         p={4}
         overflowY="auto"
+        maxH={400}
         boxShadow="md"
         sx={{ "&::-webkit-scrollbar": { display: "none" } }}
       >
@@ -520,7 +578,7 @@ const EventCalendar = () => {
           Assign Members
         </Text>
 
-        <VStack spacing={4} align="stretch">
+        <VStack spacing={4} align="stretch" >
           <List.Root>
             {users.length > 0 ? (
               users.map((user) => (
@@ -572,7 +630,7 @@ const EventCalendar = () => {
                         colorPalette={"green"}
                         checked={!!checkedMap[user._id]}
                         onCheckedChange={(val) =>
-                          handleToggle(val, selectedEvent.id, user._id)
+                          handleToggle(val, selectedEvent.id, user._id,user.email,user.fullname)
                         }
                       >
                         <Switch.HiddenInput />

@@ -30,7 +30,7 @@ const Sidebar = ({ setActiveSection, activeSection }) => {
       width: '254px',
     }}>
       {/* Sidebar Header */}
-      <CSidebarHeader className="border-bottom">
+      <CSidebarHeader >
         <CSidebarBrand style={{marginBottom: '20px'}}>Dashboard</CSidebarBrand>
       </CSidebarHeader>
 
