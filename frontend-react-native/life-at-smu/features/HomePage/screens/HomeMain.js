@@ -149,7 +149,7 @@ const HomeMain = () => {
         <View style={{ alignItems: "center", marginTop: 20 }}>
           <TouchableOpacity
             style={styles.secondaryBtn}
-            onPress={() => navigation.navigate("EventForm")}
+            onPress={() => navigation.navigate("eventForm")}
           >
             <Text style={styles.secondaryBtnText}>Plan your event</Text>
           </TouchableOpacity>

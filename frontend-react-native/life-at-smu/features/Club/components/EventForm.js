@@ -20,9 +20,8 @@ import * as ImagePicker from "expo-image-picker";
 import { MaterialIcons, FontAwesome, Entypo } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useClub } from "../../../Context/ClubContext"; // Import useClub hook
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 
 const schema = yup.object().shape({
   eventName: yup
@@ -77,147 +76,143 @@ const EventForm = () => {
 
   const navigation = useNavigation();
 
+  const [roomOverlayVisible, setRoomOverlayVisible] = useState(false);
 
-    const [roomOverlayVisible, setRoomOverlayVisible] = useState(false);
+  function getRoomAvailabilityStatus(
+    roomsList,
+    selectedDate,
+    selectedStartTime,
+    selectedEndTime
+  ) {
+    const selectedDateStr = new Date(selectedDate)
+      .toISOString()
+      .substring(0, 10);
 
-    function getRoomAvailabilityStatus(roomsList, selectedDate, selectedStartTime, selectedEndTime ) {
-      const selectedDateStr = new Date(selectedDate).toISOString().substring(0, 10);
-    
-      const getHourMinute = (value) => {
-        if (value instanceof Date) {
-          // Extract hours and minutes from the Date object
-          const hours = String(value.getHours()).padStart(2, '0');
-          const minutes = String(value.getMinutes()).padStart(2, '0');
-          return `${hours}:${minutes}`;
-        }
-      
-        if (typeof value === 'string') {
-          // If value is a string in "HH:mm" format, return as is
-          return value;
-        }
-      
-        // Return a default time if value is neither a Date nor a string
-        console.log("Invalid time value:", value);
-        return "00:00";
-      };
-    
-      const eventStart = getHourMinute(selectedStartTime);
-  const eventEnd = getHourMinute(selectedEndTime);
-    
-    
-      const availabilityMap = {};
-    
-      roomsList.forEach((room) => {
-        let hasConflict = false;
-    
-        room.reservations.forEach((res) => {
-          const resDate = new Date(res.DayOfReservation);
-          if (isNaN(resDate.getTime())) {
-            return; // Skip this reservation if it's invalid
-          }
-          const resDateStr = resDate.toISOString().substring(0, 10);
-          if (resDateStr !== selectedDateStr) return;
-    
-          if (!res.TimeInterval.start || !res.TimeInterval.end) {
-            return; // Skip this reservation if time interval is missing
-          }
-    
-          const resStart = res.TimeInterval.start;
-          const resEnd = res.TimeInterval.end;
-    
-    
-          const conflict = eventStart < resEnd && eventEnd > resStart;
-    
-          if (conflict) {
-            hasConflict = true;
-          } 
-        });
-    
-        availabilityMap[room.value] = !hasConflict;
-    
-        
-      });
-    
-      return availabilityMap;
-    }
-    
-    
-    const handleUploadPhoto = async () => {
-          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        
-          if (status !== "granted") {
-            Alert.alert("Permission denied", "We need access to your gallery.");
-            return;
-          }
-        
-          const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            quality: 1,
-          });
-        
-          if (result.canceled) {
-            return;
-          }
-        
-          const uri = result.assets[0].uri;
-          
-      
-          if (result.canceled) {
-            return;
-          }
-      
-          
-      
-          const uploadedImageUrl = await uploadImage(uri);
-          if (uploadedImageUrl) {
-            console.log("Uploaded Image URL:", uploadedImageUrl);
-            // Use uploadedImageUrl instead of result.uri
-          }
-    
-          setImage(uploadedImageUrl);
-    
-        };
-      
-        const uploadImage = async (uri) => {
-          const formData = new FormData();
-          formData.append("source", {
-            uri,
-            name: "photo.jpg", // Required for FormData
-            type: "image/jpeg",
-          });
-      
-          try {
-            const response = await fetch("https://postimage.me/api/1/upload", {
-              method: "POST",
-              body: formData,
-              headers: {
-                "Content-Type": "multipart/form-data",
-                "X-API-Key":
-                  "chv_ZtFY_1d68e60bdc2a3a9f47650fa766b07390e1b69aac2a4ee7d94a3d52e0b853cd8783e54a37fef88448278f2c92526b7f87b9da5acdc486f91f784f0891e651454a",
-              },
-            });
-      
-            const data = await response.json();
-      
-            if (data) {
-              setUrlphoto(data.image.url);
-              return data.image.url;
-            }
-          } catch (error) {
-            console.error("Error uploading image:", error);
-            return null;
-          }
-        };
-
-
-    const toggleRoomSelection = (roomId) => {
-      if (selectedRooms?.includes(roomId)) {
-        setSelectedRooms(selectedRooms.filter((id) => id !== roomId));
-      } else {
-        setSelectedRooms([...selectedRooms, roomId]);
+    const getHourMinute = (value) => {
+      if (value instanceof Date) {
+        // Extract hours and minutes from the Date object
+        const hours = String(value.getHours()).padStart(2, "0");
+        const minutes = String(value.getMinutes()).padStart(2, "0");
+        return `${hours}:${minutes}`;
       }
+
+      if (typeof value === "string") {
+        // If value is a string in "HH:mm" format, return as is
+        return value;
+      }
+
+      // Return a default time if value is neither a Date nor a string
+      console.log("Invalid time value:", value);
+      return "00:00";
     };
+
+    const eventStart = getHourMinute(selectedStartTime);
+    const eventEnd = getHourMinute(selectedEndTime);
+
+    const availabilityMap = {};
+
+    roomsList.forEach((room) => {
+      let hasConflict = false;
+
+      room.reservations.forEach((res) => {
+        const resDate = new Date(res.DayOfReservation);
+        if (isNaN(resDate.getTime())) {
+          return; // Skip this reservation if it's invalid
+        }
+        const resDateStr = resDate.toISOString().substring(0, 10);
+        if (resDateStr !== selectedDateStr) return;
+
+        if (!res.TimeInterval.start || !res.TimeInterval.end) {
+          return; // Skip this reservation if time interval is missing
+        }
+
+        const resStart = res.TimeInterval.start;
+        const resEnd = res.TimeInterval.end;
+
+        const conflict = eventStart < resEnd && eventEnd > resStart;
+
+        if (conflict) {
+          hasConflict = true;
+        }
+      });
+
+      availabilityMap[room.value] = !hasConflict;
+    });
+
+    return availabilityMap;
+  }
+
+  const handleUploadPhoto = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert("Permission denied", "We need access to your gallery.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+
+    if (result.canceled) {
+      return;
+    }
+
+    const uri = result.assets[0].uri;
+
+    if (result.canceled) {
+      return;
+    }
+
+    const uploadedImageUrl = await uploadImage(uri);
+    if (uploadedImageUrl) {
+      console.log("Uploaded Image URL:", uploadedImageUrl);
+      // Use uploadedImageUrl instead of result.uri
+    }
+
+    setImage(uploadedImageUrl);
+  };
+
+  const uploadImage = async (uri) => {
+    const formData = new FormData();
+    formData.append("source", {
+      uri,
+      name: "photo.jpg", // Required for FormData
+      type: "image/jpeg",
+    });
+
+    try {
+      const response = await fetch("https://postimage.me/api/1/upload", {
+        method: "POST",
+        body: formData,
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "X-API-Key":
+            "chv_ZtFY_1d68e60bdc2a3a9f47650fa766b07390e1b69aac2a4ee7d94a3d52e0b853cd8783e54a37fef88448278f2c92526b7f87b9da5acdc486f91f784f0891e651454a",
+        },
+      });
+
+      const data = await response.json();
+
+      if (data) {
+        setUrlphoto(data.image.url);
+        return data.image.url;
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      return null;
+    }
+  };
+
+  const toggleRoomSelection = (roomId) => {
+    if (selectedRooms?.includes(roomId)) {
+      setSelectedRooms(selectedRooms.filter((id) => id !== roomId));
+    } else {
+      setSelectedRooms([...selectedRooms, roomId]);
+    }
+  };
 
   const {
     control,
@@ -282,7 +277,7 @@ const EventForm = () => {
         }
       });
 
-      navigation.navigate('HomeMain',{screen:'HomeMain'});
+    navigation.navigate("HomeMain");
   };
 
   useEffect(() => {
@@ -295,7 +290,7 @@ const EventForm = () => {
           const formattedRooms = response.data.rooms.map((room) => ({
             label: room.number,
             value: room._id,
-            reservations : room.reservations
+            reservations: room.reservations,
           }));
           setRoomsList(formattedRooms);
           console.log("This is the second log", roomsList);
@@ -308,466 +303,475 @@ const EventForm = () => {
     fetchRooms();
   }, []);
 
-  
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      <ScrollView keyboardShouldPersistTaps="handled">
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Event Proposal</Text>
-        </View>
-
-        {/* Event Image */}
-        <TouchableOpacity onPress={handleUploadPhoto} style={styles.imageContainer}>
-          {image ? (
-            <Image source={{ uri: image }} style={styles.image} />
-          ) : (
-            <View style={styles.imagePlaceholder}>
-              <MaterialIcons name="add-a-photo" size={50} color="#007da5" />
-              <Text style={styles.imageText}>Tap to add image</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-
-        <View style={styles.formContainer}>
-          {/* Event Name */}
-          <View style={styles.inputWrapper}>
-            <MaterialIcons
-              name="event"
-              size={24}
-              color="#007da5"
-              style={styles.icon}
-            />
-            <Controller
-              control={control}
-              name="eventName"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Event Name"
-                  value={value}
-                  onChangeText={(val) => {
-                    onChange(val); // Update react-hook-form value
-                    seteventName(val); // Update state value
-                  }}
-                />
-              )}
-            />
+      <View style={styles.container}>
+        <ScrollView keyboardShouldPersistTaps="handled">
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Event Proposal</Text>
           </View>
-          {errors.eventName && (
-            <Text style={styles.errorText}>{errors.eventName.message}</Text>
-          )}
 
-          {/* Date Picker Button */}
+          {/* Event Image */}
           <TouchableOpacity
-            onPress={() => setShowDatePicker(true)}
-            style={styles.inputWrapper}
+            onPress={handleUploadPhoto}
+            style={styles.imageContainer}
           >
-            <Entypo
-              name="calendar"
-              size={24}
-              color="#007da5"
-              style={styles.icon}
-            />
-            <Text style={[styles.input, { color: "#000" }]}>
-              {selectedDate.toISOString().split("T")[0]}
-            </Text>
+            {image ? (
+              <Image source={{ uri: image }} style={styles.image} />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <MaterialIcons name="add-a-photo" size={50} color="#007da5" />
+                <Text style={styles.imageText}>Tap to add image</Text>
+              </View>
+            )}
           </TouchableOpacity>
 
-          {/* Show Date Picker Modal when button is clicked */}
-          {showDatePicker && (
-            <DateTimePicker
-              value={selectedDate}
-              mode="date"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={(event, date) => {
-                setShowDatePicker(false);
-                if (date) {
-                  setSelectedDate(date);
-                  setValue("date", date.toISOString().split("T")[0]); // ✅ Set value in form
-                }
-              }}
-            />
-          )}
-
-          {errors.date && (
-            <Text style={styles.errorText}>{errors.date.message}</Text>
-          )}
-
-          {/* Time Picker Button */}
-          <TouchableOpacity
-            onPress={() => setShowTimePicker(true)}
-            style={styles.inputWrapper}
-          >
-            <MaterialIcons
-              name="access-time"
-              size={24}
-              color="#007da5"
-              style={styles.icon}
-            />
-            <Text style={[styles.input, { color: "#000" }]}>
-              Event Start Time:{" "}
-              {selectedTime
-                ? selectedTime.getHours().toString().padStart(2, "0") +
-                  ":" +
-                  selectedTime.getMinutes().toString().padStart(2, "0")
-                : "Not set"}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Show Time Picker */}
-          {showTimePicker && (
-            <DateTimePicker
-              value={selectedTime}
-              mode="time"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={(event, time) => {
-                setShowTimePicker(false);
-                if (time) {
-                  setSelectedTime(time);
-                  const formattedTime =
-                    time.getHours().toString().padStart(2, "0") +
-                    ":" +
-                    time.getMinutes().toString().padStart(2, "0");
-
-                  setValue("time", formattedTime); 
-                }
-              }}
-            />
-          )}
-          {errors.time && (
-            <Text style={styles.errorText}>{errors.time.message}</Text>
-          )}
-          {/*Event End time*/}
-          <TouchableOpacity
-            onPress={() => setShowTimePicker2(true)}
-            style={styles.inputWrapper}
-          >
-            <MaterialIcons
-              name="access-time"
-              size={24}
-              color="#007da5"
-              style={styles.icon}
-            />
-            <Text style={[styles.input, { color: "#000" }]}>
-              Event End Time:{" "}
-              {eventEndTime
-                ? eventEndTime.getHours().toString().padStart(2, "0") +
-                  ":" +
-                  eventEndTime.getMinutes().toString().padStart(2, "0")
-                : "Not set"}
-            </Text>
-          </TouchableOpacity>
-
-          {/* Show Time Picker */}
-          {showTimePicker2 && (
-            <DateTimePicker
-              value={eventEndTime}
-              mode="time"
-              display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={(event, time) => {
-                setShowTimePicker2(false);
-                if (time) {
-                  setEventEndTime(time);
-                  const formattedTime =
-                    time.getHours().toString().padStart(2, "0") +
-                    ":" +
-                    time.getMinutes().toString().padStart(2, "0");
-
-                  setValue("time", formattedTime); // ✅ Store time
-                }
-              }}
-            />
-          )}
-          {errors.time && (
-            <Text style={styles.errorText}>{errors.time.message}</Text>
-          )}
-
-          {/* Place */}
-          <View style={styles.inputWrapper}>
-            <MaterialIcons
-              name="place"
-              size={24}
-              color="#007da5"
-              style={styles.icon}
-            />
-            <Controller
-              control={control}
-              name="place"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Event Place"
-                  value={value}
-                  onChangeText={(val) => {
-                    onChange(val); // Update react-hook-form value
-                    seteventLocation(val); // Update state value
-                  }}
-                />
-              )}
-            />
-          </View>
-          {errors.place && (
-            <Text style={styles.errorText}>{errors.place.message}</Text>
-          )}
-          {/*Rooms*/}
-          <View>
-      {/* Room selection button */}
-      <TouchableOpacity
-        onPress={() => setRoomOverlayVisible(true)}
-        style={styles.inputWrapper}
-      >
-        <MaterialIcons
-          name="meeting-room"
-          size={24}
-          color="#007da5"
-          style={styles.icon}
-        />
-        <Text style={styles.selectText}>
-          {selectedRooms?.length > 0
-            ? `${selectedRooms?.length} room(s) selected`
-            : "Select rooms"}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Room selection overlay modal */}
-      <Modal
-  visible={roomOverlayVisible}
-  animationType="slide"
-  transparent={true}
-  onRequestClose={() => setRoomOverlayVisible(false)}
->
-  <View style={styles.overlayBackground}>
-    <View style={styles.overlayContainer}>
-      <Text style={styles.overlayTitle}>Select Rooms</Text>
-
-      
-      {(() => {
-        const roomAvailability = getRoomAvailabilityStatus(
-          roomsList,
-          selectedDate,
-          selectedTime,
-          eventEndTime
-        );
-
-        console.log(roomAvailability)
-        console.log(selectedDate)
-        console.log(selectedTime)
-        console.log(eventEndTime)
-
-
-        return (
-          <ScrollView contentContainerStyle={styles.roomCardContainer}>
-            {roomsList.map((room) => {
-              const isSelected = selectedRooms.includes(room.value);
-              const isAvailable = roomAvailability[room.value];
-
-              return (
-                <TouchableOpacity
-                  key={room.value}
-                  style={[
-                    styles.roomCard,
-                    isSelected && styles.roomCardSelected,
-                    !isAvailable && styles.roomCardDisabled,
-                  ]}
-                  onPress={() => {
-                    if (isAvailable) {
-                      toggleRoomSelection(room.value);
-                    }
-                  }}
-                  disabled={!isAvailable}
-                  activeOpacity={isAvailable ? 0.7 : 1}
-                >
-                  <Text
-                    style={[
-                      styles.roomCardText,
-                      isSelected && styles.roomCardTextSelected,
-                      !isAvailable && styles.roomCardTextDisabled,
-                    ]}
-                  >
-                    {room.label} {!isAvailable ? '🔴' : '🟢'}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-        );
-      })()}
-
-      <Button
-        title="Confirm Selection"
-        onPress={() => setRoomOverlayVisible(false)}
-        color="#007da5"
-      />
-    </View>
-  </View>
-</Modal>
-
-    </View>
-          {/* Participants */}
-          <View style={styles.inputWrapper}>
-            <FontAwesome
-              name="users"
-              size={24}
-              color="#007da5"
-              style={styles.icon}
-            />
-            <Controller
-              control={control}
-              name="participants"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Estimated Participants"
-                  keyboardType="numeric"
-                  value={value ? String(value) : ""}
-                  onChangeText={(val) => onChange(val.replace(/[^0-9]/g, ""))}
-                />
-              )}
-            />
-          </View>
-          {errors.participants && (
-            <Text style={styles.errorText}>{errors.participants.message}</Text>
-          )}
-
-          {/* Description */}
-          <View style={styles.inputWrapper}>
-            <MaterialIcons
-              name="description"
-              size={24}
-              color="#007da5"
-              style={styles.icon}
-            />
-            <Controller
-              control={control}
-              name="description"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={[styles.input, { height: 80 }]}
-                  placeholder="Event Description"
-                  multiline
-                  value={value}
-                  onChangeText={(val) => {
-                    onChange(val);
-                    seteventDescription(val);
-                  }}
-                />
-              )}
-            />
-          </View>
-          {errors.description && (
-            <Text style={styles.errorText}>{errors.description.message}</Text>
-          )}
-
-          {/* Event Link (formLink) */}
-          <View style={styles.inputWrapper}>
-            <MaterialIcons
-              name="link"
-              size={24}
-              color="#007da5"
-              style={styles.icon}
-            />
-            <Controller
-              control={control}
-              name="formLink"
-              render={({ field: { onChange, value } }) => (
-                <TextInput
-                  style={styles.input}
-                  placeholder="Event Link (Google Form URL)"
-                  value={value}
-                  onChangeText={(val) => {
-                    setformLink(val);
-                    onChange(val); // Update react-hook-form value
-                  }}
-                />
-              )}
-            />
-          </View>
-          {errors.formLink && (
-            <Text style={styles.errorText}>{errors.formLink.message}</Text>
-          )}
-
-          <View style={styles.checkboxContainer}>
-            <Controller
-              control={control}
-              name="mandatoryParentalAgreement"
-              render={({ field: { onChange, value } }) => (
-                <TouchableOpacity
-                  style={styles.checkbox}
-                  onPress={() => {
-                    setMandatoryParentalAgreement(!mandatoryParentalAgreement);
-                    setValue(
-                      "mandatoryParentalAgreement",
-                      !mandatoryParentalAgreement
-                    ); // ✅ Sync with react-hook-form
-                  }}
-                >
-                  <MaterialIcons
-                    name={
-                      mandatoryParentalAgreement
-                        ? "check-box"
-                        : "check-box-outline-blank"
-                    }
-                    size={24}
-                    color="#007da5"
+          <View style={styles.formContainer}>
+            {/* Event Name */}
+            <View style={styles.inputWrapper}>
+              <MaterialIcons
+                name="event"
+                size={24}
+                color="#007da5"
+                style={styles.icon}
+              />
+              <Controller
+                control={control}
+                name="eventName"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Event Name"
+                    value={value}
+                    onChangeText={(val) => {
+                      onChange(val); // Update react-hook-form value
+                      seteventName(val); // Update state value
+                    }}
                   />
-                  <Text style={styles.checkboxLabel}>
-                    Mandatory Parental Agreement
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
+                )}
+              />
+            </View>
+            {errors.eventName && (
+              <Text style={styles.errorText}>{errors.eventName.message}</Text>
+            )}
 
-            {errors.mandatoryParentalAgreement && (
+            {/* Date Picker Button */}
+            <TouchableOpacity
+              onPress={() => setShowDatePicker(true)}
+              style={styles.inputWrapper}
+            >
+              <Entypo
+                name="calendar"
+                size={24}
+                color="#007da5"
+                style={styles.icon}
+              />
+              <Text style={[styles.input, { color: "#000" }]}>
+                {selectedDate.toISOString().split("T")[0]}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Show Date Picker Modal when button is clicked */}
+            {showDatePicker && (
+              <DateTimePicker
+                value={selectedDate}
+                mode="date"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={(event, date) => {
+                  setShowDatePicker(false);
+                  if (date) {
+                    setSelectedDate(date);
+                    setValue("date", date.toISOString().split("T")[0]); // ✅ Set value in form
+                  }
+                }}
+              />
+            )}
+
+            {errors.date && (
+              <Text style={styles.errorText}>{errors.date.message}</Text>
+            )}
+
+            {/* Time Picker Button */}
+            <TouchableOpacity
+              onPress={() => setShowTimePicker(true)}
+              style={styles.inputWrapper}
+            >
+              <MaterialIcons
+                name="access-time"
+                size={24}
+                color="#007da5"
+                style={styles.icon}
+              />
+              <Text style={[styles.input, { color: "#000" }]}>
+                Event Start Time:{" "}
+                {selectedTime
+                  ? selectedTime.getHours().toString().padStart(2, "0") +
+                    ":" +
+                    selectedTime.getMinutes().toString().padStart(2, "0")
+                  : "Not set"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Show Time Picker */}
+            {showTimePicker && (
+              <DateTimePicker
+                value={selectedTime}
+                mode="time"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={(event, time) => {
+                  setShowTimePicker(false);
+                  if (time) {
+                    setSelectedTime(time);
+                    const formattedTime =
+                      time.getHours().toString().padStart(2, "0") +
+                      ":" +
+                      time.getMinutes().toString().padStart(2, "0");
+
+                    setValue("time", formattedTime);
+                  }
+                }}
+              />
+            )}
+            {errors.time && (
+              <Text style={styles.errorText}>{errors.time.message}</Text>
+            )}
+            {/*Event End time*/}
+            <TouchableOpacity
+              onPress={() => setShowTimePicker2(true)}
+              style={styles.inputWrapper}
+            >
+              <MaterialIcons
+                name="access-time"
+                size={24}
+                color="#007da5"
+                style={styles.icon}
+              />
+              <Text style={[styles.input, { color: "#000" }]}>
+                Event End Time:{" "}
+                {eventEndTime
+                  ? eventEndTime.getHours().toString().padStart(2, "0") +
+                    ":" +
+                    eventEndTime.getMinutes().toString().padStart(2, "0")
+                  : "Not set"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Show Time Picker */}
+            {showTimePicker2 && (
+              <DateTimePicker
+                value={eventEndTime}
+                mode="time"
+                display={Platform.OS === "ios" ? "spinner" : "default"}
+                onChange={(event, time) => {
+                  setShowTimePicker2(false);
+                  if (time) {
+                    setEventEndTime(time);
+                    const formattedTime =
+                      time.getHours().toString().padStart(2, "0") +
+                      ":" +
+                      time.getMinutes().toString().padStart(2, "0");
+
+                    setValue("time", formattedTime); // ✅ Store time
+                  }
+                }}
+              />
+            )}
+            {errors.time && (
+              <Text style={styles.errorText}>{errors.time.message}</Text>
+            )}
+
+            {/* Place */}
+            <View style={styles.inputWrapper}>
+              <MaterialIcons
+                name="place"
+                size={24}
+                color="#007da5"
+                style={styles.icon}
+              />
+              <Controller
+                control={control}
+                name="place"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Event Place"
+                    value={value}
+                    onChangeText={(val) => {
+                      onChange(val); // Update react-hook-form value
+                      seteventLocation(val); // Update state value
+                    }}
+                  />
+                )}
+              />
+            </View>
+            {errors.place && (
+              <Text style={styles.errorText}>{errors.place.message}</Text>
+            )}
+            {/*Rooms*/}
+            <View>
+              {/* Room selection button */}
+              <TouchableOpacity
+                onPress={() => setRoomOverlayVisible(true)}
+                style={styles.inputWrapper}
+              >
+                <MaterialIcons
+                  name="meeting-room"
+                  size={24}
+                  color="#007da5"
+                  style={styles.icon}
+                />
+                <Text style={styles.selectText}>
+                  {selectedRooms?.length > 0
+                    ? `${selectedRooms?.length} room(s) selected`
+                    : "Select rooms"}
+                </Text>
+              </TouchableOpacity>
+
+              {/* Room selection overlay modal */}
+              <Modal
+                visible={roomOverlayVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setRoomOverlayVisible(false)}
+              >
+                <View style={styles.overlayBackground}>
+                  <View style={styles.overlayContainer}>
+                    <Text style={styles.overlayTitle}>Select Rooms</Text>
+
+                    {(() => {
+                      const roomAvailability = getRoomAvailabilityStatus(
+                        roomsList,
+                        selectedDate,
+                        selectedTime,
+                        eventEndTime
+                      );
+
+                      console.log(roomAvailability);
+                      console.log(selectedDate);
+                      console.log(selectedTime);
+                      console.log(eventEndTime);
+
+                      return (
+                        <ScrollView
+                          contentContainerStyle={styles.roomCardContainer}
+                        >
+                          {roomsList.map((room) => {
+                            const isSelected = selectedRooms.includes(
+                              room.value
+                            );
+                            const isAvailable = roomAvailability[room.value];
+
+                            return (
+                              <TouchableOpacity
+                                key={room.value}
+                                style={[
+                                  styles.roomCard,
+                                  isSelected && styles.roomCardSelected,
+                                  !isAvailable && styles.roomCardDisabled,
+                                ]}
+                                onPress={() => {
+                                  if (isAvailable) {
+                                    toggleRoomSelection(room.value);
+                                  }
+                                }}
+                                disabled={!isAvailable}
+                                activeOpacity={isAvailable ? 0.7 : 1}
+                              >
+                                <Text
+                                  style={[
+                                    styles.roomCardText,
+                                    isSelected && styles.roomCardTextSelected,
+                                    !isAvailable && styles.roomCardTextDisabled,
+                                  ]}
+                                >
+                                  {room.label} {!isAvailable ? "🔴" : "🟢"}
+                                </Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </ScrollView>
+                      );
+                    })()}
+
+                    <Button
+                      title="Confirm Selection"
+                      onPress={() => setRoomOverlayVisible(false)}
+                      color="#007da5"
+                    />
+                  </View>
+                </View>
+              </Modal>
+            </View>
+            {/* Participants */}
+            <View style={styles.inputWrapper}>
+              <FontAwesome
+                name="users"
+                size={24}
+                color="#007da5"
+                style={styles.icon}
+              />
+              <Controller
+                control={control}
+                name="participants"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Estimated Participants"
+                    keyboardType="numeric"
+                    value={value ? String(value) : ""}
+                    onChangeText={(val) => onChange(val.replace(/[^0-9]/g, ""))}
+                  />
+                )}
+              />
+            </View>
+            {errors.participants && (
               <Text style={styles.errorText}>
-                {errors.mandatoryParentalAgreement.message}
+                {errors.participants.message}
               </Text>
             )}
 
-            <Controller
-              control={control}
-              name="transportationProvided"
-              render={({ field: { onChange, value } }) => (
-                <TouchableOpacity
-                  style={styles.checkbox}
-                  onPress={() => {
-                    setTransportationProvided(!transportationProvided);
-                    setValue("transportationProvided", !transportationProvided); // ✅ Sync with react-hook-form
-                  }}
-                >
-                  <MaterialIcons
-                    name={
-                      transportationProvided
-                        ? "check-box"
-                        : "check-box-outline-blank"
-                    }
-                    size={24}
-                    color="#007da5"
+            {/* Description */}
+            <View style={styles.inputWrapper}>
+              <MaterialIcons
+                name="description"
+                size={24}
+                color="#007da5"
+                style={styles.icon}
+              />
+              <Controller
+                control={control}
+                name="description"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={[styles.input, { height: 80 }]}
+                    placeholder="Event Description"
+                    multiline
+                    value={value}
+                    onChangeText={(val) => {
+                      onChange(val);
+                      seteventDescription(val);
+                    }}
                   />
-                  <Text style={styles.checkboxLabel}>
-                    Transportation Provided
-                  </Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-
-          {/* Submit Button */}
-          <TouchableOpacity
-            onPress={handleSubmitForm}
-            style={styles.submitButton}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Text style={styles.submitText}>Submit</Text>
+                )}
+              />
+            </View>
+            {errors.description && (
+              <Text style={styles.errorText}>{errors.description.message}</Text>
             )}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </View>
+
+            {/* Event Link (formLink) */}
+            <View style={styles.inputWrapper}>
+              <MaterialIcons
+                name="link"
+                size={24}
+                color="#007da5"
+                style={styles.icon}
+              />
+              <Controller
+                control={control}
+                name="formLink"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Event Link (Google Form URL)"
+                    value={value}
+                    onChangeText={(val) => {
+                      setformLink(val);
+                      onChange(val); // Update react-hook-form value
+                    }}
+                  />
+                )}
+              />
+            </View>
+            {errors.formLink && (
+              <Text style={styles.errorText}>{errors.formLink.message}</Text>
+            )}
+
+            <View style={styles.checkboxContainer}>
+              <Controller
+                control={control}
+                name="mandatoryParentalAgreement"
+                render={({ field: { onChange, value } }) => (
+                  <TouchableOpacity
+                    style={styles.checkbox}
+                    onPress={() => {
+                      setMandatoryParentalAgreement(
+                        !mandatoryParentalAgreement
+                      );
+                      setValue(
+                        "mandatoryParentalAgreement",
+                        !mandatoryParentalAgreement
+                      ); // ✅ Sync with react-hook-form
+                    }}
+                  >
+                    <MaterialIcons
+                      name={
+                        mandatoryParentalAgreement
+                          ? "check-box"
+                          : "check-box-outline-blank"
+                      }
+                      size={24}
+                      color="#007da5"
+                    />
+                    <Text style={styles.checkboxLabel}>
+                      Mandatory Parental Agreement
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+
+              {errors.mandatoryParentalAgreement && (
+                <Text style={styles.errorText}>
+                  {errors.mandatoryParentalAgreement.message}
+                </Text>
+              )}
+
+              <Controller
+                control={control}
+                name="transportationProvided"
+                render={({ field: { onChange, value } }) => (
+                  <TouchableOpacity
+                    style={styles.checkbox}
+                    onPress={() => {
+                      setTransportationProvided(!transportationProvided);
+                      setValue(
+                        "transportationProvided",
+                        !transportationProvided
+                      ); // ✅ Sync with react-hook-form
+                    }}
+                  >
+                    <MaterialIcons
+                      name={
+                        transportationProvided
+                          ? "check-box"
+                          : "check-box-outline-blank"
+                      }
+                      size={24}
+                      color="#007da5"
+                    />
+                    <Text style={styles.checkboxLabel}>
+                      Transportation Provided
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+
+            {/* Submit Button */}
+            <TouchableOpacity
+              onPress={handleSubmitForm}
+              style={styles.submitButton}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.submitText}>Submit</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 };
@@ -780,7 +784,7 @@ const styles = {
     backgroundColor: "#f7fcff",
   },
   titleContainer: {
-    backgroundColor: "#007da5", 
+    backgroundColor: "#007da5",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
@@ -794,12 +798,12 @@ const styles = {
 
   title: {
     fontSize: 28,
-    fontWeight: "700", 
+    fontWeight: "700",
     color: "#fff",
     textAlign: "center",
   },
   imageContainer: {
-    width: "90%", 
+    width: "90%",
     height: 200,
     borderWidth: 2,
     borderColor: "#007da5",
@@ -883,7 +887,7 @@ const styles = {
   },
   overlayBackground: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)", 
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -908,10 +912,10 @@ const styles = {
   },
   roomCard: {
     backgroundColor: "#e0e0e0",
-    padding: 15,
+    padding: 18,
     margin: 10,
     borderRadius: 10,
-    width: 100,
+    width: 120,
     alignItems: "center",
     borderColor: "#ccc",
     borderWidth: 1,
@@ -935,10 +939,10 @@ const styles = {
     boxShadow: "0 2px 6px rgba(255, 0, 0, 0.15)", // soft red shadow
     transition: "all 0.3s ease-in-out",
   },
-  
+
   roomCardTextDisabled: {
-    color: "#cc0000", 
-    fontWeight: "600", 
+    color: "#cc0000",
+    fontWeight: "600",
   },
 };
 
