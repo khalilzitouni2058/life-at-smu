@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -26,6 +26,14 @@ const Login = ({ setIsAuthenticated }) => {
     password: "admin",
   };
 
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    if (isAuthenticated) {
+      setIsAuthenticated(true);
+      navigate("/dashboard"); 
+    }
+  }, [setIsAuthenticated, navigate]);
+
   const handleLogin = (e) => {
     e.preventDefault();
     setLoading(true);
@@ -35,6 +43,7 @@ const Login = ({ setIsAuthenticated }) => {
       setLoading(false);
       if (username === validUser.username && password === validUser.password) {
         setIsAuthenticated(true);
+        localStorage.setItem("isAuthenticated", "true");
         navigate("/dashboard");
       } else {
         setError(true);
