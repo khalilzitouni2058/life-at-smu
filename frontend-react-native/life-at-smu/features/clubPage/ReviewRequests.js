@@ -7,15 +7,13 @@ import {
   TouchableOpacity,
   Image,
   Animated,
+  ScrollView,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import { useNavigation } from "@react-navigation/native";
 import { useClub } from "../../Context/ClubContext";
-import {
-  GestureHandlerRootView,
-  Swipeable,
-} from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
 const ReviewRequests = () => {
@@ -88,127 +86,168 @@ const ReviewRequests = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.backBtn}
-      >
-        <Text style={styles.backText}>Back to Profile</Text>
-      </TouchableOpacity>
-      <Text style={styles.title}>Review Join Requests</Text>
-      {requests.length === 0 ? (
-        <Text style={styles.emptyText}>No requests found.</Text>
-      ) : (
-        <FlatList
-          data={requests}
-          keyExtractor={(item) => item._id}
-          renderItem={({ item }) => (
-            <Animated.View style={[styles.card, { opacity: fadeAnim }]}>
-              <View style={styles.cardHeader}>
-                <Image source={{ uri: item.picture }} style={styles.avatar} />
-                <View>
-                  <Text style={styles.name}>{item.fullname}</Text>
-                  <Text style={styles.email}>{item.email}</Text>
-                  <View style={styles.detailRow}>
-                    <Ionicons
-                      name="school-outline"
-                      size={14}
-                      color="#666"
-                      style={styles.iconLeft}
-                    />
-                    <Text style={styles.detail}>
-                      Program: {item.program || "N/A"}
-                    </Text>
-                  </View>
-                  <View style={styles.detailRow}>
-                    <Ionicons
-                      name="book-outline"
-                      size={14}
-                      color="#666"
-                      style={styles.iconLeft}
-                    />
-                    <Text style={styles.detail}>
-                      Major: {item.major || "N/A"}
-                    </Text>
-                  </View>
-                </View>
-              </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.backTab}>
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={styles.backButton}
+        >
+          <Ionicons name="chevron-back-outline" size={22} color="#fff" />
+          <Text style={styles.backText}>Club Profile</Text>
+        </TouchableOpacity>
+      </View>
 
-              <View style={styles.statusWrapper}>
-                {getStatusIcon(item.request.status)}
-                <Text style={styles.statusText}>{item.request.status}</Text>
-              </View>
-
-              {item.request.status === "Pending" ? (
-                <View style={styles.actionRow}>
-                  <TouchableOpacity
-                    onPress={() => respond(item._id, "accept")}
-                    style={styles.btnAccept}
-                  >
-                    <Ionicons
-                      name="checkmark-outline"
-                      size={18}
-                      color="white"
-                    />
-                    <Text style={styles.btnText}> Accept</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => respond(item._id, "decline")}
-                    style={styles.btnDecline}
-                  >
-                    <Ionicons name="close-outline" size={18} color="white" />
-                    <Text style={styles.btnText}> Decline</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <TouchableOpacity
-                  onPress={() => deleteRequest(item._id)}
-                  style={styles.btnDelete}
+      <ScrollView>
+        <View style={styles.container}>
+          <View style={styles.contentBox}>
+            <Text style={styles.title}>Review Join Requests</Text>
+            {requests.length === 0 ? (
+              <Text style={styles.emptyText}>No requests found.</Text>
+            ) : (
+              requests.map((item) => (
+                <Animated.View
+                  key={item._id}
+                  style={[styles.card, { opacity: fadeAnim }]}
                 >
-                  <Ionicons name="trash-outline" size={18} color="white" />
-                  <Text style={styles.btnText}> Delete</Text>
-                </TouchableOpacity>
-              )}
-            </Animated.View>
-          )}
-        />
-      )}
-    </View>
+                  <View style={styles.cardHeader}>
+                    <Image
+                      source={{ uri: item.picture }}
+                      style={styles.avatar}
+                    />
+                    <View>
+                      <Text style={styles.name}>{item.fullname}</Text>
+                      <Text style={styles.email}>{item.email}</Text>
+                      <View style={styles.detailRow}>
+                        <Ionicons
+                          name="school-outline"
+                          size={14}
+                          color="#666"
+                          style={styles.iconLeft}
+                        />
+                        <Text style={styles.detail}>
+                          Program: {item.program || "N/A"}
+                        </Text>
+                      </View>
+                      <View style={styles.detailRow}>
+                        <Ionicons
+                          name="book-outline"
+                          size={14}
+                          color="#666"
+                          style={styles.iconLeft}
+                        />
+                        <Text style={styles.detail}>
+                          Major: {item.major || "N/A"}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  <View style={styles.statusWrapper}>
+                    {getStatusIcon(item.request.status)}
+                    <Text style={styles.statusText}>{item.request.status}</Text>
+                  </View>
+
+                  {item.request.status === "Pending" ? (
+                    <View style={styles.actionRow}>
+                      <TouchableOpacity
+                        onPress={() => respond(item._id, "accept")}
+                        style={styles.btnAccept}
+                      >
+                        <Ionicons
+                          name="checkmark-outline"
+                          size={18}
+                          color="white"
+                        />
+                        <Text style={styles.btnText}> Accept</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => respond(item._id, "decline")}
+                        style={styles.btnDecline}
+                      >
+                        <Ionicons
+                          name="close-outline"
+                          size={18}
+                          color="white"
+                        />
+                        <Text style={styles.btnText}> Decline</Text>
+                      </TouchableOpacity>
+                    </View>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => deleteRequest(item._id)}
+                      style={styles.btnDelete}
+                    >
+                      <Ionicons name="trash-outline" size={18} color="white" />
+                      <Text style={styles.btnText}> Delete</Text>
+                    </TouchableOpacity>
+                  )}
+                </Animated.View>
+              ))
+            )}
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#F4F6FA",
+  },
+  backTab: {
+    paddingHorizontal: 15,
+    paddingVertical: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#007DA5",
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  backText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    marginLeft: 4,
+  },
   container: {
     flex: 1,
-    backgroundColor: "#E0F4FF",
-    padding: 20,
-    paddingTop: 40,
+    backgroundColor: "#F4F6FA",
+    paddingBottom: 30,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#007DA5",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-  backBtn: {
-    backgroundColor: "#007DA5",
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    alignSelf: "flex-start",
-    marginBottom: 10,
-  },
-  backText: { color: "#fff", fontWeight: "bold" },
-  card: {
+  contentBox: {
     backgroundColor: "white",
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 20,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 40,
     shadowColor: "#000",
     shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
     shadowRadius: 5,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 4,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#007DA5",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 16,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
   cardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 8 },

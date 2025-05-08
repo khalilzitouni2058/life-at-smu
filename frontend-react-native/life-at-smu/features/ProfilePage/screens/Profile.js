@@ -40,7 +40,7 @@ const Profile = ({ navigation, route }) => {
   }, [slideAnim, branchOpacity]);
 
   return (
-    <ScrollView >
+    <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <Animated.Image
           source={branch4}
@@ -50,23 +50,25 @@ const Profile = ({ navigation, route }) => {
           source={branch4}
           style={[styles.image, styles.bottomLeft, { opacity: branchOpacity }]}
         />
-        <View style={[styles.profileHeader]}>
-          <View style={styles.profilePictureContainer}>
-            <Image
-              source={{ uri: user?.picture }}
-              style={styles.profilePicture}
-            />
-          </View>
+        <View style={styles.profileContent}>
+          <View style={[styles.profileHeader]}>
+            <View style={styles.profilePictureContainer}>
+              <Image
+                source={{ uri: user?.picture }}
+                style={styles.profilePicture}
+              />
+            </View>
 
-          <View style={{ flex: 1, gap: 20, alignItems: "center" }}>
-            <Text style={styles.name}>{user.fullname}</Text>
-            <Text style={styles.email}>{user.email}</Text>
-            <TouchableOpacity
-              style={styles.editProfileButton}
-              onPress={getUserId}
-            >
-              <Text style={styles.editProfileText}>Edit Profile</Text>
-            </TouchableOpacity>
+            <View style={{ flex: 1, gap: 20, alignItems: "center" }}>
+              <Text style={styles.name}>{user.fullname}</Text>
+              <Text style={styles.email}>{user.email}</Text>
+              <TouchableOpacity
+                style={styles.editProfileButton}
+                onPress={getUserId}
+              >
+                <Text style={styles.editProfileText}>Edit Profile</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -90,11 +92,6 @@ const Profile = ({ navigation, route }) => {
           >
             <Ionicons name="heart-outline" size={30} color="#007DA5" />
             <Text style={styles.cardText}>My Clubs</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionCard}>
-            <Ionicons name="gift-outline" size={30} color="#007DA5" />
-            <Text style={styles.cardText}>Offers</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -129,6 +126,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#007DA5",
     paddingBottom: 100,
   },
+  profileContent: {
+    marginTop: 60, // or increase to lower everything more
+  },
+
   picture: {
     width: 100,
     height: 100,
@@ -163,6 +164,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#D9F4FF", // Slightly faded white
     marginBottom: 10,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: "#007DA5",
   },
 
   image: {
@@ -259,7 +264,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
-    marginVertical: 20,
+    marginTop: 100,
+
     gap: 20,
     paddingTop: 40,
     backgroundColor: "white",

@@ -14,9 +14,9 @@ const TabNavigator = () => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         animationEnabled: true,
-        tabBarPressColor: "transparent", 
-        tabBarHideOnKeyboard: true, 
-        tabBarPressOpacity: 0.7, 
+        tabBarPressColor: "transparent",
+        tabBarHideOnKeyboard: true,
+        tabBarPressOpacity: 0.7,
         headerShown: false,
         tabBarShowLabel: false,
         tabBarActiveTintColor: "#007DA5",
@@ -47,8 +47,7 @@ const TabNavigator = () => {
         tabBarIcon: ({ color, size }) => {
           let iconName = "home-outline";
           if (route.name === "HomeMain") iconName = "home-outline";
-          else if (route.name === "Clubs")
-            iconName = "people-outline";
+          else if (route.name === "Clubs") iconName = "people-outline";
           else if (route.name === "Schedule") iconName = "calendar-outline";
           else if (route.name === "Profile") iconName = "person-outline";
           return <Ionicons name={iconName} size={30} color={color} />;
