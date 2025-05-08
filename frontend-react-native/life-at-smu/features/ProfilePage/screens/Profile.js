@@ -18,7 +18,10 @@ const Profile = ({ navigation, route }) => {
   }, [route.params?.updatedUser]);
 
   const getUserId = async () => {
-    navigation.navigate("EditProfile", { user });
+    navigation.navigate("Profile", {
+      screen: "EditProfile",
+      params: { user },
+    });
   };
 
   const slideAnim = useRef(new Animated.Value(300)).current; // Start below the screen

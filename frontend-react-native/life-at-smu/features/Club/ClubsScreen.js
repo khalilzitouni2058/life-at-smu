@@ -174,7 +174,7 @@ const ClubsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F4F6FA",
     paddingTop: 5,
     paddingBottom: 80,
   },
@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#F4F6FA",
   },
 });
 

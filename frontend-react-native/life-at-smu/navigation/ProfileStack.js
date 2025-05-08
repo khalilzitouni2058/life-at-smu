@@ -9,6 +9,10 @@ import BoardMembersScreen from "../features/clubPage/BoardMembersScreen";
 import ClubRequests from "../features/ProfilePage/screens/ClubRequests";
 import MyClubs from "../features/ProfilePage/screens/MyClubs";
 import ReviewRequests from "../features/clubPage/ReviewRequests"; // ✅ include here
+import ClubUpdate from "../features/clubPage/ClubUpdate";
+import AddBoardMember from "../features/clubPage/AddBoardMember";
+import EditBoardMember from "../features/clubPage/EditBoardMember";
+import EditProfile from "../features/ProfilePage/screens/EditProfile";
 
 const Stack = createNativeStackNavigator();
 
@@ -25,8 +29,11 @@ const ProfileStack = () => {
             component={ClubProfile}
             initialParams={{ id: clubId }}
           />
-          <Stack.Screen name="ReviewRequests" component={ReviewRequests} />
+          <Stack.Screen name="AddBoardMember" component={AddBoardMember} />
+          <Stack.Screen name="EditBoardMember" component={EditBoardMember} />
 
+          <Stack.Screen name="ReviewRequests" component={ReviewRequests} />
+          <Stack.Screen name="ClubUpdate" component={ClubUpdate} />
           <Stack.Screen name="ClubRequests" component={ClubRequests} />
           {/* Board Members Screen for Clubs */}
           <Stack.Screen
@@ -41,6 +48,8 @@ const ProfileStack = () => {
             component={Profile}
             initialParams={{ id: user?.id }}
           />
+          <Stack.Screen name="EditProfile" component={EditProfile} />
+
           <Stack.Screen name="MyClubs" component={MyClubs} />
           <Stack.Screen name="ClubRequests" component={ClubRequests} />
           <Stack.Screen name="EventHistory" component={EventHistory} />
