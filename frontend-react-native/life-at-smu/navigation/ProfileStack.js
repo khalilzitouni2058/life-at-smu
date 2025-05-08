@@ -13,6 +13,7 @@ import ClubUpdate from "../features/clubPage/ClubUpdate";
 import AddBoardMember from "../features/clubPage/AddBoardMember";
 import EditBoardMember from "../features/clubPage/EditBoardMember";
 import EditProfile from "../features/ProfilePage/screens/EditProfile";
+import EventForm from "../features/Club/components/EventForm";
 
 const Stack = createNativeStackNavigator();
 
@@ -31,7 +32,7 @@ const ProfileStack = () => {
           />
           <Stack.Screen name="AddBoardMember" component={AddBoardMember} />
           <Stack.Screen name="EditBoardMember" component={EditBoardMember} />
-
+          <Stack.Screen name="EventForm" component={EventForm} />
           <Stack.Screen name="ReviewRequests" component={ReviewRequests} />
           <Stack.Screen name="ClubUpdate" component={ClubUpdate} />
           <Stack.Screen name="ClubRequests" component={ClubRequests} />
