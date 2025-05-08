@@ -7,7 +7,9 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
-  SafeAreaView
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
@@ -25,104 +27,84 @@ const AskAiButton = () => {
 
   const handleAsk = async () => {
     if (!question.trim()) return;
-  
     const newMessages = [...messages, { type: 'user', text: question }];
     setMessages(newMessages);
     setQuestion('');
     setLoading(true);
-    
+
     try {
       const res = await axios.post(`http://${ipAddress}:8000/api/auth/ask`, { question });
       const answer = res.data.answer || "⚠️ No response from the server.";
       setMessages([...newMessages, { type: 'bot', text: answer }]);
     } catch (err) {
-      
-  
       if (err.response && err.response.status === 404 && err.response.data.answer) {
         setMessages([...newMessages, { type: 'bot', text: err.response.data.answer }]);
       } else {
-        setMessages([
-          ...newMessages,
-          { type: 'bot', text: '⚠️ Something went wrong. Please try again.' }
-        ]);
+        setMessages([...newMessages, { type: 'bot', text: '⚠️ Something went wrong. Please try again.' }]);
       }
     }
-  
+
     setLoading(false);
   };
 
   const renderMessage = ({ item }) => {
     const isUser = item.type === 'user';
-  
     return (
-      <View
-        style={[
-          styles.message,
-          isUser ? styles.userMessage : styles.botMessage
-        ]}
-      >
+      <View style={[styles.message, isUser ? styles.userMessage : styles.botMessage]}>
         <Text style={[styles.messageText, isUser ? styles.userText : styles.botText]}>
           {item.text}
         </Text>
       </View>
     );
   };
-  
+
   return (
     <SafeAreaView style={styles.container}>
-     
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="arrow-back" size={24} color="#000" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Ask the Assistant</Text>
-        <View style={{ width: 24 }} /> 
-      </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Icon name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Ask the Assistant</Text>
+          <View style={{ width: 24 }} />
+        </View>
 
-      {/* Messages */}
-      <FlatList
-        data={messages}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={renderMessage}
-        contentContainerStyle={{ padding: 16 }}
-      />
-
-      {/* Input */}
-      <View style={styles.inputContainer}>
-        <TextInput
-          placeholder="Ask something about an event..."
-          placeholderTextColor="#999"
-          value={question}
-          onChangeText={setQuestion}
-          style={styles.input}
+        <FlatList
+          data={messages}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={renderMessage}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         />
-        <TouchableOpacity style={styles.sendButton} onPress={handleAsk}>
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Icon name="send" size={20} color="#fff" />
-          )}
-        </TouchableOpacity>
-      </View>
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            placeholder="Ask something about an event..."
+            placeholderTextColor="#999"
+            value={question}
+            onChangeText={setQuestion}
+            style={styles.input}
+          />
+          <TouchableOpacity style={styles.sendButton} onPress={handleAsk}>
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Icon name="send" size={20} color="#fff" />
+            )}
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-    messageText: {
-        fontSize: 16,
-      },
-      userText: {
-        color: '#fff',
-      },
-      botText: {
-        color: '#000',
-      },
   container: {
     flex: 1,
     backgroundColor: '#f6f7fb',
-    marginTop:15,
-    padding:5,
+    padding: 5,
   },
   header: {
     flexDirection: 'row',
@@ -153,17 +135,27 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   messageText: {
-    color: '#fff',
     fontSize: 16,
+  },
+  userText: {
+    color: '#fff',
+  },
+  botText: {
+    color: '#000',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    borderTopColor: '#ccc',
-    borderTopWidth: 1,
+    paddingHorizontal: 5,
+    paddingVertical: 8,
     backgroundColor: '#fff',
-  },
+    position: "absolute",
+   bottom:0,
+   
+    left: 0,
+    right: 0,
+    paddingBottom: 16,
+    height:80  },
   input: {
     flex: 1,
     backgroundColor: '#f1f1f1',
