@@ -28,15 +28,18 @@ function ListOfClubs() {
 
   const handleDeleteClub = (clubId) => {
     axios
-      .delete(`http://localhost:8000/api/delete-club/${clubId}`)
-      .then(() => fetchClubs())
-      .catch((err) => console.error("Error deleting club:", err));
+      .delete(`http://localhost:8000/api/delete-clubs/${clubId}`)
+      .then(() => {
+        setClubs((prevClubs) => prevClubs.filter((club) => club._id !== clubId));
+      })
+      .catch((error) => {
+        console.error("Error deleting club:", error);
+      });
   };
-
+  
   useEffect(() => {
     fetchClubs();
   }, []);
-
   const fetchClubs = () => {
     axios
       .get("http://localhost:8000/api/clubs")

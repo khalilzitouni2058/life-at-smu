@@ -1,91 +1,107 @@
 .club-card {
-    width: 100%;
-    border-radius: 16px;
-    overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    display: flex;
-    flex-direction: column;
-    justify-content:center; 
-    align-items: center;
-    height: 100%;
-    text-align: center;
-    background-color: #fff;
-  }
-  
-  .club-card:hover {
-    transform: scale(1.03);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-  }
-  
-  .club-card-title {
-    font-size: 1.2rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    margin-top: 10px;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;  /* Adjusted for proper alignment */
+  height: 100%;
+  text-align: center;
+  background-color: #fff;
+}
 
-  }
-  
-  .club-card-description {
-    font-size: 0.95rem;
-    color: #555;
-    margin-bottom: 1rem;
-    max-height: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .club-card-image {
-    width: 100%;
-    height: auto;
-    max-height: 300px;
-    object-fit: contain;
-  }
+.club-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
 
-  .card-view-details {
-    background-color: #007da5 !important;
-    color: #fff !important;
-    border: none !important;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    align-self: center;
-    margin-top: 10px;
-    box-shadow: none !important;
-    transition: background-color 0.2s ease;
-  }
-  
-  .card-view-details:hover {
-    background-color: #005c7a !important;
-    color: #fff !important;
-    box-shadow: none !important;
-  }
+.club-card-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+  margin-top: 10px;
+}
 
-  /* Positioning & styling */
+.club-card-description {
+  font-size: 0.95rem;
+  color: #555;
+  margin-bottom: 1rem;
+  max-height: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.club-card-image {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+.card-view-details {
+  background-color: #007da5 !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  align-self: center;
+  margin-top: 10px;
+  box-shadow: none !important;
+  transition: background-color 0.2s ease;
+}
+
+.card-view-details:hover {
+  background-color: #005c7a !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+/* Positioning & styling */
 .delete-btn {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background-color: #dc3545;
-    border: none;
-    border-radius: 8px;
-    padding: 8px 10px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    z-index: 10;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .delete-btn:hover {
-    background-color: #c82333;
-    transform: scale(1.05);
-  }
-  
-  .delete-icon-inner {
-    color: white;
-    font-size: 1rem;
-  }
-  
-  
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background-color: #dc3545;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+  transform: scale(1.05);
+}
+
+.delete-icon-inner {
+  color: white;
+  font-size: 1rem;
+}
+
+/* New additions for better layout alignment */
+.club-card-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.card-view-details-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.card-view-details {
+  align-self: center; /* Aligns button to the center of the card */
+}

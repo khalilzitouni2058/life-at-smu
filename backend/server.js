@@ -30,6 +30,8 @@ app.use("/api", clubRoutes);
 const statsRoutes = require("./routes/statsRoutes");
 app.use("/api/stats", statsRoutes);
 
+const studentLifeRoutes = require('./routes/studentLifeMebersRoutes');
+app.use('/api', studentLifeRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

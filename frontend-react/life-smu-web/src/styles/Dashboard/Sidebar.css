@@ -1,25 +1,24 @@
 /* Base styling for sidebar buttons */
 .sidebar-button {
-    padding: 8px 12px;
-    width: auto;
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover and active states */
-    border: none;
-    background-color: transparent; /* Make sure no default background */
-    color: #000; /* Default text color */
-  }
-  
-  /* Hover effect */
-  .sidebar-button:hover {
-    background-color: #f0f0f0; /* Light background on hover */
-    color: #007da5; /* Change text color on hover */
-  }
-  
-  /* Active state - when clicked */
-  .sidebar-button.active {
-    background-color: #007da5; /* Blue background when active */
-    color: white; /* White text when active */
-  }
-  
+  padding: 8px 12px;
+  width: auto;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover and active states */
+  border: none;
+  background-color: transparent; /* Make sure no default background */
+  color: #000; /* Default text color */
+}
+
+/* Hover effect */
+.sidebar-button:hover {
+  background-color: #f0f0f0; /* Light background on hover */
+  color: #007da5; /* Change text color on hover */
+}
+
+/* Active state - when clicked */
+.sidebar-button.active {
+  background-color: #007da5; /* Blue background when active */
+  color: white; /* White text when active */
+}
