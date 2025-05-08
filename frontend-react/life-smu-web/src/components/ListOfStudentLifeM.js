@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import "../styles/Dashboard/delete-btn.css";
 import axios from "axios";
 import {
   Box,
@@ -20,8 +19,11 @@ import {
   Flex,
   Badge,
   VStack,
+  Dialog,
+  IconButton
 } from "@chakra-ui/react";
 import defaultImage from "../assets/defaultImage.png";
+import { IoMdClose } from "react-icons/io";
 const ListOfStudentLifeM = () => {
   const [users, setUsers] = useState([]);
   const [existingUsers, setexistingUsers] = useState([]);
@@ -29,8 +31,10 @@ const ListOfStudentLifeM = () => {
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isDialogOpen, setisDialogOpen] = useState(false);
   const [pickedRole, setpickedRole] = useState("");
   const [showList, setShowList] = useState(false);
+  const [deleted, setdeleted] = useState(false);
   const frameworks = createListCollection({
     items: [
       { label: "Student Life Member", value: "Student Life Member" },
@@ -58,6 +62,8 @@ const ListOfStudentLifeM = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
+      console.log(userId);
+      setdeleted(true);
       await axios.delete(`http://localhost:8000/api/delete-user/${userId}`);
       setexistingUsers((prevUsers) =>
         prevUsers.filter((user) => user.id !== userId)
@@ -65,11 +71,13 @@ const ListOfStudentLifeM = () => {
     } catch (error) {
       console.error("Error deleting user:", error);
     }
+    setdeleted(false);
+    setisDialogOpen(false);
   };
 
   useEffect(() => {
     fetchexistingUsers();
-  }, [isDrawerOpen]);
+  }, [isDrawerOpen, deleted]);
   const fetchUsers = async () => {
     try {
       const response = await axios.get("http://localhost:8000/api/auth/users");
@@ -324,38 +332,56 @@ const ListOfStudentLifeM = () => {
             }}
           >
             {/* Delete Button */}
-            <Button
-              position="absolute"
-              top="8px"
-              right="8px"
-              size="sm"
-              onClick={() => handleDeleteUser(user.id)}
-              sx={{
-                backgroundColor: "#e74c3c", // Red background
-                color: "white",
-                borderRadius: "50%", // Circular button
-                width: "36px", // Button size
-                height: "36px", // Button size
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                cursor: "pointer",
-                transition: "background-color 0.3s ease, transform 0.2s ease",
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                zIndex: 10,
-              }}
-              _hover={{
-                backgroundColor: "#c0392b", // Darker red when hovered
-                transform: "scale(1.1)", // Slightly enlarge the button when hovered
-              }}
-              _active={{
-                backgroundColor: "#e74c3c", // Keep red color when clicked
-                transform: "scale(1.05)", // Slightly shrink the button on press
-              }}
-            >
-              <CloseButton size="sm" />
-            </Button>
+            <Dialog.Root>
+              <Dialog.Trigger
+                open={isDialogOpen}
+                placement={"top"}
+                motionPreset="slide-in-bottom"
+              >
+                <IconButton 
+                  size="md"
+                  fontSize={"15px"}
+                  p={2}
+                 colorPalette={"gray"}
+                
+                  rounded={"2xl"}
+                  position={"absolute"}
+                  variant="subtle"
+                  top="8px"
+                  right="8px"
+                  aria-label="Remove Student"
+                >
+                  <IoMdClose />
+                </IconButton>
+              </Dialog.Trigger>
+              <Portal>
+                <Dialog.Backdrop />
+                <Dialog.Positioner>
+                  <Dialog.Content>
+                    <Dialog.Header>
+                      <Dialog.Title>
+                        are you sure you want to remove student {user.fullname}{" "}
+                      </Dialog.Title>
+                    </Dialog.Header>
 
+                    <Dialog.Footer>
+                      <Dialog.ActionTrigger asChild>
+                        <Button variant="outline">Cancel</Button>
+                      </Dialog.ActionTrigger>
+                      <Button
+                        onClick={() => handleDeleteUser(user._id)}
+                        colorPalette={"red"}
+                      >
+                        delete
+                      </Button>
+                    </Dialog.Footer>
+                    <Dialog.CloseTrigger asChild>
+                      <CloseButton size="sm" />
+                    </Dialog.CloseTrigger>
+                  </Dialog.Content>
+                </Dialog.Positioner>
+              </Portal>
+            </Dialog.Root>
             {/* User Image */}
             <Image
               objectFit="cover"
@@ -366,7 +392,6 @@ const ListOfStudentLifeM = () => {
               src={user.picture || defaultImage}
               alt={user.fullname}
             />
-
             {/* User Information */}
             <Box flex="1" overflow="hidden">
               <Card.Body>
