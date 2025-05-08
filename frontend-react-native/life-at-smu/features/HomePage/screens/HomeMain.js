@@ -6,10 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   Pressable,
-
   Image,
   FlatList,
-
 } from "react-native";
 import { useClub } from "../../../Context/ClubContext";
 import CalendarView from "../components/CalendarView";
@@ -131,7 +129,6 @@ const HomeMain = () => {
         </TouchableOpacity>
       </View>
 
-
       {eventsToday.length === 0 ? (
         <View style={styles.emptyStateContainer}>
           <Ionicons
@@ -143,19 +140,21 @@ const HomeMain = () => {
           <Text style={styles.emptyText}>
             Looks like you have no events today. Stay tuned!
           </Text>
-          {clubId && (
-            <TouchableOpacity
-              style={styles.secondaryBtn}
-              onPress={() => navigation.navigate("eventForm")}
-            >
-              <Text style={styles.secondaryBtnText}>Plan your event</Text>
-            </TouchableOpacity>
-          )}
         </View>
       ) : (
         <EventDisplay selectedDate={selectedDate} searchQuery={searchQuery} />
       )}
 
+      {clubId && (
+        <View style={{ alignItems: "center", marginTop: 20 }}>
+          <TouchableOpacity
+            style={styles.secondaryBtn}
+            onPress={() => navigation.navigate("EventForm")}
+          >
+            <Text style={styles.secondaryBtnText}>Plan your event</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -194,7 +193,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 40,
+    marginTop: 60,
     paddingHorizontal: 8,
   },
   searchBar: {
@@ -226,15 +225,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F4F6FA",
-
-    paddingHorizontal: 12,
-    paddingBottom: 60,
+    paddingHorizontal: 0, // More consistent spacing
+    paddingBottom: 30,
+    alignItems: "stretch", // Ensure full width usage
   },
-  emptyStateContainer: {
 
+  emptyStateContainer: {
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 40,
+    marginTop: 20, // Reduce this if needed
+    marginBottom: 10, // Add or reduce to tighten spacing
   },
   emptyText: {
     textAlign: "center",
@@ -244,15 +244,19 @@ const styles = StyleSheet.create({
   },
   secondaryBtn: {
     backgroundColor: "#E9F8FC",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 14,
+    paddingHorizontal: 30,
     borderRadius: 12,
+    alignSelf: "center",
+    marginTop: 12,
+    marginBottom: 10,
   },
   secondaryBtnText: {
     color: "#007DA5",
     fontWeight: "600",
-    fontSize: 16,
+    fontSize: 17, // ← Increase font size slightly
   },
+
   searchBarWrapper: {
     flexDirection: "row",
     alignItems: "center",

@@ -148,7 +148,7 @@ const EventDisplay = ({ selectedDate, searchQuery = "" }) => {
           data={filteredEvents}
           keyExtractor={(item) => item._id}
           renderItem={renderEvent}
-          contentContainerStyle={{ paddingBottom: 50 }}
+          contentContainerStyle={{ paddingBottom: 2 }}
         />
       ) : (
         <View style={styles.noEventsContainer}>
@@ -223,13 +223,15 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderBottomLeftRadius: 16,
     borderBottomRightRadius: 16,
-    alignItems: "flex-start",
+    alignItems: "center", // <- center horizontally
+    justifyContent: "center", // <- center vertically if needed
+    padding: 10, // optional spacing
   },
   eventTextContainer: {
     marginTop: 10,
-    flex: 1,
-    marginLeft: 10,
+    alignItems: "center", // center inside container
   },
+
   eventTitle: {
     color: "black",
     fontSize: 18,
