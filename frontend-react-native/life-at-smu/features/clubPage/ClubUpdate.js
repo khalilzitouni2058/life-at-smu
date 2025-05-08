@@ -251,8 +251,8 @@ const ClubUpdate = ({ navigation }) => {
                   <TouchableOpacity
                     style={styles.editButton}
                     onPress={() =>
-                      navigation.navigate("EditBoardMember", {
-                        editingMember: member,
+                      navigation.navigate("Profile", {
+                        screen: "EditBoardMember",
                       })
                     }
                   >
@@ -279,7 +279,9 @@ const ClubUpdate = ({ navigation }) => {
           </Text>
           <TouchableOpacity
             style={styles.addButton}
-            onPress={() => navigation.navigate("AddBoardMember")}
+            onPress={() =>
+              navigation.navigate("Profile", { screen: "AddBoardMember" })
+            }
           >
             <Text style={styles.addButtonText}>Add a New Board Member</Text>
           </TouchableOpacity>

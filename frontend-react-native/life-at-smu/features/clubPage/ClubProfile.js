@@ -149,7 +149,9 @@ const ClubProfile = ({ navigation }) => {
 
             <TouchableOpacity
               style={styles.editProfileButton}
-              onPress={() => navigation.navigate("ClubUpdate")}
+              onPress={() =>
+                navigation.navigate("Profile", { screen: "ClubUpdate" })
+              }
             >
               <Text style={styles.editProfileText}>Edit Profile</Text>
             </TouchableOpacity>
